@@ -6,7 +6,7 @@ The ZeroMQ Realtime Exchange Protocol (ZRE) governs how a group of peers on a ne
 
 ++ License
 
-Copyright (c) 2009-2013 iMatix Corporation
+Copyright (c) 2009-2012 iMatix Corporation
 
 This Specification is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 3 of the License, or (at your option) any later version.
 
@@ -37,13 +37,39 @@ The ZRE protocol provides a way for a set of nodes on a local network to discove
 
 ++ Implementation
 
++++ Node Identification and Life-cycle
+
+A ZRE //node// represents a source or a target for messaging. Nodes usually map to applications. A ZRE node is identified by a 16-octet universally unique identifier (UUID). ZRE does not define how a node is created or destroyed but does assume that nodes have a certain durability.
+
 +++ Node Discovery
 
-Node discovery is handled by [http://rfc.zeromq.org/spec:21/ZRE-DISC the ZRE-DISC protocol].
+ZRE uses UDP IPv4 //beacon// broadcasts to discover nodes. This works as follows:
+
+* A ZRE node SHALL listen to the ZRE discovery service which is UDP port XXXX (to be assigned by IANA).
+* Each ZRE node SHALL broadcast, at regular intervals, a UDP beacon that identifies itself to any listening nodes on the network.
+* When a ZRE node receives a beacon from a node that it does not already know about, it SHALL consider this to be a new peer.
+
+The ZRE beacon consists of one 22-octet UDP message with this format:
+
+[[code]]
++---+---+---+------+  +------+------+
+| Z | R | E | %x01 |  | UUID | port |
++---+---+---+------+  +------+------+
+
+       Header               Body
+[[/code]]
+
+Notes for implementors:
+
+* The header SHALL consist of the letters 'Z', 'R', and 'E', followed by the beacon version number, which SHALL be %x01.
+* The body SHALL consist of the sender's 16-octet UUID, followed by a two-byte mailbox port number in network order.
+* A valid beacon SHALL: use a recognized header; use a body of the right size; and provide a non-zero mailbox port number.
+* A node that receives an invalid beacon SHALL discard it silently. A node MAY log the sender IP address for the purposes of debugging.
+* A node SHALL discard beacons that it receives from itself.
 
 +++ Interconnection Model
 
-Each node SHALL create a ZeroMQ ROUTER socket and //bind// this to an ephemeral TCP port (in the range %C000x - %FFFFx). The node SHALL broadcast this mailbox port number in all beacons that it sends.
+Each node SHALL create a ZeroMQ ROUTER socket and //bind// this to an ephemeral TCP port (in the range %C000x - %FFFFx). The node SHALL broadcast this mailbox port number in all beacons that it sends. Note that a node does not broadcast its IP address as this is provided by the UDP recvfrom function.
 
 This ROUTER socket SHALL be used for all incoming ZeroMQ messages from other nodes. A node SHALL NOT send messages to peers via this socket.
 
@@ -231,6 +257,7 @@ ZRE does not have any security at this stage.
 
 [[bibliography]]
 : rfc2119 : "Key words for use in RFCs to Indicate Requirement Levels" - [http://tools.ietf.org/html/rfc2119 ietf.org]
+: rfc4422 : "Simple Authentication and Security Layer" - [http://tools.ietf.org/html/rfc4422 ietf.org]
 : fandos : "Definition of a Free and Open Standard" - [http://www.digistan.org/open-standard:definition digistan.org]
 : coss : "Consensus Oriented Specification System" - [http://www.digistan.org/spec:1/COSS digistan.org]
 : zmtp : "15/ZMTP - ZeroMQ Message Transport Protocol" - [http://rfc.zeromq.org/spec:15 rfc.zeromq.org]

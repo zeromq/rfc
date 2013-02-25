@@ -69,14 +69,19 @@ main
 
 Notes:
 
-* Whitespace is significant before property names and inside values, but not elsewhere.  Text starting with '#' is discarded as a comment.
+* Whitespace is significant only before property names and inside values.
+* Text starting with '#' is discarded as a comment.
 * Each non-empty line defines a property consisting of a name and an optional value.
-* Names are alphanumeric ([A-Za-z0-9]) and may have embedded slashes.
-* Values are untyped strings that can contain embedded spaces.
-* Values can be enclosed with single or double quotes.
+* Names are alphanumeric ([A-Za-z0-9]) and may have embedded slashes ('/').
+* Values are untyped strings which the application may interpret in any way it wishes.
+* An entire value can be enclosed with single or double quotes, which do not form part of the value.
+* Any printable character except the closing quote is valid in a quoted string.
+* A value that starts with a quote and does not end in a matching quote is treated as unquoted.
+* There is no mechanism for escaping quotes or other characters in a quoted string.
 * The only special characters in ZPL are: whitespace, '#', '=', and single and double quotes.
-* Hierarchy is signalled by indentation, where a child is indented 4 spaces more than its parent.
+* Hierarchy is signaled by indentation, where a child is indented 4 spaces more than its parent.
 * The first non-whitespace character in a ZPL file is always either '#' or an alphanumeric character.
+* Whitespace following after a value is discarded unless within valid quotes.
 
 ++ Justification and Design
 

@@ -45,7 +45,7 @@ A ZRE //node// represents a source or a target for messaging. Nodes usually map 
 
 ZRE uses UDP IPv4 //beacon// broadcasts to discover nodes. This works as follows:
 
-* A ZRE node SHALL listen to the ZRE discovery service which is UDP port XXXX (to be assigned by IANA).
+* A ZRE node SHALL listen to the ZRE discovery service which is UDP port 5670 (ZRE-DISC port assigned by IANA).
 * Each ZRE node SHALL broadcast, at regular intervals, a UDP beacon that identifies itself to any listening nodes on the network.
 * When a ZRE node receives a beacon from a node that it does not already know about, it SHALL consider this to be a new peer.
 

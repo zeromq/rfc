@@ -68,7 +68,7 @@ more-long   = %x03 8OCTET
 
 +++ The Greeting
 
-Each peer starts by sending a fixed 10 octet protocol signature (%xFF 8%x00 %x7F), followed by a two octet version number (%x03 %x00), followed by a 20 octet security mechanism (a null padded ASCII string of 1 to 20 characters).
+Each peer starts by sending a fixed 10 octet protocol signature (%xFF 8%x00 %x7F), followed by a two octet version number (%x03 %x00), followed by a 20 octet security mechanism (a null-filled ASCII string of 1 to 20 characters).
 
 The signature has an 8-byte padding field. A peer SHOULD place zeroes into this field but MAY place other values. A peer MUST NOT validate this padding value and MAY NOT interpret it in any way whatsoever.
 
@@ -76,11 +76,11 @@ ZMTP/3.0 uses an extensible security model loosely based on the Simple Authentic
 
 * "ZMTP-PLAIN", specified by rfc.zeromq.org/spec:24/ZMTP-PLAIN, which implements a clear-text user/password mechanism.
 
-* "ZMTP-CURVE", specified by rfc.zeromq.org/spec:25/ZMTP-CURVE, which implements the CurveZMQ security handshake[((bibcite curvezmq)]].
+* "ZMTP-CURVE", specified by rfc.zeromq.org/spec:25/ZMTP-CURVE, which implements the CurveZMQ security handshake[((bibcite curvezmq))].
 
 ZMTP/3.0 offers no negotiation of the security mechanisms. The security mechanism can be considered //assertive// in that once a connection is established, a peer is certain that all incoming messages have the required level of security. This prevents downgrade attacks and simplifies implementations.
 
-A greeting received from the other peer is considered "invalid" if it does not match exactly the greeting sent to the peer. That is, the same signature, version number, and security mechanism.
+A greeting received from the other peer is considered "invalid" if it does not match exactly the greeting sent to the peer. That is, the same signature (except for padding), version number, and security mechanism.
 
 A ZMTP/3.0 peer (except for working with older protocol versions) MUST treat an invalid greeting as fatal and SHOULD close the connection after a random delay. A connecting peer that receives an invalid greeting SHOULD NOT reconnect.
 
@@ -163,7 +163,7 @@ If the other peer closes the connection before sending a first data message, thi
 
 To detect and work with older versions of ZMTP, we use a mix of strategies. An implementation MAY use any or all or none of these strategies.
 
-+++ ZMTP/2.0 Peers
++++ Detecting ZMTP/2.0 Peers
 
 From ZMTP/2.0[((bibcite zmtp20))] onwards, the protocol contains the version number immediately after the signature. To detect and interoperate with ZMTP/2.0 peers, the implementation SHALL:
 
@@ -171,11 +171,11 @@ From ZMTP/2.0[((bibcite zmtp20))] onwards, the protocol contains the version num
 
 * Wait for the other peer to send its greeting.
 
-* If this has the version number 1 or 2, switch to ZMTP/2.0.
+* If this has the version number 1 or 2, the peer is using ZMTP/2.0, so send the ZMTP/2.0 socket type and identity and continue with ZMTP/2.0.
 
-* If this has the version number 3, send the rest of its greeting and continue with ZMTP/3.0.
+* If this has the version number 3, the peer is using ZMTP/3.0, so send the rest of the greeting and continue with ZMTP/3.0.
 
-+++ ZMTP/1.0 Peers
++++ Detecting ZMTP/1.0 Peers
 
 ZMTP/1.0[((bibcite zmtp10))] did not have any version information. To detect and interoperate with a ZMTP/1.0 peer, an implementation SHALL:
 

@@ -86,7 +86,7 @@ C4 is meant to provide a reusable optimal collaboration model for open source so
 
 * Change on the project SHALL be governed by the pattern of accurately identifying problems and applying minimal, accurate solutions to these problems.
 
-* To initiate changes, a user SHALL log an issue on the project Platform issue tracker.
+* To initiate changes, a user SHOULD log an issue on the project Platform issue tracker.
 
 * The user SHOULD write the issue by describing the problem they face or observe.
 

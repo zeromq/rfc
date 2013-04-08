@@ -74,9 +74,9 @@ The signature has an 8-byte padding field. A peer SHOULD place zeroes into this 
 
 ZMTP/3.0 uses an extensible security model loosely based on the Simple Authentication and Security Layer (SASL)[((bibcite rfc4422))]. All connections use a security mechanism, which is an ASCII string, null-padded as needed to fit 20 octets. A ZMTP/3.0 implementation SHOULD support at least these two security mechanisms:
 
-* "ZMTP-PLAIN", specified by rfc.zeromq.org/spec:24/ZMTP-PLAIN, which implements a clear-text user/password mechanism.
+* "ZMTP-PLAIN", specified by [http://rfc.zeromq.org/spec:24/ rfc.zeromq.org/spec:24/ZMTP-PLAIN], which implements a clear-text user/password mechanism.
 
-* "ZMTP-CURVE", specified by rfc.zeromq.org/spec:25/ZMTP-CURVE, which implements the CurveZMQ security handshake[((bibcite curvezmq))].
+* "ZMTP-CURVE", specified by [http://rfc.zeromq.org/spec:25/ rfc.zeromq.org/spec:25/ZMTP-CURVE], which implements the CurveZMQ security handshake[((bibcite curvezmq))].
 
 ZMTP/3.0 offers no negotiation of the security mechanisms. The security mechanism can be considered //assertive// in that once a connection is established, a peer is certain that all incoming messages have the required level of security. This prevents downgrade attacks and simplifies implementations.
 

@@ -52,7 +52,7 @@ signature   = %xFF padding %x7F
 padding     = 8%x00       
 major       = %x03        ; Version number major
 minor       = %x00        ; Version number minor
-mechanism   = 20OCTET     ; Null-padded string
+mechanism   = 20OCTET     ; ASCII string, null padded
 
 message     = *more-frame final-frame
 final-frame = final body
@@ -72,7 +72,7 @@ Each peer starts by sending a fixed 10 octet protocol signature (%xFF 8%x00 %x7F
 
 The signature has an 8-byte padding field. A peer SHOULD place zeroes into this field but MAY place other values. A peer MUST NOT validate this padding value and MAY NOT interpret it in any way whatsoever.
 
-ZMTP/3.0 uses an extensible security model loosely based on the Simple Authentication and Security Layer (SASL)[((bibcite rfc4422))]. All connections use a security mechanism. A ZMTP/3.0 implementation SHOULD support at least these two security mechanisms:
+ZMTP/3.0 uses an extensible security model loosely based on the Simple Authentication and Security Layer (SASL)[((bibcite rfc4422))]. All connections use a security mechanism, which is an ASCII string, null-padded as needed to fit 20 octets. A ZMTP/3.0 implementation SHOULD support at least these two security mechanisms:
 
 * "ZMTP-PLAIN", specified by rfc.zeromq.org/spec:24/ZMTP-PLAIN, which implements a clear-text user/password mechanism.
 
@@ -153,11 +153,13 @@ Any other socket combinations SHOULD be handled by silently disconnecting the ot
 
 +++ Using the Connection
 
-Following the connection property message, each peer MAY send arbitrary messages. Either peer may close the connection at any point
+Following the connection property message, each peer MAY send data messages.
 
-+++ Error Handling
+Each security mechanism has sufficient knowledge to know when a connection has been made successfully. This will usually be after the exchange of connection properties. ZMTP/3.0 has no explicit error reporting in the protocol. A peer handles an error by closing its connection.
 
-If the other peer closes the connection before sending a first data message, this SHOULD be treated as a permanent failure, i.e. the implementation SHOULD NOT reconnect automatically. If the other peer closes the connection after sending at least one data message, this SHOULD be treated as a temporary failure, and the implementation SHOULD reconnect after a suitable waiting period.
+If a peer closes its connection before the connection was completed, this SHOULD be treated as a permanent failure, i.e. the implementation SHOULD NOT reconnect automatically.
+
+If the peer closes its side of the connection after the connection was made successfully, this SHOULD be treated as a temporary failure, and the implementation SHOULD reconnect after a suitable waiting period.
 
 ++ Backwards Interoperability
 

@@ -2,7 +2,7 @@ The ZMTP-PLAIN mechanism defines a simple clear-text user/password mechanism for
 
 * Name: rfc.zeromq.org/spec:24/ZMTP-PLAIN
 * Editor: Pieter Hintjens <ph@imatix.com>
-* State: draft
+* State: raw
 
 ++ License
 
@@ -32,18 +32,23 @@ Finally, ZMTP-PLAIN acts as a model for properly secure mechanisms such as ZMTP-
 
 ++ Implementation
 
-The ZMTP-PLAIN mechanism requires that the binding peer be "server" and the connecting peer be "client". It consists of a single "hello" message from client to server as follows:
+The ZMTP-PLAIN mechanism requires that the binding peer be "server" and the connecting peer be "client". It consists of a four-message exchange as follows:
 
 [[code]]
-zmtp-plain  = C:hello 
-hello       = username password
+zmtp-plain  = C:HELLO S:OKAY C:PROPERTIES S:PROPERTIES
+
+HELLO       = username password
 username    = string
-string      = length *OCTET         ; 0 to 255 octets of data
+string      = length *OCTET     ; 0 to 255 octets
 length      = OCTET
 password    = string
+
+OKAY        = "OK"              ; 2-octet message
+
+PROPERTIES  = message           ; Connection properties message
 [[/code]]
 
-Following the hello message, the client SHALL send a connection properties message as defined in ZMTP/3.0[((bibcite zmtp30))].
+The connection properties message is defined in ZMTP/3.0[((bibcite zmtp30))]. The server will treat the connection as successful when it receives and has validated the client's properties message. The client will treat the connection as successful when it receives a properties message from the server.
 
 ++ References
 

@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-The ZMTP-CURVE mechanism provides secure authentication and confidentiality for ZMTP/3.0. This mechanism implements the CurveZMQ security handshake[((bibcite curvezmq)]].
-=======
 The ZMTP-CURVE mechanism provides secure authentication and confidentiality for ZMTP/3.0. This mechanism implements the CurveZMQ security handshake[((bibcite curvezmq))].
->>>>>>> Raw text for ZMTP-CURVE
 
 * Name: rfc.zeromq.org/spec:25/ZMTP-CURVE
 * Editor: Pieter Hintjens <ph@imatix.com>
@@ -28,11 +24,7 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 
 ++ Goals
 
-<<<<<<< HEAD
-The ZMTP-CURVE mechanism provides secure authentication and confidentiality for ZMTP/3.0. This mechanism implements the CurveZMQ security handshake[((bibcite curvezmq)]], which is a mapping of the CurveCP[[(bibcite curvecp)]] handshake for TCP transports.
-=======
 The ZMTP-CURVE mechanism provides secure authentication and confidentiality for ZMTP/3.0. This mechanism implements the CurveZMQ security handshake[((bibcite curvezmq))], which is a mapping of the CurveCP[((bibcite curvecp))] handshake for TCP transports.
->>>>>>> Raw text for ZMTP-CURVE
 
 ++ Implementation
 

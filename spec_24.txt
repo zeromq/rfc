@@ -1,0 +1,70 @@
+The ZMTP-PLAIN mechanism defines a simple clear-text user/password mechanism for ZMTP/2.1. The ZMTP-PLAIN mechanism allows explicit authentication of peers at the ZMTP transport level.
+
+* Name: rfc.zeromq.org/spec:24/ZMTP-PLAIN
+* Editor: Pieter Hintjens <ph@imatix.com>
+* State: draft
+
+++ License
+
+Copyright (c) 2009-2013 iMatix Corporation
+
+This Specification is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 3 of the License, or (at your option) any later version.
+
+This Specification is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with this program; if not, see <http://www.gnu.org/licenses>.
+
+++ Change Process
+
+This Specification is a free and open standard[((bibcite fandos))] and is governed by the Digital Standards Organization's Consensus-Oriented Specification System (COSS)[((bibcite coss))].
+
+++ Language
+
+The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED",  "MAY", and "OPTIONAL" in this document are to be interpreted as described in RFC 2119[((bibcite rfc2119))].
+
+++ Goals
+
+The ZMTP-PLAIN mechanism is intended to provide ZMTP-level authentication for non-confidential use cases. This is, for example, in a data center where clients want to be certain they are connecting to the right server, but where confidentiality is not a requirement.
+
+Additionally, ZMTP-PLAIN MAY be used when the transport layer provides security but no authentication (e.g. over a VPN).
+
+Finally, ZMTP-PLAIN servers as a model for properly secure mechanisms such as ZMTP-CURVE.
+
+++ Implementation
+
+The ZMTP-PLAIN mechanism requires that the binding peer be "server" and the connecting peer be "client". It consists of a single "hello" message from client to server as follows:
+
+[[code]]
+zmtp-plain  = C:hello
+
+hello       = username password socket-type identity
+
+username    = string
+string      = length *OCTET         ; 0 to 255 octets of data
+length      = OCTET
+
+password    = string
+
+socket-type = PAIR | PUB | SUB | REQ | REP | DEALER | ROUTER | PULL | PUSH
+PAIR        = %X00
+PUB         = %X01
+SUB         = %X02
+REQ         = %X03
+REP         = %X04
+DEALER      = %X05
+ROUTER      = %X06
+PULL        = %X07
+PUSH        = %X08
+
+identity    = string
+[[/code]]
+
+The socket-type and identity SHALL be the real socket type and identity of the sending socket. If the server accepts the client credentials it SHALL continue the connection, otherwise it SHALL close the connection.
+
+++ References
+
+[[bibliography]]
+: rfc2119 : "Key words for use in RFCs to Indicate Requirement Levels" - [http://tools.ietf.org/html/rfc2119 ietf.org]
+: fandos : "Definition of a Free and Open Standard" - [http://www.digistan.org/open-standard:definition digistan.org]
+: coss : "Consensus Oriented Specification System" - [http://www.digistan.org/spec:1/COSS digistan.org]
+[[/bibliography]]

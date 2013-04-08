@@ -1,6 +1,6 @@
 The ZeroMQ Message Transport Protocol (ZMTP) is a transport layer protocol for exchanging messages between two peers over a connected transport layer such as TCP. This document describes ZMTP/2.1.
 
-* Name: rfc.zeromq.org/spec:xx/ZMTP
+* Name: rfc.zeromq.org/spec:23/ZMTP
 * Editor: Pieter Hintjens <ph@imatix.com>
 * Contributors: Martin Hurton <mh@imatix.com>, Paul Colomiets <paul@colomiets.name>
 * State: draft
@@ -40,11 +40,12 @@ zmtp        = *connection
 
 connection  = greeting *message
 
-greeting    = signature revision ( socket-type | security ) identity
+greeting    = signature revision socket-type identity
 signature   = %xFF 8%x00 %x7F
 revision    = %x02
 
 socket-type = PAIR | PUB | SUB | REQ | REP | DEALER | ROUTER | PULL | PUSH
+            | SECURE
 PAIR        = %X00
 PUB         = %X01
 SUB         = %X02
@@ -54,14 +55,11 @@ DEALER      = %X05
 ROUTER      = %X06
 PULL        = %X07
 PUSH        = %X08
+SECURE      = %X80
 
 identity    = final-short body
 final-short = %x00 OCTET
 body        = *OCTET
-
-security    = curvecli | curvesrv
-curvecli    = %X80
-curvesrv    = %X81
 
 message     = *more-frame final-frame
 final-frame = final body
@@ -129,12 +127,25 @@ Any other socket combinations SHOULD be handled by silently disconnecting the ot
 
 XPUB and XSUB sockets are implemented at the protocol level as PUB and SUB sockets. That is, XPUB and XSUB are API constructs only. A SUB socket sends a subscription message as one byte %x01 followed by the subscription body, and unsubscription messages as one byte %x00 followed by the subscription body.
 
-+++ Backwards Interoperability
++++ Backwards and Forwards Interoperability
 
-- accepts revision = %x01
-- but only if no security defined
+ZMTP/2.x uses a single octet to indicate the protocol revision number. ZMTP/2.1 is considered revision 2 of the protocol. ZMTP/2.x uses the following version negotiation mechanism:
 
-ZMTP/2.x uses a single octet to indicate the protocol revision number. ZMTP/2.1 is considered revision 2 of the protocol. ZMTP/1.0[((bibcite zmtp10))] did not have any version information. However, implementations can detect and interoperate with ZMTP/1.0 implementations.
+* Each peer sends a greeting (consisting of signature, revision, socket type and signature). The greeting structure is consistent across all revisions of ZMTP/2.x.
+
+* Based on its own capabilities, and the announced revision of the peer, each peer decides how to continue the protocol.
+
+* An implementation MUST always accept a peer using a revision greater than the one it implements.
+
+* An implementation MAY reject a peer using a lower revision.
+
+* If an implementation rejects a peer it SHOULD disconnect and not reconnect to that peer (if it is the peer making the connection).
+
+That is, there is no version negotiation. Peers exchange greetings asynchronously and decide, based on the greeting they receive, whether and how to continue the connection.
+
+++++ With ZMTP/1.0 Peers
+
+ZMTP/1.0[((bibcite zmtp10))] did not have any version information. However, implementations can detect and interoperate with ZMTP/1.0 implementations.
 
 If an implementation does not want backwards compatibility with ZMTP/1.0 peers, it should use the signature defined in the grammar, above. To detect and interoperate with a ZMTP/1.0 peer, an implementation should immediately after opening a TCP socket:
 
@@ -150,15 +161,33 @@ If an implementation does not want backwards compatibility with ZMTP/1.0 peers, 
 
 * When we have detected a ZMTP/1.0 peer, we have already sent 10 octets, which the other peer interprets as the start of an identity frame. We continue by sending the body of the identity frame (zero or more octets). From then, we encode and decode all frames on that connection using the ZMTP/1.0 framing syntax.
 
-++ Security
+++ Extensible Security
 
-* To be written.
+ZMTP/2.1 uses an extensible security model based on the Simple Authentication and Security Layer, or SASL[((bibcite rfc4422))].
+
+To request a secure connection, a peer SHALL send a greeting with socket type SECURE (%x80) and identity equal to the security mechanism it implements and requires. The other peer MAY handle such a greeting in several ways:
+
+* It may ignore the socket type and identity and attempt to continue with a plain text connection (this is how ZMTP/2.0 peers will behave).
+
+* It may initiate its own security mechanisms and enter a security handshake.
+
+* It may reject the connection and it may block the peer temporarily or permanently.
+
+A peer may re-connect and attempt with different security mechanisms. ZMTP/2.1 does not however allow any negotiation on security mechanisms (unlike SASL which allows peers to offer multiple security mechanisms). In this respect it is not interoperable with SASL libraries. The lack of negotiation is intentional and meant to reduce the risk of misconfiguration leading to unintentionally weak security being used between two peers.
+
+ZMTP/2.1 specifies at least the following security mechanisms (specified in the identity sent by each peer):
+
+* "PLAIN", specified by rfc.zeromq.org/spec:24/ZMTP-PLAIN, which implements a clear-text user/password mechanism.
+
+* "CURVE", specified by rfc.zeromq.org/spec:25/ZMTP-CURVE, which implements the CurveZMQ security handshake[((bibcite curvezmq)]].
 
 ++ References
 
 [[bibliography]]
 : rfc2119 : "Key words for use in RFCs to Indicate Requirement Levels" - [http://tools.ietf.org/html/rfc2119 ietf.org]
+: rfc4422 : "Simple Authentication and Security Layer" - [http://tools.ietf.org/html/rfc4422 ietf.org]
 : fandos : "Definition of a Free and Open Standard" - [http://www.digistan.org/open-standard:definition digistan.org]
 : coss : "Consensus Oriented Specification System" - [http://www.digistan.org/spec:1/COSS digistan.org]
 : zmtp10 : "13/ZMTP - ZeroMQ Message Transport Protocol" - [http://rfc.zeromq.org/spec:13 rfc.zeromq.org]
+: curvezmq : "The CurveZMQ Secure Handshake" - [http://curvezmq.org curvezmq.org]
 [[/bibliography]]

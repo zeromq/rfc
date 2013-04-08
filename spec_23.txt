@@ -133,7 +133,7 @@ Following successful security handshaking, the peer SHALL send, and SHALL expect
 All implementations SHALL provide at least these properties:
 
 * "SOCKET-TYPE", which specifies the sender's socket type, as one of "PAIR", "XPUB", "XSUB", "REQ", "REP", "DEALER", "ROUTER", "PULL", or "PUSH".
-* "IDENTITY", which specifies the sender's socket identity, encoded as a hex string.
+* "IDENTITY", which specifies the sender's socket identity, encoded as a hex string. The identity may not exceed 510 hex characters (255 decoded bytes).
 
 An implementation MAY validate socket types and identities. The implementation MUST ignore any property that it does not recognize.
 

@@ -1,0 +1,51 @@
+The ZMTP-CURVE mechanism provides secure authentication and confidentiality for ZMTP/3.0. This mechanism implements the CurveZMQ security handshake[((bibcite curvezmq)]].
+
+* Name: rfc.zeromq.org/spec:25/ZMTP-CURVE
+* Editor: Pieter Hintjens <ph@imatix.com>
+* State: raw
+
+++ License
+
+Copyright (c) 2009-2013 iMatix Corporation
+
+This Specification is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 3 of the License, or (at your option) any later version.
+
+This Specification is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with this program; if not, see <http://www.gnu.org/licenses>.
+
+++ Change Process
+
+This Specification is a free and open standard[((bibcite fandos))] and is governed by the Digital Standards Organization's Consensus-Oriented Specification System (COSS)[((bibcite coss))].
+
+++ Language
+
+The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED",  "MAY", and "OPTIONAL" in this document are to be interpreted as described in RFC 2119[((bibcite rfc2119))].
+
+++ Goals
+
+The ZMTP-CURVE mechanism provides secure authentication and confidentiality for ZMTP/3.0. This mechanism implements the CurveZMQ security handshake[((bibcite curvezmq)]], which is a mapping of the CurveCP[[(bibcite curvecp)]] handshake for TCP transports.
+
+++ Implementation
+
+The ZMTP-CURVE mechanism requires that the binding peer be "server" and the connecting peer be "client". It consists of a four-message exchange as follows:
+
+[[code]]
+zmtp-curve  = C:HELLO S:COOKIE C:INITIATE C:PROPERTIES S:PROPERTIES
+HELLO       = message    ; CurveZMQ HELLO
+COOKIE      = message    ; CurveZMQ COOKIE 
+INITIATE    = message    ; CurveZMQ INITIATE
+PROPERTIES  = message    ; CurveZMQ MESSAGE holding connection properties
+[[/code]]
+
+The connection properties message is defined in ZMTP/3.0[((bibcite zmtp30))]. The server will treat the connection as successful when it receives and has validated the client's properties message. The client will treat the connection as successful when it receives a properties message from the server.
+
+++ References
+
+[[bibliography]]
+: rfc2119 : "Key words for use in RFCs to Indicate Requirement Levels" - [http://tools.ietf.org/html/rfc2119 ietf.org]
+: fandos : "Definition of a Free and Open Standard" - [http://www.digistan.org/open-standard:definition digistan.org]
+: coss : "Consensus Oriented Specification System" - [http://www.digistan.org/spec:1/COSS digistan.org]
+: curvezmq : "The CurveZMQ Secure Handshake" - [http://curvezmq.org curvezmq.org]
+: curvecp : "CurveCP: Usable security for the Internet" - [http://curvezmq.org curvezmq.org]
+[[/bibliography]]

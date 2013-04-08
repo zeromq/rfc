@@ -28,38 +28,22 @@ The ZMTP-PLAIN mechanism is intended to provide ZMTP-level authentication for no
 
 Additionally, ZMTP-PLAIN MAY be used when the transport layer provides security but no authentication (e.g. over a VPN).
 
-Finally, ZMTP-PLAIN servers as a model for properly secure mechanisms such as ZMTP-CURVE.
+Finally, ZMTP-PLAIN acts as a model for properly secure mechanisms such as ZMTP-CURVE.
 
 ++ Implementation
 
 The ZMTP-PLAIN mechanism requires that the binding peer be "server" and the connecting peer be "client". It consists of a single "hello" message from client to server as follows:
 
 [[code]]
-zmtp-plain  = C:hello
-
-hello       = username password socket-type identity
-
+zmtp-plain  = C:hello 
+hello       = username password
 username    = string
 string      = length *OCTET         ; 0 to 255 octets of data
 length      = OCTET
-
 password    = string
-
-socket-type = PAIR | PUB | SUB | REQ | REP | DEALER | ROUTER | PULL | PUSH
-PAIR        = %X00
-PUB         = %X01
-SUB         = %X02
-REQ         = %X03
-REP         = %X04
-DEALER      = %X05
-ROUTER      = %X06
-PULL        = %X07
-PUSH        = %X08
-
-identity    = string
 [[/code]]
 
-The socket-type and identity SHALL be the real socket type and identity of the sending socket. If the server accepts the client credentials it SHALL continue the connection, otherwise it SHALL close the connection.
+Following the hello message, the client SHALL send a connection properties message as defined in ZMTP/3.0[((bibcite zmtp30))].
 
 ++ References
 
@@ -67,4 +51,5 @@ The socket-type and identity SHALL be the real socket type and identity of the s
 : rfc2119 : "Key words for use in RFCs to Indicate Requirement Levels" - [http://tools.ietf.org/html/rfc2119 ietf.org]
 : fandos : "Definition of a Free and Open Standard" - [http://www.digistan.org/open-standard:definition digistan.org]
 : coss : "Consensus Oriented Specification System" - [http://www.digistan.org/spec:1/COSS digistan.org]
+: zmtp30 : "23/ZMTP - ZeroMQ Message Transport Protocol" - [http://rfc.zeromq.org/spec:23 rfc.zeromq.org]
 [[/bibliography]]

@@ -1,4 +1,4 @@
-The ZMTP-PLAIN mechanism defines a simple clear-text user/password mechanism for ZMTP/2.1. The ZMTP-PLAIN mechanism allows explicit authentication of peers at the ZMTP transport level.
+The ZMTP PLAIN mechanism defines a simple clear-text user/password mechanism for ZMTP/2.1. The ZMTP PLAIN mechanism allows explicit authentication of peers at the ZMTP transport level.
 
 * Name: rfc.zeromq.org/spec:24/ZMTP-PLAIN
 * Editor: Pieter Hintjens <ph@imatix.com>
@@ -24,18 +24,18 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 
 ++ Goals
 
-The ZMTP-PLAIN mechanism is intended to provide ZMTP-level authentication for non-confidential use cases. This is, for example, in a data center where clients want to be certain they are connecting to the right server, but where confidentiality is not a requirement.
+The ZMTP PLAIN mechanism is intended to provide ZMTP-level authentication for non-confidential use cases. This is, for example, in a data center where clients want to be certain they are connecting to the right server, but where confidentiality is not a requirement.
 
-Additionally, ZMTP-PLAIN MAY be used when the transport layer provides security but no authentication (e.g. over a VPN).
+Additionally, PLAIN MAY be used when the transport layer provides security but no authentication (e.g. over a VPN).
 
-Finally, ZMTP-PLAIN acts as a model for properly secure mechanisms such as ZMTP-CURVE.
+Finally, PLAIN acts as a model for properly secure mechanisms such as ZMTP CURVE.
 
 ++ Implementation
 
-The ZMTP-PLAIN mechanism requires that the binding peer be "server" and the connecting peer be "client". It consists of a four-message exchange as follows:
+The PLAIN mechanism requires that the binding peer be "server" and the connecting peer be "client". It consists of a four-message exchange as follows:
 
 [[code]]
-zmtp-plain  = C:HELLO S:OKAY C:PROPERTIES S:PROPERTIES
+plain       = C:HELLO S:OKAY C:PROPERTIES S:PROPERTIES
 
 HELLO       = username password
 username    = string

@@ -1,9 +1,9 @@
-The ZeroMQ Message Transport Protocol (ZMTP) is a transport layer protocol for exchanging messages between two peers over a connected transport layer such as TCP. This document describes ZMTP/3.0. The major change in this version is the addition of security mechanisms and the removal of connection properties (socket type and identity).
+The ZeroMQ Message Transport Protocol (ZMTP) is a transport layer protocol for exchanging messages between two peers over a connected transport layer such as TCP. This document describes ZMTP/3.0. The major change in this version is the addition of security mechanisms and the removal of hard-coded connection meta-data (socket type and identity) from the greeting.
 
 * Name: rfc.zeromq.org/spec:23/ZMTP
 * Editor: Pieter Hintjens <ph@imatix.com>
 * Contributors: Martin Hurton <mh@imatix.com>
-* State: raw
+* State: draft
 
 ++ License
 
@@ -23,121 +23,170 @@ This Specification is a free and open standard[((bibcite fandos))] and is govern
 
 The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED",  "MAY", and "OPTIONAL" in this document are to be interpreted as described in RFC 2119[((bibcite rfc2119))].
 
-++ Goals and Overall Behavior
+++ Goals
 
-The ZeroMQ Message Transport Protocol (ZMTP) is a transport layer protocol for exchanging messages between two peers over a connected transport layer such as TCP. This document describes ZMTP/3.0. The changes in this version of the specification are a new version numbering scheme, the addition of security mechanisms, and the removal of connection properties (socket type and identity) from the greeting.
+The ZeroMQ Message Transport Protocol (ZMTP) is a transport layer protocol for exchanging messages between two peers over a connected transport layer such as TCP. This document describes ZMTP/3.0. ZMTP/3.0 solves a number of problems we face when using TCP carry messages:
+
+* TCP carries a stream of bytes with no delimiters, but we want to send and receive discrete messages. Thus, ZMTP reads and writes //frames// consisting of a size and a body.
+
+* We need to carry meta-data on each frame (such as, whether the frame is part of a multipart message, or not). ZMTP provides a //flags// field in each frame for meta-data.
+
+* We need to be able to talk to older implementations, so that our framing can evolve without breaking existing implementations. ZMTP defines a //greeting// that announces the implemented version number, and specifies a method for version negotiation.
+
+* We want to avoid that each task must bind to a unique interface and port, since this increases system administration costs. ZMTP provides a //service// field in the greeting that lets any number of tasks bind to the same interface and port.
+
+* We need security so that peers can be sure of the identity of the peers they talk to, and so that messages cannot be tampered with, nor inspected, by third parties. ZMTP defines a //security handshake// that allows peers to create a secure connection.
+
+* We need a range of security protocols, from clear text (no security, but fast) to fully authenticated and encrypted (secure, but slow). Further, we need the freedom to add new security protocols over time. ZMTP defines a way for peers to agree on an extensible //security mechanism//.
+
+* We need a way to carry meta-data about the connection, after the security handshake. ZMTP defines a standard set of //meta data properties// (socket type, identity, etc.) that peers exchange after the security mechanism.
+
+* We need to write down these solutions in a way that is easy for teams to implement on any platform and in any language. ZMTP is thus specified as a formal protocol (this document) and made available to teams under a free license.
+
+* We need guarantees that people will not create private forks of ZMTP, thus breaking interoperability. ZMTP is thus licensed under the GPLv3, so that any derived versions must also be made available to users of software that implements it.
+
++++ Changes from Previous Versions
+
+The changes in version 3 of the specification are a simpler version numbering scheme, the addition of security mechanisms, the removal of hard-coded connection meta-data (socket type and identity) from the greeting, and the addition of connection meta data.
+
+++ Implementation
+
++++ Overall Behavior
 
 A ZMTP/3.0 connection goes through these stages:
 
-* The two peers greet each other.
-* The peers handshake a security mechanism.
-* The peers exchange connection properties.
-* The peers use the connection to send data.
+* The two peers agree on the version and security mechanism of the connection by sending each other data and either continuing the discussion, or closing the connection.
 
-A ZMTP/3.0 connection //always// uses a security mechanism. The protocol allows the use of arbitrary mechanisms, for future extensibility and experimentation. ZMTP/3.0 specifies two mechanisms: PLAIN (simple authentication over clear text) and CURVE (secure authentication and confidentiality).
+* The two peers handshake the security mechanism by exchanging zero or more commands. If the security handshake is successful, the peers continue the discussion, otherwise one or both peers closes the connection.
 
-++ Implementation
+* Each peer then sends the other meta data about the connection as a final command. The peers may check the meta data and each peer decides either to continue, or to close the connection.
+
+* Each peer is then able to send the other messages. Either peer may at any moment close the connection.
 
 +++ Formal Grammar
 
 The following ABNF grammar defines the ZMTP/3.0 protocol:
 
 [[code]]
-zmtp        = *connection
+;   The protocol consists of zero or more connections
+zmtp = *connection
 
-connection  = greeting *message
+;   Each connection consists of a greeting, zero or more commands
+;   depending on the mechanism, and and zero or more messages
+connection = greeting *command *message
 
-greeting    = signature major minor mechanism
-signature   = %xFF padding %x7F
-padding     = 8%x00       
-major       = %x03        ; Version number major
-minor       = %x00        ; Version number minor
-mechanism   = 20OCTET     ; ASCII string, null padded
+;   The greeting announces the protocol details
+greeting = signature version service mechanism filler
 
-message     = *more-frame final-frame
-final-frame = final body
-final       = final-short | final-long
-final-short = %x00 OCTET
-body        = *OCTET
-final-long  = %x02 8OCTET
-more-frame  = more body
-more        = more-short | more-long
-more-short  = %x01 OCTET            
-more-long   = %x03 8OCTET           
+signature = %xFF padding %x7F
+padding = 8OCTET        ; Not significant
+
+version = version-major version-minor
+version-major = %x03            
+version-minor = %x00     
+
+service = 128service-char
+service-char = ALPHA | DIGIT
+    | "$" | "-" | "_" | "@" | "." | "&" | "+" | %x0
+          
+mechanism = 20mechanism-char
+mechanism-char = "A"-"Z" | DIGIT
+    | "-" | "_" | "." | "+" | %x0
+
+;   A command is a single long or short frame
+command = command-size frame-body
+command-size = %x04 short-size | %x06 long-size
+short-size = OCTET
+long-size = 8OCTET
+frame-body = *OCTET
+
+;   A message is 1 or more long or short frames
+message = *message-more message-last
+message-more = ( %x01 short-size | %x03 long-size ) frame-body
+message-last = ( %x00 short-size | %x02 long-size ) frame-body
 [[/code]]
 
-+++ The Greeting
++++ Topology
 
-Each peer starts by sending a fixed 10 octet protocol signature (%xFF 8%x00 %x7F), followed by a two octet version number (%x03 %x00), followed by a 20 octet security mechanism (a null-filled ASCII string of 1 to 20 characters).
+ZMTP/3.0 is a peer-to-peer protocol that makes no distinction between the "client" (the peer that connects) and the "server" (the peer that binds). The ZMTP/3.0 security mechanisms (which are extension protocols, and explained below) may be peer-to-peer, or may have distinct roles for client peers and server peers. This difference reflects the need to protect resources that tend to be concentrated on servers.
 
-The signature has an 8-byte padding field. A peer SHOULD place zeroes into this field but MAY place other values. A peer MUST NOT validate this padding value and MAY NOT interpret it in any way whatsoever.
++++ Version Negotiation
 
-ZMTP/3.0 uses an extensible security model loosely based on the Simple Authentication and Security Layer (SASL)[((bibcite rfc4422))]. All connections use a security mechanism, which is an ASCII string, null-padded as needed to fit 20 octets. A ZMTP/3.0 implementation SHOULD support at least these two security mechanisms:
+ZMTP/3.0 provides asymmetric version negotiation. A ZMTP/3.0 peer MAY attempt to detect and work with older versions of the protocol. It MAY also demand ZMTP/3.0 capabilities from its peers.
 
-* "PLAIN", specified by [http://rfc.zeromq.org/spec:24/ rfc.zeromq.org/spec:24/ZMTP-PLAIN], which implements a clear-text user/password mechanism.
+In the first case, after making or receiving a connection, the peer SHALL send to the other a partial greeting sufficient to trigger version detection. This is the first eleven (11) octets of the greeting (signature and major version number). The peer SHALL then read the first eleven octets of greeting sent by the other peer, and determine whether to downgrade or not. The specific heuristics for each older ZMTP version are explained in the section "Backwards Interoperability". In this case the peer MAY use the padding field for older protocol detection (we explain the specific known case below).
 
-* "CURVE", specified by [http://rfc.zeromq.org/spec:25/ rfc.zeromq.org/spec:25/ZMTP-CURVE], which implements the CurveZMQ security handshake[((bibcite curvezmq))].
+In the second case, after making or receiving a connection, the peer SHALL send its entire greeting (32 octets) and SHALL expect a matching 32 octet greeting. In this case the peer SHOULD set the padding field to binary zeroes.
 
-ZMTP/3.0 offers no negotiation of the security mechanisms. The security mechanism can be considered //assertive// in that once a connection is established, a peer is certain that all incoming messages have the required level of security. This prevents downgrade attacks and simplifies implementations.
+In either case, note that:
 
-A greeting received from the other peer is considered "invalid" if it does not match exactly the greeting sent to the peer. That is, the same signature (except for padding), version number, and security mechanism.
+* A peer SHALL NOT assign any significance to the padding field and MUST NOT validate this nor interpret it in any way whatsoever.
 
-A ZMTP/3.0 peer (except for working with older protocol versions) MUST treat an invalid greeting as fatal and SHOULD close the connection after a random delay. A connecting peer that receives an invalid greeting SHOULD NOT reconnect.
+* A peer MUST accept higher protocol versions as valid. That is, a ZMTP/3.0 peer MUST accept protocol versions greater or equal to 3.0. This allows future implementations to safely interoperate with current implementations.
 
-To detect and interoperate with older ZMTP protocol implementations, we use the strategy of selectively imitating the older protocol. Future interoperability is based on this same strategy (applied backwards to this version of ZMTP). We discuss backwards interoperability at the end of this document.
+* A peer SHALL always use its own protocol (including framing) when talking to an equal or higher protocol peer.
 
-+++ Messages and Frames
+* A peer MAY downgrade its protocol to talk to a lower protocol peer.
 
-ZMTP/3.0 delimits the TCP stream following the greeting into //messages//. A message consists of one or more //frames// for purposes of structuring. A frame consists of a flags field (1 octet), followed by a length field (1 or 8 octets) and a frame body of length octets. The length does not include the flags field, nor itself, so an empty frame has a length of zero.
+* If a peer cannot downgrade its protocol to match its peer, it MUST close the connection.
 
-The flags field consists of a single octet containing various control flags. Bit 0 is the least significant bit (rightmost bit):
++++ Service Routing
 
-* Bit 0 (MORE): //More frames to follow//. A value of 0 indicates that there are no more frames to follow. A value of 1 indicates that more frames will follow. On messages consisting of a single frame the MORE bit MUST be 0.
-
-* Bit 1 (LONG): //Long message//. A value of 0 indicates that the message length is encoded as a single octet. A value of 1 indicates that the message length is encoded as a 64-bit unsigned integer in network byte order.
-
-* Bits 2-7: //Reserved//. Bits 2-7 are reserved for future use and MUST be zero.
-
-The following diagram shows the layout of a final data frame with a length of 0 to 255 octets:
+ZMTP/3.0 supports internal routing of connections, similarly to the HTTP "Virtual Host" function. Service names are chosen by end user applications. Conceptually, the service name extends the endpoint used in a bind or connect API call, like this:
 
 [[code]]
-            +-----------------+
- Octet 0    | 0 0 0 0 0 0 0 0 |
-            +-----------------+
- Octet 1    | Length          |
-            +-----------------+- ... -----------------+
- Octets 2+  | Body                      Length octets |
-            +------------------- ... -----------------+
+zmq_bind (publisher, "tcp://*:9001/service-name");
+...
+zmq_connect (subscriber, "tcp://192.168.55.23:9001/service-name");
 [[/code]]
 
-The following diagram shows the layout of a final LONG data frame:
+The service name may be empty.
 
-[[code]]
-            +-----------------+
- Octet 0    | 0 0 0 0 0 0 1 0 |
-            +-----------------+
- Octets 1-8 | Length                       8 octets   |
-            +------------------ ... ------------------+
- Octets 9+  | Body                      Length octets |
-            +------------------ ... ------------------+
-[[/code]]
++++ Authentication and Confidentiality
 
-+++ Security Handshake
+ZMTP/3.0 provides extensible authentication and confidentiality through the use of a negotiated security mechanism that is loosely based on the IETF Simple Authentication and Security Layer (SASL)[((bibcite rfc4422))]. The peer MAY support any or all of the following mechanisms:
 
-The security handshake consists of zero or more messages sent between the peers. The precise nature of this handshake depends on the security mechanism.
+* "NULL", specified later in this document, which implements no authentication, and no confidentiality.
 
-+++ Connection Properties
+* "PLAIN", specified by [http://rfc.zeromq.org/spec:24/ rfc.zeromq.org/spec:24/ZMTP-PLAIN], which implements simple user-name and password authentication, in clear text.
 
-Following successful security handshaking, the peer SHALL send, and SHALL expect, a single message containing the connection properties. This message may be encrypted according to the security mechanism. In its clear text form, it SHALL be formatted as a list of name-value pairs where each pair consists of a printable name, followed by '=', followed by a printable string value, followed by a null octet.
+* "CURVE", specified by [http://rfc.zeromq.org/spec:25/ rfc.zeromq.org/spec:25/ZMTP-CURVE], which implements full authentication and confidentiality using the CurveZMQ security handshake[((bibcite curvezmq))].
 
-All implementations SHALL provide at least these properties:
+The security mechanism is an ASCII string, null-padded as needed to fit 20 octets. Implementations MAY define their own mechanisms for experimentation and internal use. All mechanisms intended for public interoperability SHALL be defined as 0MQ RFCs. Mechanism names SHALL be assigned on a first-come first-served basis. Mechanism names SHALL consist only of uppercase letters A to Z, digits, and embedded hyphens or underscores.
+
+A peer announces precisely one security mechanism, unlike SASL, which lets servers announce multiple security mechanisms. Security in ZMTP/3.0 is //assertive// in that all peers on a given socket have the same, required level of security. This prevents downgrade attacks and simplifies implementations.
+
+Each security mechanism defines a protocol consisting of zero or more commands sent by either peer to the other until the handshaking is complete or either of the peers refuses to continue, and closes the connection.
+
+Commands are single frames consisting of a size field, and a body. If the body is 0-255 octets, the command SHOULD use a short size field (%x04 followed by 1 octet). If the body is 256 or more octets, the command SHOULD use a long size field (%x06 followed by 8 octets).
+
+The size field is always in clear text. The body may be partially or fully encrypted. ZMTP/3.0 does not define the syntax nor semantics of commands. These are fully defined by the security mechanism protocol.
+
+The supported mechanism is not considered sensitive information. A peer that reads a full greeting, including mechanism, MUST also send a full greeting including mechanism. This avoids deadlocks in which two peers each wait for the other to divulge the remainder of their greeting.
+
+If the mechanism that the peer received does not exactly match the mechanism it sent, it MUST close the connection.
+
++++ Error Handling
+
+ZMTP/3.0 has no explicit error responses. The peer SHALL treat all errors as fatal and act by closing the connection. When a peer sees that the other peer has closed the connection before the security handshake was complete, it SHALL NOT reconnect. If the other peer closes the connection after the security handshake was complete, the peer SHOULD reconnect.
+
+To avoid connection storms, peers should reconnect after a short and possibly randomized interval. Further, if a peer reconnects more than once, it should increase the delay between reconnects. Various strategies are possible.
+
+If a peer closes its connection before the connection was completed, this SHOULD be treated as a permanent failure, i.e. the implementation SHOULD NOT reconnect automatically.
+
+If the peer closes its side of the connection after the connection was made successfully, this SHOULD be treated as a temporary failure, and the implementation SHOULD reconnect after a suitable waiting period.
+
++++ Connection Meta-Data
+
+The security mechanism SHALL provide a way for each peer to exchange meta data in the form of a key-value dictionary. The precise encoding of the meta data depends on the mechanism.
+
+All implementations SHALL provide at least these meta-data properties:
 
 * "SOCKET-TYPE", which specifies the sender's socket type, as one of "PAIR", "XPUB", "XSUB", "REQ", "REP", "DEALER", "ROUTER", "PULL", or "PUSH".
-* "IDENTITY", which specifies the sender's socket identity, encoded as a hex string. The identity may not exceed 510 hex characters (255 decoded bytes).
 
-An implementation MAY validate socket types and identities. The implementation MUST ignore any property that it does not recognize.
+* "IDENTITY", which specifies the sender's socket identity, as an opaque binary blob of zero to 255 octets. If a peer does not send an IDENTITY value, the receiving peer SHALL assume the IDENTITY was empty (a zero-sized blob).
 
-The implementation MAY enforce that an incoming connection has a valid socket type, depending on the socket type of the socket receiving the connection:
+The peer MAY enforce that an incoming connection has a valid socket type, depending on the socket type of the socket receiving the connection:
 
 * PAIR accepts connections from PAIR.
 * PUB accepts connections from SUB.
@@ -149,17 +198,38 @@ The implementation MAY enforce that an incoming connection has a valid socket ty
 * PULL accepts connections from PUSH.
 * PUSH accepts connections from PULL.
 
-Any other socket combinations SHOULD be handled by silently disconnecting the other peer and possibly logging the error for debugging purposes.
+If a peer validates the socket type, it SHOULD handle the error by silently disconnecting the other peer and possibly logging the error for debugging purposes.
 
-+++ Using the Connection
++++ Commands, Messages and Frames
 
-Following the connection property message, each peer MAY send data messages.
+Following the greeting, which has a fixed size of 160 octets, all further data is sent as size-specified frames. //Command frames// are used in the security handshake, and //message frames// are used to carry application data. Commands always consist of a single frame. Messages consist of one or more frames. 
 
-Each security mechanism has sufficient knowledge to know when a connection has been made successfully. This will usually be after the exchange of connection properties. ZMTP/3.0 has no explicit error reporting in the protocol. A peer handles an error by closing its connection.
+A frame consists of a flags field (1 octet), followed by a length field (1 or 8 octets) and a frame body of length octets. The length does not include the flags field, nor itself, so an empty frame has a length of zero.
 
-If a peer closes its connection before the connection was completed, this SHOULD be treated as a permanent failure, i.e. the implementation SHOULD NOT reconnect automatically.
+The flags field consists of a single octet containing various control flags. Bit 0 is the least significant bit (rightmost bit):
 
-If the peer closes its side of the connection after the connection was made successfully, this SHOULD be treated as a temporary failure, and the implementation SHOULD reconnect after a suitable waiting period.
+* Bits 7-3: //Reserved//. Bits 7-3 are reserved for future use and MUST be zero.
+
+* Bit 2 (command): //command frame//. A value of 1 indicates that the frame is part of a command. A value of 0 indicates that the frame is part of a data message.
+
+* Bit 1 (LONG): //Long frame//. A value of 0 indicates that the frame size is encoded as a single octet. A value of 1 indicates that the frame size is encoded as a 64-bit unsigned integer in network byte order.
+
+* Bit 0 (MORE): //More frames to follow//. A value of 0 indicates that there are no more frames to follow. A value of 1 indicates that more frames will follow. This bit SHALL be zero on command frames.
+
+++ The NULL Security Mechanism
+
+The NULL mechanism implements no authentication and no confidentiality. To complete a NULL security handshake, the client (the connecting peer) SHALL send a METADATA command to the server. The server MAY validate this command, and MAY then either send a METADATA command back to the client, or close the connection if validation failed.
+
+The following ABNF grammar defines the NULL security handshake:
+
+[[code]]
+null-mechanism = C:metadata S:metadata
+metadata = command-size metadata-body
+metadata-body = "METADATA" *(name value)
+name = short-size *name-char
+name-char = ALPHA | DIGIT | "-" | "_" | "." | "+"
+value = short-size *OCTET
+[[/code]]
 
 ++ Backwards Interoperability
 
@@ -177,6 +247,8 @@ From ZMTP/2.0[((bibcite zmtp20))] onwards, the protocol contains the version num
 
 * If this has the version number 3, the peer is using ZMTP/3.0, so send the rest of the greeting and continue with ZMTP/3.0.
 
+To work with ZMTP/2.0 peers the application must use only empty service names.
+
 +++ Detecting ZMTP/1.0 Peers
 
 ZMTP/1.0[((bibcite zmtp10))] did not have any version information. To detect and interoperate with a ZMTP/1.0 peer, an implementation SHALL:
@@ -192,6 +264,70 @@ ZMTP/1.0[((bibcite zmtp10))] did not have any version information. To detect and
 * If the least significant bit is not 0, the peer is using ZMTP/3.0 or a later version. We read a further octet, which indicates the protocol version. If this is 1 or 2, we have a ZMTP/2.0 peer. If this is 3, we have a ZMTP/3.0 peer.
 
 * When we have detected a ZMTP/1.0 peer, we have already sent 10 octets, which the other peer interprets as the start of an identity frame. We continue by sending the body of the identity frame (zero or more octets). From then, we encode and decode all frames on that connection using the ZMTP/1.0 framing syntax.
+
+To work with ZMTP/1.0 peers the application must use only empty service names.
+
+++ Worked Example
+
+A DEALER client connects to a "lookup" service on a ROUTER server. Both client and server are running ZMTP/3.0 and the implementation has backwards compatibility detection. The peers will use the NULL security mechanism to talk to each other.
+
+* The client sends a partial greeting (11 octets) greeting to the server, and at the same time (before receiving anything from the client), the server also sends a partial greeting:
+
+[[code]]
++------+-------------+------+------+
+| %xFF | %x00...%x00 | %x7F | %x03 |
++------+-------------+------+------+
+ 0      1             9      10
+[[/code]]
+
+* The client and server read the major version number (%x03) and send the rest of their greeting to each other:
+
+[[code]]
++------+----------+-----------+
+| %x00 | "lookup" | "NULL"    |
++------+----------+-----------+
+ 11     12         140
+[[/code]]
+
+* The client and server now perform the NULL security handshake. First the client sends a METADATA command to the server that specifies the SOCKET-TYPE ("DEALER") and IDENTITY (empty) properties:
+
+[[code]]
++------+-------+----------+
+| %x04 | %x28  | METADATA |
++------+-------+----------+
+ 0      1       2
++-------------+------+--------+------+
+| SOCKET-TYPE | %x00 | DEALER | %x00 |
++-------------+------+--------+------+
+ 10            22     23       29
++----------+------+------+
+| IDENTITY | %x00 | %x00 |
++----------+------+------+
+ 30         38     39
+[[/code]]
+
+* The server validates the socket type, accepts it, and replies with a METADATA command:
+
+[[code]]
++------+-------+----------+
+| %x04 | %x28  | METADATA |
++------+-------+----------+
+ 0      1       2
++-------------+------+--------+------+
+| SOCKET-TYPE | %x00 | ROUTER | %x00 |
++-------------+------+--------+------+
+ 10            22     23       29
++----------+------+------+
+| IDENTITY | %x00 | %x00 |
++----------+------+------+
+ 30         38     39
+[[/code]]
+
+As soon as the server has sent its own METADATA command, it may also send messages to the client. As soon as the client has received the METADATA command from the server, it may send messages to the server.
+
+++ Security Considerations
+
+* All information about the peer is sent //after// security handshaking so that an attacker has less knowledge about an implementation.
 
 ++ References
 

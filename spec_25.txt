@@ -28,17 +28,51 @@ The ZMTP CURVE mechanism provides secure authentication and confidentiality for 
 
 ++ Implementation
 
-The CURVE mechanism requires that the binding peer be "server" and the connecting peer be "client". It consists of a four-message exchange as follows:
+The CURVE mechanism uses the greeting options server-flag field to identify which peer is "client" and which peer is "server".
+
+The client authenticates itself to the server by sending a HELLO command. The server accepts or rejects this authentication. If it accepts it, it replies with a WELCOME command. Otherwise, it closes the connection. The client then sends an INITIATE command, which the server parses and validates. The server responds with a READY command. The client MAY send messages after receiving a READY command from the server. The server MAY start to send messages immediately after sending a READY command.
+
+MAY send messages after receiving HELLO-OK from the server. The server MAY start to send messages immediately after sending HELLO-OK.
+
+The following ABNF grammar defines the CURVE security handshake and message flow:
 
 [[code]]
-curve       = C:HELLO S:COOKIE C:INITIATE C:PROPERTIES S:PROPERTIES
-HELLO       = message    ; CurveZMQ HELLO
-COOKIE      = message    ; CurveZMQ COOKIE 
-INITIATE    = message    ; CurveZMQ INITIATE
-PROPERTIES  = message    ; CurveZMQ MESSAGE with connection properties
+curve = C:hello S:welcome
+        C:initiate S:ready
+     *( C:message | S:message )
+
+hello = command-size "HELLO   " hello-body
+hello-body = cn_client cn_nonce nullbox padding
+cn_client = 32OCTET         ; Client short-term public key C'
+cn_nonce = 8OCTET           ; Client short-term nonce
+nullbox = 80OCTET           ; Box [64 * %x0](C'->S)
+padding = 80%x00            ; Anti-amplification padding
+
+welcome = command-size "WELCOME" welcome-body
+welcome-body = sv_nonce cookie-box
+sv_nonce = 16OCTET          ; Server long-term nonce
+cookie-box 144OCTET         ; Box [S' + cookie](C'->S)
+
+initiate = command-size "INITIATE" initiate-body
+initiate-body = cn_client cn_cookie cn_nonce vouch-box
+cn_client = 32OCTET         ; Client short-term public key C'
+cn_cookie = 96OCTET         ; Server connection cookie
+vouch-box = 112OCTET        ; Box [C + nonce + vouch](C'->S')
+
+ready = command-size "READY   " ready-body
+ready-body = cn_nonce data-box
+cn_nonce = 8OCTET           ; Server short-term nonce
+data-box = 116OCTET         ; Box [M](A'->B') (from A to B)
+
+message = command-size "MESSAGE " message-body
+message-body
+cn_nonce = 8OCTET           ; Server/client short-term nonce
+data-box = 116OCTET         ; Box [M](A'->B') (from A to B)
 [[/code]]
 
-The connection properties message is defined in ZMTP/3.0[((bibcite zmtp30))]. The server will treat the connection as successful when it receives and has validated the client's properties message. The client will treat the connection as successful when it receives a properties message from the server.
+Note: the above grammar is not complete; specifically it does not define variable length messages nor metadata.
+
+All command bodies consist of an 8-character command name, padded with spaces, followed by formatted binary fields. The ZMTP/3.0 specification defines the grammar for command-size. Note that messages are not sent as ZMTP/3.0 message frames but as encrypted MESSAGE commands.
 
 ++ References
 

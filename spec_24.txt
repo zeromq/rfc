@@ -1,4 +1,4 @@
-The ZMTP PLAIN mechanism defines a simple clear-text user/password mechanism for ZMTP/2.1. The ZMTP PLAIN mechanism allows explicit authentication of peers at the ZMTP transport level.
+The ZMTP PLAIN mechanism defines a simple username/password mechanism for ZMTP/3.0 that lets a server authenticate a client. PLAIN makes no attempt at security or confidentiality. It is intended for use on internal networks where security requirements are low.
 
 * Name: rfc.zeromq.org/spec:24/ZMTP-PLAIN
 * Editor: Pieter Hintjens <ph@imatix.com>
@@ -24,31 +24,43 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 
 ++ Goals
 
-The ZMTP PLAIN mechanism is intended to provide ZMTP-level authentication for non-confidential use cases. This is, for example, in a data center where clients want to be certain they are connecting to the right server, but where confidentiality is not a requirement.
+The ZMTP PLAIN mechanism defines a simple username/password mechanism for ZMTP/3.0 that lets a server authenticate a client. PLAIN makes no attempt at security or confidentiality. It is intended for use on internal networks where security requirements are low.
 
-Additionally, PLAIN MAY be used when the transport layer provides security but no authentication (e.g. over a VPN).
+This mechanism addresses a specific set of challenges we face in 0MQ architectures:
 
-Finally, PLAIN acts as a model for properly secure mechanisms such as ZMTP CURVE.
+* When we run multiple services on the same network (for instance, development servers and production servers) and clients must be certain they are accessing the correct server.
+
+* When we want to perform minimal authentication of clients (to avoid errors in configuration).
+
+Previously, applications have tried to do such authentication using socket identities. These do not work for all socket types, nor do they map cleanly to user identities. The PLAIN mechanism lets the client request access based on a user identity which is independent of the socket identity, IP address, and other transport-layer identities.
+
+The PLAIN mechanism is not robust against even the simplest traffic snooping or spoofing attacks, and SHOULD NOT be used on public infrastructure without transport-level security (e.g. over a VPN).
 
 ++ Implementation
 
-The PLAIN mechanism requires that the binding peer be "server" and the connecting peer be "client". It consists of a four-message exchange as follows:
+The PLAIN mechanism uses the greeting options server-flag field to identify which peer is "client" and which peer is "server".
+
+The client authenticates itself to the server by sending a HELLO command. The server accepts or rejects this authentication. If it accepts it, it replies with a WELCOME command. Otherwise, it closes the connection. The client then sends an INITIATE command, which the server parses and validates. The server responds with a READY command. The client MAY send messages after receiving a READY command from the server. The server MAY start to send messages immediately after sending a READY command.
+
+The following ABNF grammar defines the PLAIN security handshake and message flow:
 
 [[code]]
-plain       = C:HELLO S:OKAY C:PROPERTIES S:PROPERTIES
+plain = C:hello S:welcome
+        C:initiate S:ready
+     *( C:message | S:message )
+     
+hello = command-size "HELLO   " username password
+username = OCTET *VCHAR
+password = OCTET *VCHAR
 
-HELLO       = username password
-username    = string
-string      = length *OCTET     ; 0 to 255 octets
-length      = OCTET
-password    = string
+welcome = command-size "WELCOME"
 
-OKAY        = "OK"              ; 2-octet message
+initiate = command-size "INITIATE" *property
 
-PROPERTIES  = message           ; Connection properties message
+ready = command-size "READY   " *property
 [[/code]]
 
-The connection properties message is defined in ZMTP/3.0[((bibcite zmtp30))]. The server will treat the connection as successful when it receives and has validated the client's properties message. The client will treat the connection as successful when it receives a properties message from the server.
+All command bodies consist of an 8-character command name, padded with spaces, followed by formatted binary fields. The ZMTP/3.0 specification defines the grammar for message, command-size, and property.
 
 ++ References
 

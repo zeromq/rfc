@@ -1,4 +1,4 @@
-The ZMTP CURVE mechanism provides secure authentication and confidentiality for ZMTP/3.0. This mechanism implements the CurveZMQ security handshake[((bibcite curvezmq))].
+The ZMTP CURVE mechanism provides secure authentication and confidentiality for ZMTP v3.0. This mechanism implements the CurveZMQ security handshake[((bibcite curvezmq))].
 
 * Name: rfc.zeromq.org/spec:25/ZMTP-CURVE
 * Editor: Pieter Hintjens <ph@imatix.com>
@@ -24,11 +24,11 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 
 ++ Goals
 
-The ZMTP CURVE mechanism provides secure authentication and confidentiality for ZMTP/3.0. This mechanism implements the CurveZMQ security handshake[((bibcite curvezmq))], which is a mapping of the CurveCP[((bibcite curvecp))] handshake for TCP transports.
+The ZMTP CURVE mechanism provides secure authentication and confidentiality for ZMTP[((bibcite zmtp30))]. This mechanism implements the CurveZMQ security handshake[((bibcite curvezmq))], which is a mapping of the CurveCP[((bibcite curvecp))] handshake for TCP transports.
 
 ++ Implementation
 
-The CURVE mechanism uses the greeting options server-flag field to identify which peer is "client" and which peer is "server".
+The CURVE mechanism uses the greeting as-server field to identify which peer is "client" and which peer is "server".
 
 The client authenticates itself to the server by sending a HELLO command. The server accepts or rejects this authentication. If it accepts it, it replies with a WELCOME command. Otherwise, it closes the connection. The client then sends an INITIATE command, which the server parses and validates. The server responds with a READY command. The client MAY send messages after receiving a READY command from the server. The server MAY start to send messages immediately after sending a READY command.
 
@@ -72,7 +72,7 @@ data-box = 116OCTET         ; Box [M](A'->B') (from A to B)
 
 Note: the above grammar is not complete; specifically it does not define variable length messages nor metadata.
 
-All command bodies consist of an 8-character command name, padded with spaces, followed by formatted binary fields. The ZMTP/3.0 specification defines the grammar for command-size. Note that messages are not sent as ZMTP/3.0 message frames but as encrypted MESSAGE commands.
+All command bodies consist of an 8-character command name, padded with spaces, followed by formatted binary fields. The ZMTP v3.0 specification defines the grammar for command-size. Note that messages are not sent as ZMTP message frames but as encrypted MESSAGE commands.
 
 ++ References
 

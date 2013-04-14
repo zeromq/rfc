@@ -1,4 +1,4 @@
-The ZMTP PLAIN mechanism defines a simple username/password mechanism for ZMTP/3.0 that lets a server authenticate a client. PLAIN makes no attempt at security or confidentiality. It is intended for use on internal networks where security requirements are low.
+The ZMTP PLAIN mechanism defines a simple username/password mechanism for ZMTP v3.0 that lets a server authenticate a client. PLAIN makes no attempt at security or confidentiality. It is intended for use on internal networks where security requirements are low.
 
 * Name: rfc.zeromq.org/spec:24/ZMTP-PLAIN
 * Editor: Pieter Hintjens <ph@imatix.com>
@@ -24,7 +24,7 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 
 ++ Goals
 
-The ZMTP PLAIN mechanism defines a simple username/password mechanism for ZMTP/3.0 that lets a server authenticate a client. PLAIN makes no attempt at security or confidentiality. It is intended for use on internal networks where security requirements are low.
+The ZMTP PLAIN mechanism defines a simple username/password mechanism for ZMTP[((bibcite zmtp30))] that lets a server authenticate a client. PLAIN makes no attempt at security or confidentiality. It is intended for use on internal networks where security requirements are low.
 
 This mechanism addresses a specific set of challenges we face in 0MQ architectures:
 
@@ -38,7 +38,7 @@ The PLAIN mechanism is not robust against even the simplest traffic snooping or 
 
 ++ Implementation
 
-The PLAIN mechanism uses the greeting options server-flag field to identify which peer is "client" and which peer is "server".
+The PLAIN mechanism uses the greeting as-server field to identify which peer is "client" and which peer is "server".
 
 The client authenticates itself to the server by sending a HELLO command. The server accepts or rejects this authentication. If it accepts it, it replies with a WELCOME command. Otherwise, it closes the connection. The client then sends an INITIATE command, which the server parses and validates. The server responds with a READY command. The client MAY send messages after receiving a READY command from the server. The server MAY start to send messages immediately after sending a READY command.
 
@@ -60,7 +60,7 @@ initiate = command-size "INITIATE" *property
 ready = command-size "READY   " *property
 [[/code]]
 
-All command bodies consist of an 8-character command name, padded with spaces, followed by formatted binary fields. The ZMTP/3.0 specification defines the grammar for message, command-size, and property.
+All command bodies consist of an 8-character command name, padded with spaces, followed by formatted binary fields. The ZMTP v3.0 specification defines the grammar for message, command-size, and property.
 
 ++ References
 

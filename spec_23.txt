@@ -228,13 +228,13 @@ The value SHALL be 0 to 2^31-1 octets of opaque binary data. Zero-sized values a
 
 The security mechanism SHALL provide a way for peers to exchange metadata in the form of a key-value dictionary. The precise encoding of the metadata depends on the mechanism.
 
-All implementations SHALL provide at least these metadata properties:
+These metadata properties are defined:
 
-* "Socket-Type", which specifies the sender's socket type. See the section "The Socket Type Property" below.
+* "Socket-Type", which specifies the sender's socket type. See the section "The Socket Type Property" below. The sender SHOULD specify the Socket-Type.
 
-* "Identity", which specifies the sender's socket identity. See the section "The Identity Property" below.
+* "Identity", which specifies the sender's socket identity. See the section "The Identity Property" below. The sender MAY specify an Identity.
 
-* "Resource", which specifies the a resource to connect to. See the section "The Resource Property" below.
+* "Resource", which specifies the a resource to connect to. See the section "The Resource Property" below. The sender MAY specify a Resource.
 
 The implementation MAY provide other metadata properties such as implementation name, platform name, and so on. For interoperability, metadata names and semantics MAY be defined as RFCs.
 
@@ -311,9 +311,9 @@ From ZMTP v v2.0[((bibcite zmtp20))] onwards, the protocol contains the version 
 
 * Wait for the other peer to send its greeting.
 
-* If this has the version number 1 or 2, the peer is using ZMTP v2.0, so send the ZMTP v2.0 socket type and identity and continue with ZMTP v2.0.
+* If the peer version number is 1 or 2, the peer is using ZMTP v2.0, so send the ZMTP v2.0 socket type and identity and continue with ZMTP v2.0.
 
-* If this has the version number 3, the peer is using ZMTP, so send the rest of the greeting and continue with ZMTP v3.0.
+* If the peer version number is 3 or higher, the peer is using ZMTP v3.0, so send the rest of the greeting and continue with ZMTP v3.0.
 
 +++ Detecting ZMTP v1.0 Peers
 

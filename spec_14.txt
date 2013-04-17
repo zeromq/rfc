@@ -3,6 +3,7 @@ Worker-Manager Protocol is a generalization of request-reply pattern, allowing m
 * Name: rfc.zeromq.org/spec:14/WMP
 * Editor: Brugeman Artur <brugeman.artur@gmail.com>
 * Contributors: none yet
+* State: raw
 
 ++ License
 

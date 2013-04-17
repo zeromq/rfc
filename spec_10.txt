@@ -2,6 +2,7 @@ The Freelance Protocol (FLP) defines brokerless reliable request-reply dialogs a
 
 * Name: rfc.zeromq.org/spec:10/FLP
 * Editor: Pieter Hintjens <ph@imatix.com>
+* State: stable
 
 ++ License
 

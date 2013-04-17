@@ -2,7 +2,7 @@ The C Language Style for Scalability (CLASS) defines a consistent style and orga
 
 * Name: rfc.zeromq.org/spec:21/CLASS
 * Editor: Pieter Hintjens <ph@imatix.com>
-* State: draft
+* State: stable
 
 ++ License
 

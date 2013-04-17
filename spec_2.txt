@@ -2,7 +2,7 @@ SPB is a minimalist format for framing opaque binary blobs.  The blobs have no p
 
 * Name: rfc.zeromq.org/spec:2/SPB
 * Editor: Pieter Hintjens <ph@imatix.com>
-* State: stable
+* State: deprecated
 
 ++ License
 

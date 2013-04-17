@@ -1,4 +1,4 @@
-The ZeroMQ Message Transport Protocol (ZMTP) is a transport layer protocol for exchanging messages between two peers over a connected transport layer such as TCP. This document describes ZMTP v3.0. The major change in this version is the addition of security mechanisms and the removal of hard-coded connection metadata (socket type and identity) from the greeting.
+The ZeroMQ Message Transport Protocol (ZMTP) is a transport layer protocol for exchanging messages between two peers over a connected transport layer such as TCP. This document describes ZMTP 3.0. The major change in this version is the addition of security mechanisms and the removal of hard-coded connection metadata (socket type and identity) from the greeting.
 
 * Name: rfc.zeromq.org/spec:23/ZMTP
 * Editor: Pieter Hintjens <ph@imatix.com>
@@ -113,7 +113,7 @@ message-last = ( %x00 short-size | %x02 long-size ) frame-body
 
 ZMTP provides asymmetric version negotiation. A ZMTP peer MAY attempt to detect and work with older versions of the protocol. It MAY also demand ZMTP capabilities from its peers.
 
-In the first case, after making or receiving a connection, the peer SHALL send to the other a partial greeting sufficient to trigger version detection. This is the first eleven (11) octets of the greeting (signature and major version number). The peer SHALL then read the first eleven octets of greeting sent by the other peer, and determine whether to downgrade or not. The specific heuristics for each older ZMTP version are explained in the section "Backwards Interoperability". In this case the peer MAY use the padding field for older protocol detection (we explain the specific known case below).
+In the first case, after making or receiving a connection, the peer SHALL send to the other a partial greeting sufficient to trigger version detection. This is the first eleven (11) octets of the greeting (signature and major version number). The peer SHALL then read the first eleven octets of greeting sent by the other peer, and determine whether to downgrade or not. The specific heuristics for each older ZMTP ersion are explained in the section "Backwards Interoperability". In this case the peer MAY use the padding field for older protocol detection (we explain the specific known case below).
 
 In the second case, after making or receiving a connection, the peer SHALL send its entire greeting (32 octets) and SHALL expect a matching 32 octet greeting. In this case the peer SHOULD set the padding field to binary zeroes.
 
@@ -303,33 +303,33 @@ The implementation SHALL accept all resource requests, as a resource may become 
 
 To detect and work with older versions of ZMTP, we use a mix of strategies. An implementation MAY use any or all or none of these strategies.
 
-+++ Detecting ZMTP v2.0 Peers
++++ Detecting ZMTP 2.0 Peers
 
-From ZMTP v v2.0[((bibcite zmtp20))] onwards, the protocol contains the version number immediately after the signature. To detect and interoperate with ZMTP v2.0 peers, the implementation SHALL:
+From ZMTP  v2.0[((bibcite zmtp20))] onwards, the protocol contains the version number immediately after the signature. To detect and interoperate with ZMTP 2.0 peers, the implementation SHALL:
 
 * Send the 10-octet signature followed by the major version number (the single octet %x03).
 
 * Wait for the other peer to send its greeting.
 
-* If the peer version number is 1 or 2, the peer is using ZMTP v2.0, so send the ZMTP v2.0 socket type and identity and continue with ZMTP v2.0.
+* If the peer version number is 1 or 2, the peer is using ZMTP 2.0, so send the ZMTP 2.0 socket type and identity and continue with ZMTP 2.0.
 
-* If the peer version number is 3 or higher, the peer is using ZMTP v3.0, so send the rest of the greeting and continue with ZMTP v3.0.
+* If the peer version number is 3 or higher, the peer is using ZMTP 3.0, so send the rest of the greeting and continue with ZMTP 3.0.
 
-+++ Detecting ZMTP v1.0 Peers
++++ Detecting ZMTP 1.0 Peers
 
-ZMTP v1.0[((bibcite zmtp10))] did not have any version information. To detect and interoperate with a ZMTP v1.0 peer, an implementation SHALL:
+ZMTP 1.0[((bibcite zmtp10))] did not have any version information. To detect and interoperate with a ZMTP 1.0 peer, an implementation SHALL:
 
 * Send a 10-octet pseudo-signature consisting of "%xFF size %x7F" where 'size' is the number of octets in the sender's identity (0 or greater) plus 1. The size SHALL be 8 octets in network byte order and occupies the padding field.
 
 * Read the first octet from the other peer.
 
-* If this octet is not %FF, then the other peer is using ZMTP v1.0.
+* If this octet is not %FF, then the other peer is using ZMTP 1.0.
 
-* If this octet is %FF, then we read nine further octets, and inspect the last octet (the 10th). If the least significant bit is 0, then the other peer is using ZMTP v1.0.
+* If this octet is %FF, then we read nine further octets, and inspect the last octet (the 10th). If the least significant bit is 0, then the other peer is using ZMTP 1.0.
 
-* If the least significant bit is not 0, the peer is using ZMTP v3.0 or a later version. We read a further octet, which indicates the protocol version. If this is 1 or 2, we have a ZMTP v2.0 peer. If this is 3, we have a ZMTP v3.0 peer.
+* If the least significant bit is not 0, the peer is using ZMTP 2.0 or later. We read a further octet, which indicates the protocol version. If this is 1 or 2, we have a ZMTP 2.0 peer. If this is 3, we have a ZMTP 3.0 peer.
 
-* When we have detected a ZMTP v1.0 peer, we have already sent 10 octets, which the other peer interprets as the start of an identity frame. We continue by sending the body of the identity frame (zero or more octets). From then, we encode and decode all frames on that connection using the ZMTP v1.0 framing syntax.
+* When we have detected a ZMTP 1.0 peer, we have already sent 10 octets, which the other peer interprets as the start of an identity frame. We continue by sending the body of the identity frame (zero or more octets). From then, we encode and decode all frames on that connection using the ZMTP 1.0 framing syntax.
 
 ++ Worked Example
 

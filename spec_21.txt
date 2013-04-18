@@ -571,7 +571,7 @@ The module MAY offer any number of other methods that operate on the instance. T
 * The first argument to the method SHALL be the instance reference.
 * Other arguments may follow.
 
-A method may act as a destructor when it for example moves an object instance elsewhere (e.g. as a message to another thread). In that case the method SHALL use the same style as the destructor.
+A method may take ownership of an object instance and then act as a destructor of the object instance at some later stage. In that case the method SHALL use the same style as the destructor.
 
 ++++ Return Values
 

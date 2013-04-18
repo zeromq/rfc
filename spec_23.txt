@@ -65,7 +65,7 @@ A ZMTP connection goes through these main stages:
 
 +++ Formal Grammar
 
-The following ABNF grammar defines the ZMTP protocol:
+The following ABNF grammar defines the protocol:
 
 [[code]]
 ;   The protocol consists of zero or more connections
@@ -276,7 +276,7 @@ When a peer validates the socket type, it MUST handle errors by silently disconn
 
 ++++ The Identity Property
 
-A REQ, DEALER, or ROUTER peer connecting to a ROUTER MAY announce its identity, which is used as an addressing mechanism by the ROUTER socket. For all other socket types, the Identity property shall be ignored. If the Identity is empty or absent, the ROUTER socket SHALL generate an internal identity for this peer.
+A REQ, DEALER, or ROUTER peer connecting to a ROUTER MAY announce its identity, which is used as an addressing mechanism by the ROUTER socket. For all other socket types, the Identity property shall be ignored.
 
 The Identity SHALL match this grammar:
 
@@ -284,7 +284,7 @@ The Identity SHALL match this grammar:
 identity = 0*255OCTET
 [[/code]]
 
-The first octet of the Identity SHALL NOT be zero.
+The first octet of the Identity SHALL NOT be zero: identities starting with a zero octet are reserved for implementations' internal use.
 
 ++++ The Resource Property
 
@@ -301,11 +301,11 @@ The implementation SHALL accept all resource requests, as a resource may become 
 
 ++ Backwards Interoperability
 
-To detect and work with older versions of ZMTP, we use a mix of strategies. An implementation MAY use any or all or none of these strategies.
+To detect and work with older versions of ZMTP, we use a mix of strategies. We define two strategies; one will detect only 2.0 peers, and the second will detect both 1.0 and 2.0 peers.
 
 +++ Detecting ZMTP 2.0 Peers
 
-From ZMTP  v2.0[((bibcite zmtp20))] onwards, the protocol contains the version number immediately after the signature. To detect and interoperate with ZMTP 2.0 peers, the implementation SHALL:
+From ZMTP 2.0[((bibcite zmtp20))] onwards, the protocol contains the version number immediately after the signature. To detect and interoperate with ZMTP 2.0 peers, the implementation MAY use this strategy:
 
 * Send the 10-octet signature followed by the major version number (the single octet %x03).
 
@@ -315,19 +315,19 @@ From ZMTP  v2.0[((bibcite zmtp20))] onwards, the protocol contains the version n
 
 * If the peer version number is 3 or higher, the peer is using ZMTP 3.0, so send the rest of the greeting and continue with ZMTP 3.0.
 
-+++ Detecting ZMTP 1.0 Peers
++++ Detecting ZMTP 1.0 and 2.0 Peers
 
-ZMTP 1.0[((bibcite zmtp10))] did not have any version information. To detect and interoperate with a ZMTP 1.0 peer, an implementation SHALL:
+ZMTP 1.0[((bibcite zmtp10))] did not have any version information. To detect and interoperate with a ZMTP 1.0 and 2.0 peers, an implementation MAY use this strategy:
 
 * Send a 10-octet pseudo-signature consisting of "%xFF size %x7F" where 'size' is the number of octets in the sender's identity (0 or greater) plus 1. The size SHALL be 8 octets in network byte order and occupies the padding field.
 
 * Read the first octet from the other peer.
 
-* If this octet is not %FF, then the other peer is using ZMTP 1.0.
+* If this first octet is not %FF, then the other peer is using ZMTP 1.0, and has sent us a short frame header for its identity.
 
-* If this octet is %FF, then we read nine further octets, and inspect the last octet (the 10th). If the least significant bit is 0, then the other peer is using ZMTP 1.0.
+* If this first octet is %FF, then we read nine further octets, and inspect the last octet (the 10th in total). If the least significant bit is 0, then the other peer is using ZMTP 1.0 and has sent us the header for a long frame containing an identity.
 
-* If the least significant bit is not 0, the peer is using ZMTP 2.0 or later. We read a further octet, which indicates the protocol version. If this is 1 or 2, we have a ZMTP 2.0 peer. If this is 3, we have a ZMTP 3.0 peer.
+* If the least significant bit is 1, the peer is using ZMTP 2.0 or later and has sent us the ZMTP signature. We read a further octet, which indicates the ZMTP version. If this is 1 or 2, we have a ZMTP 2.0 peer. If this is 3, we have a ZMTP 3.0 peer.
 
 * When we have detected a ZMTP 1.0 peer, we have already sent 10 octets, which the other peer interprets as the start of an identity frame. We continue by sending the body of the identity frame (zero or more octets). From then, we encode and decode all frames on that connection using the ZMTP 1.0 framing syntax.
 

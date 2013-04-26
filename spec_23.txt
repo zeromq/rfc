@@ -323,9 +323,9 @@ ZMTP 1.0[((bibcite zmtp10))] did not have any version information. To detect and
 
 * Read the first octet from the other peer.
 
-* If this first octet is not %FF, then the other peer is using ZMTP 1.0, and has sent us a short frame header for its identity.
+* If this first octet is not %FF, then the other peer is using ZMTP 1.0, and has sent us a short frame length for its identity. We read that many octets.
 
-* If this first octet is %FF, then we read nine further octets, and inspect the last octet (the 10th in total). If the least significant bit is 0, then the other peer is using ZMTP 1.0 and has sent us the header for a long frame containing an identity.
+* If this first octet is %FF, then we read nine further octets, and inspect the last octet (the 10th in total). If the least significant bit is 0, then the other peer is using ZMTP 1.0 and has sent us a long length for its identity. We read that many octets.
 
 * If the least significant bit is 1, the peer is using ZMTP 2.0 or later and has sent us the ZMTP signature. We read a further octet, which indicates the ZMTP version. If this is 1 or 2, we have a ZMTP 2.0 peer. If this is 3, we have a ZMTP 3.0 peer.
 

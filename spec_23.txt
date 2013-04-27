@@ -211,7 +211,7 @@ When a peer uses the NULL security mechanism, the as-server field MUST be zero. 
 null = ready *message
 ready = command-size "READY   " *property
 property = name value
-name = OCTET *name-char
+name = OCTET 1*name-char
 name-char = ALPHA | DIGIT | "-" | "_" | "." | "+"
 value = 4OCTET *OCTET       ; Size in network byte order
 [[/code]]

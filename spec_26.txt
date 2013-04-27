@@ -1,158 +1,18 @@
-CurveZMQ
-
 This document describes CurveZMQ, a protocol for secure messaging across the Internet. CurveZMQ is closely based on Daniel J. Bernstein's **CurveCP**, adapted for use in ZeroMQ over TCP. The [http://curvecp.org curvecp.org site] acts as a primary reference for CurveCP and is foundation material for this document. A reference implementation of CurveZMQ is provided at [http://curvezmq.org curvezmq.org]. This document describes version 1.0 of CurveZMQ.
 
 ++ Preamble
 
-+++ Copyright
-
 Copyright (c) 2013 iMatix Corporation.
-
-+++ License
 
 This Specification is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 3 of the License, or (at your option) any later version. This Specification is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details. You should have received a copy of the GNU General Public License along with this program; if not, see <http://www.gnu.org/licenses>.
 
-+++ Change Process
-
 This Specification is a [http://www.digistan.org/open-standard:definition free and open standard] and is governed by the Digital Standards Organization's [http://www.digistan.org/spec:1/COSS Consensus-Oriented Specification System].
 
-+++ Language
-
 The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED",  "MAY", and "OPTIONAL" in this document are to be interpreted as described in [http://tools.ietf.org/html/rfc2119 RFC 2119].
-
-+++ Goals and Structure of this Document
-
-With this document we aim to provide the reader, who is a skilled programmer with no particular security background, with the knowledge needed to implement CurveZMQ in his/her chosen language, using [http://nacl.cr.yp.to/ the NaCl cryptography library] (or [https://github.com/jedisct1/libsodium libsodium] distribution of NaCl).
-
-To understand CurveZMQ and implement it correctly, the reader must have some understanding of CurveCP. The CurveCP web site provides extensive argumentation and detail but may be overwhelming to new readers. So we start this document with a brief explanation of what CurveCP is, and how it works.
-
-Armed with an understanding of CurveCP's security model, the reader will be better prepared to understand the CurveZMQ protocol. The second part of this document is a description of CurveZMQ written as a more conventional protocol specification.
-
-Finally, we walk through the reference implementation of CurveZMQ to explain each step in detail. This is intended both to teach the reader how this protocol works, and make it easier for critics to find mistakes in the protocol design.
-
-We expect that later versions of this document will drop the first and last sections.
-
-++ Overview of CurveCP
-
-CurveCP is a replacement for TCP that creates a secure connection between a server and client using UDP messages. The security in CurveCP is designed to withstand a specific set of attacks, which we will explain. The cryptographic core in CurveCP is the Networking and Cryptography library (NaCl), more widely used as [https://github.com/jedisct1/libsodium libsodium]. NaCl is significant for its focus on speed, strength, and simplicity.
-
-CurveCP was announced at the 27th Chaos Communication Congress on 28 December 2010 and CurveCP implementations are still considered experimental.
-
-+++ General Design
-
-CurveCP has two main functions: one, to deliver a reliable stream of octets from sender to receiver, and two, to ensure that transmitted data is confidential, cannot be tampered with, or forged. We will look only at the second part, which consists of a security handshake followed by an encryption and authentication mechanism.
-
-The protocol defines a distinct "client" and "server" role that reflects the asymmetric nature of most architectures. For example, most attacks are focused on servers, not clients, and thus CurveCP's defenses are more focused on protecting servers than clients. CurveZMQ has inherited this perspective but we may shift to more symmetric defenses in the future. 
-
-CurveCP uses elliptic-curve cryptography to encrypt and authenticate each packet. It puts data into a //cryptographic box// that is encrypted and authenticated from a sender's secret key to a receiver's public key. To create a box and successfully open it, NaCl uses five elements:
-
-* The sender's and receiver's //public keys//, which we assume are exchanged beforehand in some secure fashion. Public keys are not confidential, but any exchange mechanism itself must be secure against fraud, else an attacker can substitute their own keys and perform a man-in-the-middle attack.
-
-* The two corresponding //secret keys//, which are never exchanged in any form.
-
-* A public //nonce//, or "number used once", chosen by the sender. Nonces stop replay attacks and CurveCP pays a lot of attention on to how to choose nonces. Overall we either use random octets, or incremental integers, depending on the case.
-
-NaCl (and this document) uses the syntax "Box [X](S->R)" to define a cryptographic box encrypting and authenticating data X from the sender S to the receiver R. To create a box we need the nonce, secret key for S, and public key for R. To open a box we need the nonce, secret key for R, and public key for S. When we successfully open a box, we know it was sent by S and that the data was not tampered with. If we cannot open a box, it was either tampered with, or created fraudulently.
-
-Keys in CurveCP are 32 octets (256 bits) and nonces are 24 octets. These are the default sizes proposed by NaCl. These sizes are hard-coded into the CurveCP packet formats, and CurveZMQ uses the same sizes. There is no option for users to choose weaker security. However we would expect future versions of CurveZMQ to use longer key sizes.
-
-Each peer (client or server) has a //long-term// key which is known to the other party beforehand. CurveCP uses the long-term keys at the start of a connection to provide authentication and to securely exchange //connection// keys (which CurveCP calls "short-term"). The long-term keys are never used to encrypt data. The connection keys are unique to the connection, and both peers discard these when the connection is finished. Thus, even if an attacker records encrypted boxes, and later seizes the long-term keys, he cannot open those boxes (so-called "perfect forward secrecy").
-
-Each "key" is in fact a pair of keys, one public and one secret. Data is encrypted with the public key (and other information) and decrypted with the secret key. The public key may be known to other peers (shared across some secure medium), while the secret keys are never known to other peers.
-
-To establish a connection, the client must know the server's public long-term key, while the server may know a set of client public long-term keys. During the handshake, the client sends its public long-term key to the server, protected by the connection keys. The server may thus authenticate the client, while the client's public long-term key cannot be extracted from the traffic by an attacker.
-
-The packet flow in CurveCP is as follows:
-
-* The client generates a connection key pair and sends the public key to the server as a **Hello** packet. This packet has a signature (Box [zeros](C'->S)) that prevents tampering.
-
-* The server generates a new, random key pair and send this to the client as a **Cookie** packet, with the public key in clear, and the secret key in a box (the "cookie") that only the server can open, and at most for two minutes.
-
-* The client sends the cookie back to the server, along with its public long-term key to the server as an **Initiate** packet. At this point the server may authenticate the client's identity and establish the connection, opening the cookie to get the connection keys for the connection.
-
-* Client and server can now send **Message** packets that hold data, in boxes locked with the connection keys. CurveCP uses a fixed maximum message size designed to fit into UDP packets.
-
-+++ Specific Defenses
-
-We list the specific attacks that CurveCP's security design aims to prevent:
-
-* //Eavesdropping,// in which an attacker sitting between the client and server monitors the data. We send all in boxes that only the authentic recipient, knowing the necessary secret key, can open.
-
-* //Fraudulent data,// in which an attacker creates packets that claim to come from the server or client. Only the authentic sender, knowing the necessary secret key, can create a valid box, and thus a valid packet.
-
-* //Altering data,// in which an attacker sitting between client and server manipulates packets in specific ways. If a packet is modified in any way, the box it contains will not open, so the recipient knows there has been an attack and discards the packet.
-
-* //Replaying data,// in which an attacker captures packets and re-sends them later to imitate a valid peer. We encrypt every box with a unique nonce. An attacker cannot replay any packet except a Hello packet, which has no impact on the server or client. Any other replayed packet will be discarded by its recipient.
-
-* //Amplification attacks,// in which an attacker makes many small unauthenticated requests but uses a fake origin address so large responses are sent to that innocent party, overwhelming it. Only a Hello packets are unauthenticated, and they are padded to be larger than Cookie packets.
-
-* //Man-in-the-middle attacks,// in which an attacker sitting between client and server substitutes its own keys so it can play "server" to the client and play "client" to the server, and thus be able to open all boxes. Since long-term keys are known beforehand, an attacker cannot successfully imitate a server, nor a client if the server does client authentication.
-
-* //Key theft attacks,// in which an attacker records encrypted data, then seizes the secret keys at some later stage, perhaps by physically attacking the client or server computer. Client and server use connection keys that they throw away when they close the connection.
-
-* //Identifying the client,// in which an attacker traces the identity of a client by extracting its public long-term key from packets. The client sends this only in an Initiate packet, protected by the connection keys.
-
-* //Denial-of-Service attacks,// in which an attacker forces the server to perform expensive operations before authentication, thus exhausting the server. CurveCP uses high-speed high-security elliptic-curve cryptography so that a typical CPU can perform public-key operations faster than a typical Internet connection can ask for those operations. The server does not allocate memory until a client sends the Initiate packet.
-
-+++ Authentication
-
-A CurveCP client must know the server public long-term key in order to start a connection. A server may differentiate the clients through their public long-term keys. Servers may thus accept unauthenticated clients, but clients will always authenticate the server. CurveCP uses the long-term keys to securely vouch for connection keys so that every box can be authenticated, but cannot be opened after the connection has closed (and each peer discards its connection keys).
-
-CurveCP does not use client IP addresses as part of its security model. Firstly, because IP addresses are not secure, and secondly this means a CurveCP connection is independent of the IP endpoints (so can migrate across network changes).
-
-+++ Simplicity-Oriented Design
-
-CurveCP (like NaCl) expresses the view that security should not come with options, as these lead to bad choices and vulnerable systems. Thus it has no options to disable encryption or authentication. As the curvecp.org site says, "//CurveCP's server authentication is always active and cannot be disabled. CurveCP's client authentication is always active and cannot be disabled. CurveCP's encryption is always active and cannot be disabled. CurveCP's forward secrecy is always active and cannot be disabled. CurveCP has nothing analogous to IPsec's separation between AH and ESP, and nothing analogous to HTTPS renegotiation. The lack of options in CurveCP simplifies the protocol and prevents a wide range of design and implementation mistakes.//"
-
-+++ Known Issues with Using CurveCP
-
-To implement or use CurveCP you need to be aware of some issues and limitations with the design:
-
-**CurveCP makes no attempt to defend against traffic analysis attacks.** When an application sends packets that correspond to real data (for example a password being typed, a voice-over-IP call, or a compressed video stream), an attacker can extract useful data from the timing, addressing, and size of encrypted packets. To protect against traffic analysis attacks, we could pad packets with random data, send bogus data randomly, and blur the difference between heartbeat xmessages and data messages.
-
-**CurveCP does not explain how keys are exchanged.** To some extent, CurveCP is so simple and robust because it completely ignores this problem. However any realistic implementation must solve this problem. At the very least, clients can be configured with the server public key, and generate their own keys randomly. This lets clients be sure they are talking securely to the correct server. The server however will not be able to authenticate clients without knowing their public long-term keys in advance.
-
-**CurveCP enforces a 1-to-many relationship from servers to clients.** One change we might propose to CurveCP would be the addition of the server public connection key in Message packets from the server, so that clients could work with many servers (a common pattern in ZeroMQ applications).
-
-**CurveCP depends on NaCl.** The protocol is bound to the NaCl crypto library that is today the primary implementation of the necessary algorithms. NaCl is a young library and not as widely available, stable, or fast as it might be. This affects CurveZMQ equally.
-
-**CurveCP is a full protocol stack.** This is perhaps the most serious risk: it does traffic control over UDP as well as security. The consequence is that there is only one implementation (in the NaCl library), which is difficult to integrate into existing systems. It is also uncertain how well CurveCP's traffic control works. TCP on the other hand, is available everywhere and is well-known (for good, and bad).
-
-+++ CurveZMQ as an Interim Solution
-
-CurveCP is remarkable for several reasons, and stands a good chance of becoming a real protocol since it addresses in one package a set of problems that many people have struggled with for some time. The world wants a secure, reliable UDP protocol, but it will take years to see this implemented at the kernel level, where it belongs.
-
-As an interim solution, we have taken CurveCP's security handshake alone, and implemented that design on top of TCP as CurveZMQ. The results are good. We believe it is easier to validate this security model than the whole CurveCP design, we believe this will solve an immediate need (secure messaging at Internet scales), and we believe it will help CurveCP gain further mind-share.
 
 ++ CurveZMQ Specification
 
 CurveZMQ is a protocol for secure messaging across the Internet that closely follows the [http://curvecp.org CurveCP security handshake]. We built CurveZMQ primarily to provide security for ZeroMQ applications but it can be used more widely. The CurveZMQ protocol can work either on top of the {{libzmq}} API, at the application layer, or inside {{libzmq}}, as a security mechanism for a [http://rfc.zeromq.org/spec:23 ZMTP 3.0 transport layer].
-
-+++ Differences from CurveCP
-
-While CurveCP defines a security handshake and traffic control for messages sent over UDP, CurveZMQ defines just a security handshake for messages sent over a connected stream protocol such as TCP, IPC, SCTP, or similar. We have made these significant changes from CurveCP:
-
-* We use the term "command" instead of "packet" to represent an atomic block of data sent over the network.
-
-* The HELLO command has a protocol version number (CurveCP is not versioned).
-
-* We rename Cookie to Welcome to be consistent with other mechanisms used in ZMTP 3.0.
-
-* In the Initiate command, we do not send message data nor a hostname, but we do send connection metadata which may include the hostname, and other properties.
-
-* We add a Ready command to send connection metadata from server to client, after security has been established.
-
-* In Message commands, we do not send the client public connection key since it is redundant in a connected protocol.
-
-* In Message commands, the payload can be of any size from zero to 2^63-1 octets, whereas CurveCP limits packets to fit in UDP frames.
-
-* In Message commands, the payload has a frame format that supports some requirements of ZMTP 3.0, particularly the continuation flag ("more").
-
-* In Message commands, we do not use the CurveCP traffic control fields since traffic control is handled by the underlying stream protocol.
-
-* While CurveCP delivers a stream (reconstituted from packets), CurveZMQ delivers atomic messages.
-
-* While CurveCP uses strictly incrementing connection nonces, CurveZMQ has no such requirement since commands are guaranteed to arrive in order over the stream transport.
 
 +++ Goals
 
@@ -249,7 +109,7 @@ ready-box = 16*OCTET        ; Box [metadata](S'->C')
 
 message = "MESSAGE " cn_nonce message-box
 message-box = 17*OCTET      ; Box [msgdata](S'->C') or (C'->S')
-msgdata = flags payload 
+msgdata = flags payload
 flags = %x00 | %x01         ; %x01 means more messages to follow
 payload = *octet            ; zero or more octets
 [[/code]]
@@ -355,6 +215,124 @@ The message data consists of a flags field (1 octet) followed by zero or more oc
 * Bit 0 (MORE): //More messages to follow//. A value of 1 indicates that more messages will follow. A value of 0 indicates that there are no more messages to follow.
 
 The recipient SHALL validate all fields and SHALL reject and disconnect from peers who send malformed MESSAGE commands.
+
++++ Differences from CurveCP
+
+While CurveCP defines a security handshake and traffic control for messages sent over UDP, CurveZMQ defines just a security handshake for messages sent over a connected stream protocol such as TCP, IPC, SCTP, or similar. We have made these significant changes from CurveCP:
+
+* We use the term "command" instead of "packet" to represent an atomic block of data sent over the network.
+
+* The HELLO command has a protocol version number (CurveCP is not versioned).
+
+* We rename Cookie to Welcome to be consistent with other mechanisms used in ZMTP 3.0.
+
+* In the Initiate command, we do not send message data nor a hostname, but we do send connection metadata which may include the hostname, and other properties.
+
+* We add a Ready command to send connection metadata from server to client, after security has been established.
+
+* In Message commands, we do not send the client public connection key since it is redundant in a connected protocol.
+
+* In Message commands, the payload can be of any size from zero to 2^63-1 octets, whereas CurveCP limits packets to fit in UDP frames.
+
+* In Message commands, the payload has a frame format that supports some requirements of ZMTP 3.0, particularly the continuation flag ("more").
+
+* In Message commands, we do not use the CurveCP traffic control fields since traffic control is handled by the underlying stream protocol.
+
+* While CurveCP delivers a stream (reconstituted from packets), CurveZMQ delivers atomic messages.
+
+* While CurveCP uses strictly incrementing connection nonces, CurveZMQ has no such requirement since commands are guaranteed to arrive in order over the stream transport.
+
+++ CurveCP
+
+CurveCP is a replacement for TCP that creates a secure connection between a server and client using UDP messages. The security in CurveCP is designed to withstand a specific set of attacks, which we will explain. The cryptographic core in CurveCP is the Networking and Cryptography library (NaCl), more widely used as [https://github.com/jedisct1/libsodium libsodium]. NaCl is significant for its focus on speed, strength, and simplicity.
+
+CurveCP was announced at the 27th Chaos Communication Congress on 28 December 2010 and CurveCP implementations are still considered experimental.
+
++++ General Design
+
+CurveCP has two main functions: one, to deliver a reliable stream of octets from sender to receiver, and two, to ensure that transmitted data is confidential, cannot be tampered with, or forged. We will look only at the second part, which consists of a security handshake followed by an encryption and authentication mechanism.
+
+The protocol defines a distinct "client" and "server" role that reflects the asymmetric nature of most architectures. For example, most attacks are focused on servers, not clients, and thus CurveCP's defenses are more focused on protecting servers than clients. CurveZMQ has inherited this perspective but we may shift to more symmetric defenses in the future. 
+
+CurveCP uses elliptic-curve cryptography to encrypt and authenticate each packet. It puts data into a //cryptographic box// that is encrypted and authenticated from a sender's secret key to a receiver's public key. To create a box and successfully open it, NaCl uses five elements:
+
+* The sender's and receiver's //public keys//, which we assume are exchanged beforehand in some secure fashion. Public keys are not confidential, but any exchange mechanism itself must be secure against fraud, else an attacker can substitute their own keys and perform a man-in-the-middle attack.
+
+* The two corresponding //secret keys//, which are never exchanged in any form.
+
+* A public //nonce//, or "number used once", chosen by the sender. Nonces stop replay attacks and CurveCP pays a lot of attention on to how to choose nonces. Overall we either use random octets, or incremental integers, depending on the case.
+
+NaCl (and this document) uses the syntax "Box [X](S->R)" to define a cryptographic box encrypting and authenticating data X from the sender S to the receiver R. To create a box we need the nonce, secret key for S, and public key for R. To open a box we need the nonce, secret key for R, and public key for S. When we successfully open a box, we know it was sent by S and that the data was not tampered with. If we cannot open a box, it was either tampered with, or created fraudulently.
+
+Keys in CurveCP are 32 octets (256 bits) and nonces are 24 octets. These are the default sizes proposed by NaCl. These sizes are hard-coded into the CurveCP packet formats, and CurveZMQ uses the same sizes. There is no option for users to choose weaker security. However we would expect future versions of CurveZMQ to use longer key sizes.
+
+Each peer (client or server) has a //long-term// key which is known to the other party beforehand. CurveCP uses the long-term keys at the start of a connection to provide authentication and to securely exchange //connection// keys (which CurveCP calls "short-term"). The long-term keys are never used to encrypt data. The connection keys are unique to the connection, and both peers discard these when the connection is finished. Thus, even if an attacker records encrypted boxes, and later seizes the long-term keys, he cannot open those boxes (so-called "perfect forward secrecy").
+
+Each "key" is in fact a pair of keys, one public and one secret. Data is encrypted with the public key (and other information) and decrypted with the secret key. The public key may be known to other peers (shared across some secure medium), while the secret keys are never known to other peers.
+
+To establish a connection, the client must know the server's public long-term key, while the server may know a set of client public long-term keys. During the handshake, the client sends its public long-term key to the server, protected by the connection keys. The server may thus authenticate the client, while the client's public long-term key cannot be extracted from the traffic by an attacker.
+
+The packet flow in CurveCP is as follows:
+
+* The client generates a connection key pair and sends the public key to the server as a **Hello** packet. This packet has a signature (Box [zeros](C'->S)) that prevents tampering.
+
+* The server generates a new, random key pair and send this to the client as a **Cookie** packet, with the public key in clear, and the secret key in a box (the "cookie") that only the server can open, and at most for two minutes.
+
+* The client sends the cookie back to the server, along with its public long-term key to the server as an **Initiate** packet. At this point the server may authenticate the client's identity and establish the connection, opening the cookie to get the connection keys for the connection.
+
+* Client and server can now send **Message** packets that hold data, in boxes locked with the connection keys. CurveCP uses a fixed maximum message size designed to fit into UDP packets.
+
++++ Specific Defenses
+
+We list the specific attacks that CurveCP's security design aims to prevent:
+
+* //Eavesdropping,// in which an attacker sitting between the client and server monitors the data. We send all in boxes that only the authentic recipient, knowing the necessary secret key, can open.
+
+* //Fraudulent data,// in which an attacker creates packets that claim to come from the server or client. Only the authentic sender, knowing the necessary secret key, can create a valid box, and thus a valid packet.
+
+* //Altering data,// in which an attacker sitting between client and server manipulates packets in specific ways. If a packet is modified in any way, the box it contains will not open, so the recipient knows there has been an attack and discards the packet.
+
+* //Replaying data,// in which an attacker captures packets and re-sends them later to imitate a valid peer. We encrypt every box with a unique nonce. An attacker cannot replay any packet except a Hello packet, which has no impact on the server or client. Any other replayed packet will be discarded by its recipient.
+
+* //Amplification attacks,// in which an attacker makes many small unauthenticated requests but uses a fake origin address so large responses are sent to that innocent party, overwhelming it. Only a Hello packets are unauthenticated, and they are padded to be larger than Cookie packets.
+
+* //Man-in-the-middle attacks,// in which an attacker sitting between client and server substitutes its own keys so it can play "server" to the client and play "client" to the server, and thus be able to open all boxes. Since long-term keys are known beforehand, an attacker cannot successfully imitate a server, nor a client if the server does client authentication.
+
+* //Key theft attacks,// in which an attacker records encrypted data, then seizes the secret keys at some later stage, perhaps by physically attacking the client or server computer. Client and server use connection keys that they throw away when they close the connection.
+
+* //Identifying the client,// in which an attacker traces the identity of a client by extracting its public long-term key from packets. The client sends this only in an Initiate packet, protected by the connection keys.
+
+* //Denial-of-Service attacks,// in which an attacker forces the server to perform expensive operations before authentication, thus exhausting the server. CurveCP uses high-speed high-security elliptic-curve cryptography so that a typical CPU can perform public-key operations faster than a typical Internet connection can ask for those operations. The server does not allocate memory until a client sends the Initiate packet.
+
++++ Authentication
+
+A CurveCP client must know the server public long-term key in order to start a connection. A server may differentiate the clients through their public long-term keys. Servers may thus accept unauthenticated clients, but clients will always authenticate the server. CurveCP uses the long-term keys to securely vouch for connection keys so that every box can be authenticated, but cannot be opened after the connection has closed (and each peer discards its connection keys).
+
+CurveCP does not use client IP addresses as part of its security model. Firstly, because IP addresses are not secure, and secondly this means a CurveCP connection is independent of the IP endpoints (so can migrate across network changes).
+
++++ Simplicity-Oriented Design
+
+CurveCP (like NaCl) expresses the view that security should not come with options, as these lead to bad choices and vulnerable systems. Thus it has no options to disable encryption or authentication. As the curvecp.org site says, "//CurveCP's server authentication is always active and cannot be disabled. CurveCP's client authentication is always active and cannot be disabled. CurveCP's encryption is always active and cannot be disabled. CurveCP's forward secrecy is always active and cannot be disabled. CurveCP has nothing analogous to IPsec's separation between AH and ESP, and nothing analogous to HTTPS renegotiation. The lack of options in CurveCP simplifies the protocol and prevents a wide range of design and implementation mistakes.//"
+
++++ Known Issues with Using CurveCP
+
+To implement or use CurveCP you need to be aware of some issues and limitations with the design:
+
+**CurveCP makes no attempt to defend against traffic analysis attacks.** When an application sends packets that correspond to real data (for example a password being typed, a voice-over-IP call, or a compressed video stream), an attacker can extract useful data from the timing, addressing, and size of encrypted packets. To protect against traffic analysis attacks, we could pad packets with random data, send bogus data randomly, and blur the difference between heartbeat xmessages and data messages.
+
+**CurveCP does not explain how keys are exchanged.** To some extent, CurveCP is so simple and robust because it completely ignores this problem. However any realistic implementation must solve this problem. At the very least, clients can be configured with the server public key, and generate their own keys randomly. This lets clients be sure they are talking securely to the correct server. The server however will not be able to authenticate clients without knowing their public long-term keys in advance.
+
+**CurveCP enforces a 1-to-many relationship from servers to clients.** One change we might propose to CurveCP would be the addition of the server public connection key in Message packets from the server, so that clients could work with many servers (a common pattern in ZeroMQ applications).
+
+**CurveCP depends on NaCl.** The protocol is bound to the NaCl crypto library that is today the primary implementation of the necessary algorithms. NaCl is a young library and not as widely available, stable, or fast as it might be. This affects CurveZMQ equally.
+
+**CurveCP is a full protocol stack.** This is perhaps the most serious risk: it does traffic control over UDP as well as security. The consequence is that there is only one implementation (in the NaCl library), which is difficult to integrate into existing systems. It is also uncertain how well CurveCP's traffic control works. TCP on the other hand, is available everywhere and is well-known (for good, and bad).
+
++++ CurveZMQ as an Interim Solution
+
+CurveCP is remarkable for several reasons, and stands a good chance of becoming a real protocol since it addresses in one package a set of problems that many people have struggled with for some time. The world wants a secure, reliable UDP protocol, but it will take years to see this implemented at the kernel level, where it belongs.
+
+As an interim solution, we have taken CurveCP's security handshake alone, and implemented that design on top of TCP as CurveZMQ. The results are good. We believe it is easier to validate this security model than the whole CurveCP design, we believe this will solve an immediate need (secure messaging at Internet scales), and we believe it will help CurveCP gain further mind-share.
 
 ++ Reference Implementation
 

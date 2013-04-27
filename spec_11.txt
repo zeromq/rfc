@@ -2,6 +2,7 @@ This document proposes a Message Transport Layer (MTL), a connection-oriented pr
 
 * Name: rfc.zeromq.org/spec:11/MTL
 * Editor: Pieter Hintjens <ph@imatix.com>
+* State: draft
 
 ++ License
 

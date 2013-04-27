@@ -2,8 +2,7 @@ The ZeroMQ Property Language (ZPL) defines a minimalistic framing language for s
 
 * Name: rfc.zeromq.org/spec:4/zpl
 * Editor: Pieter Hintjens <ph@imatix.com>
-* Contributors:
-* State: draft
+* State: stable
 
 ++ License
 

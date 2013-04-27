@@ -3,7 +3,7 @@ The ZeroMQ Message Transport Protocol (ZMTP) is a transport layer protocol for e
 * Name: rfc.zeromq.org/spec:15/ZMTP
 * Editor: Pieter Hintjens <ph@imatix.com>
 * Contributors: Martin Hurton <mh@imatix.com>, Paul Colomiets <paul@colomiets.name>
-* State: draft
+* State: stable
 
 ++ License
 

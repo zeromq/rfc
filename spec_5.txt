@@ -2,8 +2,7 @@ The ZeroMQ Device Configuration File (ZDCF) specifies a standard language for co
 
 * Name: rfc.zeromq.org/spec:5/zdcf
 * Editor: Pieter Hintjens <ph@imatix.com>
-* Contributors:
-* State: draft
+* State: deprecated
 
 ++ License
 

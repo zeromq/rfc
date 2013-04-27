@@ -2,8 +2,7 @@ The ZeroMQ Device Configuration File format (ZDCF) specifies a standard syntax f
 
 * Name: rfc.zeromq.org/spec:3/zdcf
 * Editor: Pieter Hintjens <ph@imatix.com>
-* Contributors:
-* State: draft
+* State: deprecated
 
 ++ License
 

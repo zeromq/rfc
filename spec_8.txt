@@ -2,7 +2,7 @@ The Majordomo Management Interface (MMI) defines a namespace and set of manageme
 
 * Name: rfc.zeromq.org/spec:8/MMI
 * Editor: Pieter Hintjens <ph@imatix.com>
-* Contributors: none
+* State: stable
 
 ++ License
 

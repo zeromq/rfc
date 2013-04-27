@@ -2,6 +2,7 @@ The Clustered Hashmap Protocol (CHP) defines a cluster-wide key-value hashmap, a
 
 * Name: rfc.zeromq.org/spec:12/CHP
 * Editor: Pieter Hintjens <ph@imatix.com>
+* State: stable
 
 ++ License
 

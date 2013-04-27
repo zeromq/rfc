@@ -32,8 +32,6 @@ The CURVE mechanism uses the greeting as-server field to identify which peer is 
 
 The client authenticates itself to the server by sending a HELLO command. The server accepts or rejects this authentication. If it accepts it, it replies with a WELCOME command. Otherwise, it closes the connection. The client then sends an INITIATE command, which the server parses and validates. The server responds with a READY command. The client MAY send messages after receiving a READY command from the server. The server MAY start to send messages immediately after sending a READY command.
 
-MAY send messages after receiving HELLO-OK from the server. The server MAY start to send messages immediately after sending HELLO-OK.
-
 The following ABNF grammar defines the CURVE security handshake and message flow:
 
 [[code]]
@@ -58,6 +56,7 @@ initiate-body = cn_client cn_cookie cn_nonce vouch-box
 cn_client = 32OCTET         ; Client short-term public key C'
 cn_cookie = 96OCTET         ; Server connection cookie
 vouch-box = 112OCTET        ; Box [C + nonce + vouch](C'->S')
+data-box = 116OCTET         ; Box [M](A'->B') (from A to B)
 
 ready = command-size "READY   " ready-body
 ready-body = cn_nonce data-box

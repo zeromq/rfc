@@ -2,6 +2,7 @@ The Paranoid Pirate Protocol (PPP) defines a reliable request-reply dialog betwe
 
 * Name: rfc.zeromq.org/spec:6/PPP
 * Editor: Pieter Hintjens <ph@imatix.com>
+* State: stable
 
 ++ License
 

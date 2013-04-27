@@ -2,7 +2,7 @@ The Titanic Service Protocol (SP) defines a set of services, requests, and repli
 
 * Name: rfc.zeromq.org/spec:9/TSP
 * Editor: Pieter Hintjens <ph@imatix.com>
-* Contributors: none
+* State: stable
 
 ++ License
 

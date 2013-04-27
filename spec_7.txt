@@ -3,6 +3,7 @@ The Majordomo Protocol (MDP) defines a reliable service-oriented request-reply d
 * Name: rfc.zeromq.org/spec:7/MDP
 * Editor: Pieter Hintjens <ph@imatix.com>
 * Contributors: Chuck Remes <cremes@mac.com>, Guido Goldstein <zmqdev@a-nugget.de>
+* State: legacy
 
 ++ License
 

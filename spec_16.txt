@@ -1,5 +1,9 @@
 The Collective Code Construction Contract (C4) is an evolution of the github.com [http://help.github.com/send-pull-requests/ Fork + Pull Model], aimed at providing an optimal collaboration model for free software projects. C4 is derived from the ZeroMQ contribution policy of early 2012.
 
+* Name: rfc.zeromq.org/spec:16/C4
+* Editor: Pieter Hintjens <ph@imatix.com>
+* State: deprecated
+
 ++ Language
 
 The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED",  "MAY", and "OPTIONAL" in this document are to be interpreted as described in RFC 2119[((bibcite rfc2119))].

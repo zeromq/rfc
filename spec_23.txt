@@ -1,3 +1,5 @@
+-- socket behavior
+
 The ZeroMQ Message Transport Protocol (ZMTP) is a transport layer protocol for exchanging messages between two peers over a connected transport layer such as TCP. This document describes ZMTP 3.0. The major change in this version is the addition of security mechanisms and the removal of hard-coded connection metadata (socket type and identity) from the greeting.
 
 * Name: rfc.zeromq.org/spec:23/ZMTP
@@ -5,23 +7,15 @@ The ZeroMQ Message Transport Protocol (ZMTP) is a transport layer protocol for e
 * Contributors: Martin Hurton <mh@imatix.com>
 * State: draft
 
-++ License
+++ Preamble
 
 Copyright (c) 2009-2013 iMatix Corporation
 
-This Specification is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 3 of the License, or (at your option) any later version.
-
-This Specification is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along with this program; if not, see <http://www.gnu.org/licenses>.
-
-++ Change Process
+This Specification is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 3 of the License, or (at your option) any later version. This Specification is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details. You should have received a copy of the GNU General Public License along with this program; if not, see <http://www.gnu.org/licenses>.
 
 This Specification is a free and open standard[((bibcite fandos))] and is governed by the Digital Standards Organization's Consensus-Oriented Specification System (COSS)[((bibcite coss))].
 
-++ Language
-
-The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED",  "MAY", and "OPTIONAL" in this document are to be interpreted as described in RFC 2119[((bibcite rfc2119))].
+The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in RFC 2119[((bibcite rfc2119))].
 
 ++ Goals
 
@@ -135,9 +129,9 @@ ZMTP is by default a peer-to-peer protocol that makes no distinction between the
 
 However, the security mechanisms (which are extension protocols, and explained below) MAY define distinct roles for client peers and server peers. This difference reflects the general model of concentrating authentication on servers.
 
-Traditionally in TCP topologies, the "server" is the peer which binds, and the "client" is the peer that connects. ZMTP allows the opposite topology in which the client binds, and the server connects. This is specified in the greeting as-server field, which is set to 1 for server peers, and 0 for client peers.
+Traditionally in TCP topologies, the "server" is the peer which binds, and the "client" is the peer that connects. ZMTP allows this but also the opposite topology in which the client binds, and the server connects. The actual server role is therefore not defined by bind/connect direction, but specified in the greeting {{as-server}} field, which is set to 1 for server peers, and 0 for client peers.
 
-If the chosen security mechanism does not specify a client and server topology, the as-server field SHALL have no significance, and SHALL be zero for all peers.
+If the chosen security mechanism does not specify a client and server topology, the as-server field SHALL have no significance, and SHOULD be zero for all peers.
 
 +++ Authentication and Confidentiality
 

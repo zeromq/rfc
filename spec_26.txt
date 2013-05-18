@@ -1,5 +1,9 @@
 This document describes CurveZMQ, a protocol for secure messaging across the Internet. CurveZMQ is closely based on Daniel J. Bernstein's **CurveCP**, adapted for use in ZeroMQ over TCP. The [http://curvecp.org curvecp.org site] acts as a primary reference for CurveCP and is foundation material for this document. A reference implementation of CurveZMQ is provided at [http://curvezmq.org curvezmq.org]. This document describes version 1.0 of CurveZMQ.
 
+* Name: rfc.zeromq.org/spec:26/CURVEZMQ
+* Editor: Pieter Hintjens <ph@imatix.com>
+* State: draft
+
 ++ Preamble
 
 Copyright (c) 2013 iMatix Corporation.
@@ -8,7 +12,7 @@ This Specification is free software; you can redistribute it and/or modify it un
 
 This Specification is a [http://www.digistan.org/open-standard:definition free and open standard] and is governed by the Digital Standards Organization's [http://www.digistan.org/spec:1/COSS Consensus-Oriented Specification System].
 
-The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED",  "MAY", and "OPTIONAL" in this document are to be interpreted as described in [http://tools.ietf.org/html/rfc2119 RFC 2119].
+The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in [http://tools.ietf.org/html/rfc2119 RFC 2119].
 
 ++ CurveZMQ Specification
 
@@ -30,13 +34,13 @@ Additionally, it aims to:
 
 +++ Use Cases
 
-There are two main use-cases for CurveZMQ:
+There are two main use cases for CurveZMQ:
 
-* To secure a single hop between client and server, which is the CurveCP use case. For this use-case we would embed CurveZMQ in the transport layer so that it can work for all patterns (publish-subscribe, pipeline, and so on).
+* To secure a single hop between client and server, which is the CurveCP use case. For this use case we would embed CurveZMQ in the transport layer so that it can work for all patterns (publish-subscribe, pipeline, and so on).
 
-* To secure a client and server across multiple untrusted peers. For this use-case we would build CurveZMQ into our application-layer protocols using an asynchronous request-reply pattern.
+* To secure a client and server end-to-end across one or more untrusted peers, where transport-layer security is not sufficient. For this use case we would build CurveZMQ into our application-layer protocols using an asynchronous request-reply pattern.
 
-Additionally, CurveZMQ could be used for data sent from one peer to another over other transports, such as email or file transfer, assuming both peers execute the initial handshake over a suitable transport.
+Additionally, CurveZMQ could be used for data sent from one peer to another over out-of-band transports, such as email or file transfer, assuming both peers first execute the initial handshake over a suitable transport.
 
 +++ General Design
 
@@ -81,37 +85,53 @@ The following ABNF grammar defines the CurveZMQ protocol from a high level:
 [[code]]
 curvezmq = C:hello S:welcome C:initiate S:ready *message
 
-hello = "HELLO   " version padding cn-client cn-nonce signature
-version = %x1 %x0           ; CurveZMQ major-minor version
-padding = 70%x00            ; Anti-amplification padding
-cn-client = 32OCTET         ; Client public connection key C'
-cn-nonce = 8OCTET           ; Connection nonce
-signature = 80OCTET         ; Box [64 * %x0](C'->S)
+;   HELLO command, 200 octets
+hello = "HELLO   " version padding hello-client hello-nonce hello-box
+hello-version = %x1 %x0     ; CurveZMQ major-minor version
+hello-padding = 70%x00      ; Anti-amplification padding
+hello-client = 32OCTET      ; Client public connection key C'
+hello-nonce = 8OCTET        ; Short nonce, prefixed by "CurveZMQHELLO---"
+hello-box = 80OCTET         ; Signature, Box [64 * %x0](C'->S)
 
-welcome = "WELCOME " sv-nonce cookie-box
-sv-nonce = 16OCTET          ; Server long-term nonce
-cookie-box 144OCTET         ; Box [S' + cookie](S->C')
+;   WELCOME command, 168 octets
+welcome = "WELCOME " welcome-nonce welcome-box
+welcome-nonce = 16OCTET     ; Long nonce, prefixed by "WELCOME-"
+welcome-box = 144OCTET      ; Box [S' + cookie](S->C')
+;   This is the text sent encrypted in the box
+cookie = cookie-nonce cookie-box
+cookie-nonce = 16OCTET      ; Long nonce, prefixed by "COOKIE--"
+cookie-box = 80OCTET        ; Box [C' + s'](K)
 
-initiate = "INITIATE" cn-client cn-cookie cn-nonce initiate-box
-cn-cookie = 96OCTET         ; Server-provided cookie
+;   INITIATE command, 224+ octets
+initiate = "INITIATE" initiate-cookie initiate-nonce initiate-box
+initiate-cookie = 96OCTET   ; Server-provided cookie
+initiate-nonce = 8OCTET     ; Short nonce, prefixed by "CurveZMQINITIATE"
 initiate-box = 112*OCTET    ; Box [C + vouch + metadata](C'->S')
-vouch = client-nonce + client-box
-client-nonce = 16OCTET      ; Client long-term nonce
-client-box = 48OCTET        ; Box [C'](C->S)
+;   This is the text sent encrypted in the box
+vouch = vouch-nonce vouch-box
+vouch-nonce = 16OCTET       ; Long nonce, prefixed by "VOUCH---"
+vouch-box = 48OCTET         ; Box [C'](C->S)
 metadata = *property
 property = name value
 name = OCTET *name-char
 name-char = ALPHA | DIGIT | "-" | "_" | "." | "+"
-value = 4OCTET *OCTET       ; Size in network order
+value = value-size value-data
+value-size = 4OCTET         ; Size in network order
+value-data = *OCTET         ; 0 or more octets
 
-ready = "READY   " cn-nonce ready-box
+;   READY command, 32+ octets
+ready = "READY   " ready-nonce ready-box
+ready-nonce = 8OCTET        ; Short nonce, prefixed by "CurveZMQREADY---"
 ready-box = 16*OCTET        ; Box [metadata](S'->C')
 
-message = "MESSAGE " cn_nonce message-box
-message-box = 17*OCTET      ; Box [msgdata](S'->C') or (C'->S')
-msgdata = flags payload
-flags = %x00 | %x01         ; %x01 means more messages to follow
-payload = *octet            ; zero or more octets
+;   MESSAGE command, 33+ octets
+message = "MESSAGE " message_nonce message-box
+message-nonce = 8OCTET      ; Short nonce, prefixed by "CurveZMQMESSAGE-"
+message-box = 17*OCTET      ; Box [payload](S'->C') or (C'->S')
+;   This is the text sent encrypted in the box
+payload = payload-flags payload-data
+payload-flags = OCTET       ; Explained below
+payload-data = *octet       ; 0 or more octets
 [[/code]]
 
 The command size is not part of the command encoding but is assumed to be a property of the command (in other words, known to the implementation when it encodes or decodes a command).
@@ -132,23 +152,23 @@ CurveZMQ uses the same cryptography as CurveCP, so keys are 32 octets (256 bits)
 
 ++++ The HELLO Command
 
-The client SHALL send a HELLO command after opening the stream connection. This command SHALL be 194 octets long and have the following fields:
+The client SHALL send a HELLO command after opening the stream connection. This command SHALL be 200 octets long and have the following fields:
 
 * The command ID, which is "HELLO   " as 8 octets.
 
-* The protocol version number, which SHALL be two octets 1 and 0.
+* The CurveZMQ version number, which SHALL be the two octets 1 and 0.
 
-* An anti-amplification filler field. This SHALL be 70 octets, all zero. This filler field ensures the HELLO command is larger than the WELCOME command, so an attacker who spoofs a sender IP address cannot use the server to overwhelm that innocent 3rd party with data.
+* An anti-amplification padding field. This SHALL be 70 octets, all zero. This filler field ensures the HELLO command is larger than the WELCOME command, so an attacker who spoofs a sender IP address cannot use the server to overwhelm that innocent 3rd party with response data.
 
 * The client's public connection key C' (32 octets). The client SHALL generate a unique key pair for each connection it creates to a server. It SHALL discard this key pair when it closes the connection, and it MUST NOT store its secret key in long-term storage, nor share it in any way.
 
-* The client's connection nonce. This SHALL be 8 octets. The nonce SHALL be implicitly prefixed with the 16 characters "CurveCP-client-H" to form the 24-octet nonce used to encrypt and decrypt the signature box.
+* A client short nonce (8 octets). The nonce SHALL be implicitly prefixed with the 16 characters "CurveZMQHELLO---" to form the 24-octet nonce used to encrypt and decrypt the signature box.
 
-* The signature box (80 octets). This SHALL encrypt 64 zero octets, encrypted from the client's connection key C' to the server's long-term key S.
+* The signature box (80 octets). This SHALL contain 64 zero octets, encrypted from the client's connection key C' to the server's long-term key S.
 
 The server SHALL validate all fields and SHALL reject and disconnect clients who send malformed HELLO commands.
 
-Note that the client uses a connection nonce in the HELLO, INITIATE, and MESSAGE commands. The nonce SHALL be unique in each command within a connection. The client SHALL NOT send more than 2^64-1 commands in one connection. The client MAY use any strategy to generate unique connection nonces, including the CurveCP strategy of an incremental counter.
+Note that the client uses an 8 octet "short nonce" in the HELLO, INITIATE, and MESSAGE commands. This nonce SHALL be unique in each command within a connection. The client SHALL NOT send more than 2^64-1 commands in one connection. The client MAY use any strategy to generate unique short nonces, including the CurveCP strategy of an incremental counter.
 
 ++++ The WELCOME Command
 
@@ -156,33 +176,39 @@ The server SHALL respond to a valid HELLO command with a WELCOME command. This c
 
 * The command ID, which is "WELCOME " as 8 octets.
 
-* The server long-term nonce. This SHALL be 16 octets. This nonce SHALL be implicitly prefixed by the 8 characters "CurveCPK" to form a 24-octet nonce used to encrypt and decrypt the cookie box. This nonce SHALL be unique for all WELCOME commands using this long-term key. A valid strategy is to use 16 random octets from a sufficiently good entropy source.
+* A server long nonce (16 octets). This nonce SHALL be implicitly prefixed by the 8 characters "WELCOME-" to form a 24-octet nonce used to encrypt and decrypt the welcome box.
 
-* The cookie box (144 octets). This SHALL encrypt the server public connection key S' (32 octets) and the server cookie (96 octets), from the server long-term key S to the client's connection key C'. The server SHALL generate a new connection key pair for each HELLO command it receives. It SHALL immediately discard this key pair, after creating the cookie box.
+* A welcome box (144 octets) that encrypts the server public connection key S' (32 octets) and the server cookie (96 octets), from the server long-term key S to the client's connection key C'.
 
-The cookie SHALL consist of the client public connection key C' (32 octets) and the server secret connection key s' (32 octets), encrypted to and from a secret "cookie key" that the server holds for a short time. The server MUST discard the cookie key after a short interval, for example 60 seconds, or as soon as the client sends a valid INITIATE command.
+Note that the server uses a 16-octet "long nonce" in the WELCOME command and when creating a cookie. This nonce SHALL be unique for this server long term key. The recommended simplest strategy is to use 16 random octets from a sufficiently good entropy source.
 
-The client SHALL validate all fields and SHALL reject and disconnect from servers who send malformed WELCOME commands.
+The cookie consists of two fields:
+
+* A server long nonce (16 octets). This nonce SHALL be implicitly prefixed by the 8 characters "COOKIE--" to form a 24-octet nonce used to encrypt and decrypt the cookie box.
+
+* A cookie box (80 octets) that holds the client public connection key C' (32 octets) and the server secret connection key s' (32 octets), encrypted to and from a secret short-term "cookie key". The server MUST discard from its memory the cookie key after a short interval, for example 60 seconds, or as soon as the client sends a valid INITIATE command. The server SHALL generate a new connection key pair and cookie for each HELLO command it receives. It SHALL immediately discard this key pair, after creating the cookie.
+
+The client SHALL validate all fields and SHALL reject and disconnect from servers which send malformed WELCOME commands.
 
 ++++ The INITIATE Command
 
-The client SHALL respond to a valid WELCOME with an INITIATE command. This command SHALL be at least 232 octets long and have the following fields:
+The client SHALL respond to a valid WELCOME with an INITIATE command. This command SHALL be at least 224 octets long and have the following fields:
 
 * The command ID, which is "INITIATE" as 8 octets.
 
 * The cookie provided by the server in the WELCOME command (96 octets).
 
-* The client's connection nonce (8 octets). The nonce SHALL be implicitly prefixed with the 16 characters "CurveCP-client-I" to form the 24-octet nonce used to encrypt and decrypt the vouch box.
+* A client short nonce (8 octets). The nonce SHALL be implicitly prefixed with the 16 characters "CurveZMQINITIATE" to form the 24-octet nonce used to encrypt and decrypt the vouch box.
 
 * The initiate box (112 or more octets), by which the client securely sends its public long-term key C to the server. The initiate box holds the client public long-term key C (32 octets), the vouch (64 octets), and the metadata (0 or more octets), encrypted from the client's connection key C' to the server's connection key S'.
 
-The vouch itself consists of a nonce and a box:
+The vouch itself consists of two fields:
 
-* The client long-term nonce is 16 octets. This nonce SHALL be implicitly prefixed with the 8 characters "CurveCPV" to give a 24-octet nonce, used to encrypt and decrypt the client box. This nonce SHALL be unique for all INITIATE commands from this client. A valid strategy is to use 16 random octets from a sufficiently good entropy source.
+* A client long nonce (16 octets). This nonce SHALL be implicitly prefixed with the 8 characters "VOUCH---" to give a 24-octet nonce, used to encrypt and decrypt the vouch box. This nonce SHALL be unique for all INITIATE commands from this client long-term key. A valid strategy is to use 16 random octets from a sufficiently good entropy source.
 
-* The client box is 48 octets and holds the client's connection key C' (32 octets), encrypted from the client long-term key C to the server long-term key S.
+* The vouch box (48 octets), that encrypts the client's connection key C' (32 octets) from the client long-term key C to the server long-term key S.
 
-The metadata consists of a list of properties consisting of name and value as size-specified strings. The name SHALL be 1 to 255 characters. Zero-sized names are not valid. The case (upper or lower) of names SHALL NOT be significant. The value SHALL be 0 to 2^31-1 octets of opaque binary data. Zero-sized values are allowed. The semantics of the value depend on the property. The value size field SHALL be four octets, in network byte order. Note that this size field will mostly not be aligned in memory.
+The metadata consists of a list of properties consisting of name and value as size-specified strings. The name SHALL be 1 to 255 characters. Zero-sized names are not valid. The case (upper or lower) of names SHALL NOT be significant. The value SHALL be 0 to 2^31-1 octets of opaque binary data. Zero-sized values are allowed. The semantics of the value depend on the property. The value size field SHALL be four octets, in network order. Note that this size field will mostly not be aligned in memory.
 
 The server SHALL validate all fields and SHALL reject and disconnect clients who send malformed INITIATE commands.
 
@@ -190,13 +216,15 @@ The server SHALL validate all fields and SHALL reject and disconnect clients who
 
 The server SHALL respond to a valid INITIATE command with a READY command. This command SHALL be 32 or more octets long and have the following fields:
 
-* The command ID, which is "WELCOME " as 8 octets.
+* The command ID, which is "READY   " as 8 octets.
 
-* The server's connection nonce (8 octets). The nonce SHALL be implicitly prefixed with the 16 characters "CurveCP-server-R" to form the 24-octet nonce used to encrypt and decrypt the ready box.
+* A server short nonce (8 octets). The nonce SHALL be implicitly prefixed with the 16 characters "CurveZMQREADY---" to form the 24-octet nonce used to encrypt and decrypt the ready box.
 
 * The ready box (16 or more octets). This shall contain metadata of the same format as sent in the INITIATE command, encrypted from the server's connection key S' to the client's connection key C'.
 
 The client SHALL validate all fields and SHALL reject and disconnect from servers who send malformed READY commands.
+
+Note that the server uses an 8 octet "short nonce" in the READY and MESSAGE commands. This nonce SHALL be unique in each of these command within a connection. The server SHALL NOT send more than 2^64-2 MESSAGE commands in one connection. The server MAY use any strategy to generate unique short nonces, including the CurveCP strategy of an incremental counter.
 
 ++++ The MESSAGE Command
 
@@ -204,7 +232,7 @@ The client MAY send MESSAGE commands when it has received a valid READY command.
 
 * The command ID, which is "MESSAGE " as 8 octets.
 
-* The sender's connection nonce (8 octets). The nonce SHALL be implicitly prefixed with the 16 characters "CurveCP-client-M" (if the sender is the client) or "CurveCP-server-M" (if the sender is the server) to form the 24-octet nonce used to encrypt and decrypt the message box.
+* A short nonce (8 octets). The nonce SHALL be implicitly prefixed with the 16 characters "CurveZMQMESSAGES" (from server) or "CurveZMQMESSAGEC" (from client) to form the 24-octet nonce used to encrypt and decrypt the message box.
 
 * The message box (17 or more octets). This shall contain the message data, encrypted from the sender's connection key the recipient's connection key.
 
@@ -224,23 +252,23 @@ While CurveCP defines a security handshake and traffic control for messages sent
 
 * The HELLO command has a protocol version number (CurveCP is not versioned).
 
-* We rename Cookie to Welcome to be consistent with other mechanisms used in ZMTP 3.0.
+* We rename Cookie to WELCOME to be consistent with other mechanisms used in ZMTP 3.0.
 
-* In the Initiate command, we do not send message data nor a hostname, but we do send connection metadata which may include the hostname, and other properties.
+* In the INITIATE command, we do not send message data nor a hostname, but we do send connection metadata which may include the hostname, and other properties.
 
-* We add a Ready command to send connection metadata from server to client, after security has been established.
+* We add a READY command to send connection metadata from server to client, after security has been established.
 
-* In Message commands, we do not send the client public connection key since it is redundant in a connected protocol.
+* In INITIATE and MESSAGE commands from the client, we do not send the client public connection key since it is redundant in a connected protocol.
 
-* In Message commands, the payload can be of any size from zero to 2^63-1 octets, whereas CurveCP limits packets to fit in UDP frames.
+* In MESSAGE commands, the payload can be of any size from zero to 2^63-1 octets, whereas CurveCP limits packets to fit in UDP frames.
 
-* In Message commands, the payload has a frame format that supports some requirements of ZMTP 3.0, particularly the continuation flag ("more").
+* In MESSAGE commands, the payload has a frame format that supports some requirements of ZMTP 3.0, particularly the continuation flag ("more").
 
-* In Message commands, we do not use the CurveCP traffic control fields since traffic control is handled by the underlying stream protocol.
+* In MESSAGE commands, we do not use the CurveCP traffic control fields since traffic control is handled by the underlying stream protocol.
 
 * While CurveCP delivers a stream (reconstituted from packets), CurveZMQ delivers atomic messages.
 
-* While CurveCP uses strictly incrementing connection nonces, CurveZMQ has no such requirement since commands are guaranteed to arrive in order over the stream transport.
+* While CurveCP uses strictly incrementing short nonces, CurveZMQ has no such requirement since commands are guaranteed to arrive in order over the stream transport.
 
 ++ CurveCP
 
@@ -326,7 +354,7 @@ To implement or use CurveCP you need to be aware of some issues and limitations 
 
 **CurveCP depends on NaCl.** The protocol is bound to the NaCl crypto library that is today the primary implementation of the necessary algorithms. NaCl is a young library and not as widely available, stable, or fast as it might be. This affects CurveZMQ equally.
 
-**CurveCP is a full protocol stack.** This is perhaps the most serious risk: it does traffic control over UDP as well as security. The consequence is that there is only one implementation (in the NaCl library), which is difficult to integrate into existing systems. It is also uncertain how well CurveCP's traffic control works. TCP on the other hand, is available everywhere and is well-known (for good, and bad).
+**CurveCP is a full protocol stack.** This is perhaps the most serious challenge in using CurveCP: it does traffic control over UDP as well as security. The consequence is that there is only one implementation (in the NaCl library), which is difficult to integrate into existing systems. It is also uncertain how well CurveCP's traffic control works. TCP on the other hand, is available everywhere and is well understood (for good, and bad).
 
 +++ CurveZMQ as an Interim Solution
 
@@ -334,6 +362,6 @@ CurveCP is remarkable for several reasons, and stands a good chance of becoming 
 
 As an interim solution, we have taken CurveCP's security handshake alone, and implemented that design on top of TCP as CurveZMQ. The results are good. We believe it is easier to validate this security model than the whole CurveCP design, we believe this will solve an immediate need (secure messaging at Internet scales), and we believe it will help CurveCP gain further mind-share.
 
-++ Reference Implementation
+++ CurveZMQ Reference Implementation
 
-(in progress).
+The reference implementation for CurveZMQ, which tracks this specification and always implements the latest stable version, is the CZMQ/zcurve module (in C). This module includes examples of using CurveZMQ at the application layer, in its selftest method.

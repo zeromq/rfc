@@ -1,26 +1,18 @@
-The ZMTP CURVE mechanism provides secure authentication and confidentiality for ZMTP v3.0. This mechanism implements the CurveZMQ security handshake[((bibcite curvezmq))].
+The ZMTP CURVE mechanism provides secure authentication and confidentiality for ZMTP v3.0. This mechanism implements the CurveZMQ security handshake[((bibcite curvezmq))]. It is intended for use on public networks where security requirements are high.
 
 * Name: rfc.zeromq.org/spec:25/ZMTP-CURVE
 * Editor: Pieter Hintjens <ph@imatix.com>
 * State: raw
 
-++ License
+++ Preamble
 
 Copyright (c) 2009-2013 iMatix Corporation
 
-This Specification is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 3 of the License, or (at your option) any later version.
-
-This Specification is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along with this program; if not, see <http://www.gnu.org/licenses>.
-
-++ Change Process
+This Specification is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 3 of the License, or (at your option) any later version. This Specification is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details. You should have received a copy of the GNU General Public License along with this program; if not, see <http://www.gnu.org/licenses>.
 
 This Specification is a free and open standard[((bibcite fandos))] and is governed by the Digital Standards Organization's Consensus-Oriented Specification System (COSS)[((bibcite coss))].
 
-++ Language
-
-The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED",  "MAY", and "OPTIONAL" in this document are to be interpreted as described in RFC 2119[((bibcite rfc2119))].
+The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in RFC 2119[((bibcite rfc2119))].
 
 ++ Goals
 
@@ -46,7 +38,7 @@ cn_nonce = 8OCTET           ; Client short-term nonce
 nullbox = 80OCTET           ; Box [64 * %x0](C'->S)
 padding = 80%x00            ; Anti-amplification padding
 
-welcome = command-size "WELCOME" welcome-body
+welcome = command-size "WELCOME " welcome-body
 welcome-body = sv_nonce cookie-box
 sv_nonce = 16OCTET          ; Server long-term nonce
 cookie-box 144OCTET         ; Box [S' + cookie](C'->S)
@@ -71,7 +63,7 @@ data-box = 116OCTET         ; Box [M](A'->B') (from A to B)
 
 Note: the above grammar is not complete; specifically it does not define variable length messages nor metadata.
 
-All command bodies consist of an 8-character command name, padded with spaces, followed by formatted binary fields. The ZMTP v3.0 specification defines the grammar for command-size. Note that messages are not sent as ZMTP message frames but as encrypted MESSAGE commands.
+All command bodies consist of an 8-character command name, padded with hyphens, followed by formatted binary fields. The ZMTP v3.0 specification defines the grammar for command-size. Note that messages are not sent as ZMTP message frames but as encrypted MESSAGE commands.
 
 ++ References
 

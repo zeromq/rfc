@@ -4,23 +4,15 @@ The ZMTP PLAIN mechanism defines a simple username/password mechanism for ZMTP v
 * Editor: Pieter Hintjens <ph@imatix.com>
 * State: raw
 
-++ License
+++ Preamble
 
 Copyright (c) 2009-2013 iMatix Corporation
 
-This Specification is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 3 of the License, or (at your option) any later version.
-
-This Specification is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along with this program; if not, see <http://www.gnu.org/licenses>.
-
-++ Change Process
+This Specification is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 3 of the License, or (at your option) any later version. This Specification is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details. You should have received a copy of the GNU General Public License along with this program; if not, see <http://www.gnu.org/licenses>.
 
 This Specification is a free and open standard[((bibcite fandos))] and is governed by the Digital Standards Organization's Consensus-Oriented Specification System (COSS)[((bibcite coss))].
 
-++ Language
-
-The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED",  "MAY", and "OPTIONAL" in this document are to be interpreted as described in RFC 2119[((bibcite rfc2119))].
+The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in RFC 2119[((bibcite rfc2119))].
 
 ++ Goals
 
@@ -53,14 +45,14 @@ hello = command-size "HELLO   " username password
 username = OCTET *VCHAR
 password = OCTET *VCHAR
 
-welcome = command-size "WELCOME"
+welcome = command-size "WELCOME "
 
 initiate = command-size "INITIATE" *property
 
 ready = command-size "READY   " *property
 [[/code]]
 
-All command bodies consist of an 8-character command name, padded with spaces, followed by formatted binary fields. The ZMTP v3.0 specification defines the grammar for message, command-size, and property.
+All command bodies consist of an 8-character command name, padded with hyphens, followed by formatted binary fields. The ZMTP v3.0 specification defines the grammar for message, command-size, and property.
 
 ++ References
 

@@ -58,7 +58,7 @@ ZAP uses a simplistic multi-frame format for its messages, where the version num
 
 +++ Architecture
 
-ZAP defines a message-based dialog between a //server// that makes authentication requests, and a //handler// that answers them. The server and handler SHALL communicate over ZMTP using the following socket types and transports:
+ZAP defines a message-based dialog between a //server// that makes authentication requests, and a //handler// that answers them. The server and handler SHALL communicate using the following socket types and transports:
 
 * The server SHALL use a REQ or DEALER socket.
 * The handler SHALL use a REP or ROUTER socket.
@@ -143,4 +143,4 @@ ZAP does not define how to discover handlers on the network. Some plausible opti
 
 ++ Reference Implementation
 
-A minimal empty reference implementation is provided in the RFC repository at https://github.com/zeromq/rfc/src/spec_27.c. This implementation demonstrates a server talking to a proxy handler over inproc, talking to an external terminal handler over TCP. The terminal handler implements a PLAIN authentication mechanism.
+A minimal empty reference implementation is provided in the RFC repository at https://github.com/zeromq/rfc/src/spec_27.c. This implementation demonstrates a server talking to a proxy handler over {{inproc://}}, talking to an external terminal handler over TCP. The terminal handler implements a PLAIN authentication mechanism.

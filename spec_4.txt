@@ -73,7 +73,6 @@ Notes:
 * Whitespace is significant only before property names and inside values.
 * Text starting with '#' is discarded as a comment.
 * Each non-empty line defines a property consisting of a name and an optional value.
-* Names are alphanumeric ([A-Za-z0-9]) and may have embedded slashes ('/').
 * Values are untyped strings which the application may interpret in any way it wishes.
 * An entire value can be enclosed with single or double quotes, which do not form part of the value.
 * Any printable character except the closing quote is valid in a quoted string.
@@ -83,6 +82,13 @@ Notes:
 * Hierarchy is signaled by indentation, where a child is indented 4 spaces more than its parent.
 * The first non-whitespace character in a ZPL file is always either '#' or an alphanumeric character.
 * Whitespace following after a value is discarded unless within valid quotes.
+
+Names SHALL match this grammar:
+
+[[code]]
+name = *name-char
+name-char = ALPHA | DIGIT | "$" | "-" | "_" | "@" | "." | "&" | "+" | "/"
+[[/code]]
 
 ++ Justification and Design
 

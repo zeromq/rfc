@@ -551,7 +551,7 @@ To write the value of a property, if this is permitted, the class SHALL define a
 [[code]]
 //  Set the value of myprop
 void
-myp_mymod_myprop_set (myp_mymod_t *self, <type> myprop)
+myp_mymod_set_myprop (myp_mymod_t *self, <type> myprop)
 {
     assert (self);
     self->myprop = myprop;

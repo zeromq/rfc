@@ -216,7 +216,7 @@ The body of the READY command consists of a list of properties consisting of nam
 
 The name SHALL be 1 to 255 characters. Zero-sized names are not valid. The case (upper or lower) of names SHALL NOT be significant.
 
-The value SHALL be 0 to 2^31-1 octets of opaque binary data. Zero-sized values are allowed. The semantics of the value depend on the property. The value size field SHALL be four octets, in network byte order. Note that this size field will mostly not be aligned in memory.
+The value SHALL be 0 to 2,147,483,647 (2^31-1 or INT32_MAX in C/C++) octets of opaque binary data. Zero-sized values are allowed. The semantics of the value depend on the property. The value size field SHALL be four octets, in network byte order. Note that this size field will mostly not be aligned in memory.
 
 +++ Connection Metadata
 

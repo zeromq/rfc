@@ -24,7 +24,7 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 
 ++ Goals
 
-ZPL is designed to represent a property set, where each property has a name and a value.  Properties are hierarchical, i.e. properties can contain other properties.  It aims to:
+ZPL is designed to represent a property set, where each property has a name and a value. Properties are hierarchical, i.e. properties can contain other properties. It aims to:
 
 * Be easy to read and edit, using visual clues for semantics.
 * Be minimalistic in terms of syntax.
@@ -42,7 +42,9 @@ The use cases for ZPL include:
 
 ++ Specification
 
-ZPL is an ASCII text format that uses whitespace - line endings and indentation - for framing and hierarchy.  ZPL data consists of a series of properties encoded as name/value pairs, one per line, where the name may be structured, and where the value is an untyped string.
+ZPL is an ASCII text format that uses whitespace - line endings and indentation - for framing and hierarchy. ZPL data consists of a series of properties encoded as name/value pairs, one per line, where the name may be structured, and where the value is an untyped string.
+
+Implementations should treat any of the following sequences as a line-ending: newline (%x0A), carriage-return (%x0D), or carriage-return followed by newline (%x0A %x0D).
 
 Here is a typical example of a ZPL file:
 
@@ -71,7 +73,6 @@ Notes:
 * Whitespace is significant only before property names and inside values.
 * Text starting with '#' is discarded as a comment.
 * Each non-empty line defines a property consisting of a name and an optional value.
-* Names are alphanumeric ([A-Za-z0-9]) and may have embedded slashes ('/').
 * Values are untyped strings which the application may interpret in any way it wishes.
 * An entire value can be enclosed with single or double quotes, which do not form part of the value.
 * Any printable character except the closing quote is valid in a quoted string.
@@ -82,6 +83,13 @@ Notes:
 * The first non-whitespace character in a ZPL file is always either '#' or an alphanumeric character.
 * Whitespace following after a value is discarded unless within valid quotes.
 
+Names SHALL match this grammar:
+
+[[code]]
+name = *name-char
+name-char = ALPHA | DIGIT | "$" | "-" | "_" | "@" | "." | "&" | "+" | "/"
+[[/code]]
+
 ++ Justification and Design
 
 ZPL exists because alternatives were inadequate:
@@ -91,9 +99,9 @@ ZPL exists because alternatives were inadequate:
 * YAML is relatively complex to parse.
 * UNIX-style configuration syntax does not support name hierarchies.
 
-The use of significant whitespace may be controversial.  It is meant to be easier to create and verify manually than syntax elements such as braces.  It eliminates the need for separators.  The fixed 4-character indentation is meant to avoid confusion and errors when fragments of ZPL files from different sources are mixed together.
+The use of significant whitespace may be controversial. It is meant to be easier to create and verify manually than syntax elements such as braces. It eliminates the need for separators. The fixed 4-character indentation is meant to avoid confusion and errors when fragments of ZPL files from different sources are mixed together.
 
-The lack of type awareness and other semantic validation is deliberate. ZPL is not meant to be a formal grammar but a simple-to-parse framing for name/value pairs.  It emulates 0MQ insofar as it frames data but does not attempt to inspect or validate that data.
+The lack of type awareness and other semantic validation is deliberate. ZPL is not meant to be a formal grammar but a simple-to-parse framing for name/value pairs. It emulates 0MQ insofar as it frames data but does not attempt to inspect or validate that data.
 
 ++ References
 

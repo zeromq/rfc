@@ -1,5 +1,3 @@
--- socket behavior
-
 The ZeroMQ Message Transport Protocol (ZMTP) is a transport layer protocol for exchanging messages between two peers over a connected transport layer such as TCP. This document describes ZMTP 3.0. The major change in this version is the addition of security mechanisms and the removal of hard-coded connection metadata (socket type and identity) from the greeting.
 
 * Name: rfc.zeromq.org/spec:23/ZMTP
@@ -13,9 +11,10 @@ Copyright (c) 2009-2013 iMatix Corporation
 
 This Specification is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 3 of the License, or (at your option) any later version. This Specification is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details. You should have received a copy of the GNU General Public License along with this program; if not, see <http://www.gnu.org/licenses>.
 
-This Specification is a free and open standard[((bibcite fandos))] and is governed by the Digital Standards Organization's Consensus-Oriented Specification System (COSS)[((bibcite coss))].
+This Specification is a [http://www.digistan.org/open-standard:definition free and open standard] and is governed by the Digital Standards Organization's [http://www.digistan.org/spec:1/COSS Consensus-Oriented Specification System].
 
-The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in RFC 2119[((bibcite rfc2119))].
+The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in [http://tools.ietf.org/html/rfc2119 RFC 2119].
+
 
 ++ Goals
 
@@ -135,13 +134,13 @@ If the chosen security mechanism does not specify a client and server topology, 
 
 +++ Authentication and Confidentiality
 
-ZMTP provides extensible authentication and confidentiality through the use of a negotiated security mechanism that is loosely based on the IETF Simple Authentication and Security Layer (SASL)[((bibcite rfc4422))]. The peer MAY support any or all of the following mechanisms:
+ZMTP provides extensible authentication and confidentiality through the use of a negotiated security mechanism that is loosely based on the IETF [http://tools.ietf.org/html/rfc4422 Simple Authentication and Security Layer (SASL)]. The peer MAY support any or all of the following mechanisms:
 
 * "NULL", specified later in this document, which implements no authentication, and no confidentiality.
 
 * "PLAIN", specified by [http://rfc.zeromq.org/spec:24/ rfc.zeromq.org/spec:24/ZMTP-PLAIN], which implements simple user-name and password authentication, in clear text.
 
-* "CURVE", specified by [http://rfc.zeromq.org/spec:25/ rfc.zeromq.org/spec:25/ZMTP-CURVE], which implements full authentication and confidentiality using the CurveZMQ security handshake[((bibcite curvezmq))].
+* "CURVE", specified by [http://rfc.zeromq.org/spec:25/ rfc.zeromq.org/spec:25/ZMTP-CURVE], which implements full authentication and confidentiality using the [http://curvezmq.org CurveZMQ security protocol].
 
 The security mechanism is an ASCII string, null-padded as needed to fit 20 octets. Implementations MAY define their own mechanisms for experimentation and internal use. All mechanisms intended for public interoperability SHALL be defined as 0MQ RFCs. Mechanism names SHALL be assigned on a first-come first-served basis. Mechanism names SHALL consist only of uppercase letters A to Z, digits, and embedded hyphens or underscores.
 
@@ -216,7 +215,7 @@ The body of the READY command consists of a list of properties consisting of nam
 
 The name SHALL be 1 to 255 characters. Zero-sized names are not valid. The case (upper or lower) of names SHALL NOT be significant.
 
-The value SHALL be 0 to 2^31-1 octets of opaque binary data. Zero-sized values are allowed. The semantics of the value depend on the property. The value size field SHALL be four octets, in network byte order. Note that this size field will mostly not be aligned in memory.
+The value SHALL be 0 to 2,147,483,647 (2^31-1 or INT32_MAX in C/C++) octets of opaque binary data. Zero-sized values are allowed. The semantics of the value depend on the property. The value size field SHALL be four octets, in network byte order. Note that this size field will mostly not be aligned in memory.
 
 +++ Connection Metadata
 
@@ -299,7 +298,7 @@ To detect and work with older versions of ZMTP, we use a mix of strategies. We d
 
 +++ Detecting ZMTP 2.0 Peers
 
-From ZMTP 2.0[((bibcite zmtp20))] onwards, the protocol contains the version number immediately after the signature. To detect and interoperate with ZMTP 2.0 peers, the implementation MAY use this strategy:
+From [[http://rfc.zeromq.org/spec:13 ZMTP 2.0] onwards, the protocol contains the version number immediately after the signature. To detect and interoperate with ZMTP 2.0 peers, the implementation MAY use this strategy:
 
 * Send the 10-octet signature followed by the major version number (the single octet %x03).
 
@@ -311,7 +310,7 @@ From ZMTP 2.0[((bibcite zmtp20))] onwards, the protocol contains the version num
 
 +++ Detecting ZMTP 1.0 and 2.0 Peers
 
-ZMTP 1.0[((bibcite zmtp10))] did not have any version information. To detect and interoperate with a ZMTP 1.0 and 2.0 peers, an implementation MAY use this strategy:
+[http://rfc.zeromq.org/spec:15 ZMTP 1.0] did not have any version information. To detect and interoperate with a ZMTP 1.0 and 2.0 peers, an implementation MAY use this strategy:
 
 * Send a 10-octet pseudo-signature consisting of "%xFF size %x7F" where 'size' is the number of octets in the sender's identity (0 or greater) plus 1. The size SHALL be 8 octets in network byte order and occupies the padding field.
 
@@ -421,15 +420,3 @@ As soon as the server has sent its own READY command, it may also send messages 
 * Attackers can use the size of messages (even without breaking encryption) to collect information about the meaning. Thus, on an encrypted connection, message data SHOULD be padded to a randomized minimum size.
 
 * Attackers can use the simple presence or absence of traffic to collect information about the peer ("Person X has come on line"). Thus, on an encrypted connection, the peer SHOULD send random garbage data ("noise") when there is no other traffic. To fully mask traffic, a peer MAY throttle messages so there is no visible difference between noise and real data.
-
-++ References
-
-[[bibliography]]
-: rfc2119 : "Key words for use in RFCs to Indicate Requirement Levels" - [http://tools.ietf.org/html/rfc2119 ietf.org]
-: rfc4422 : "Simple Authentication and Security Layer" - [http://tools.ietf.org/html/rfc4422 ietf.org]
-: fandos : "Definition of a Free and Open Standard" - [http://www.digistan.org/open-standard:definition digistan.org]
-: coss : "Consensus Oriented Specification System" - [http://www.digistan.org/spec:1/COSS digistan.org]
-: zmtp10 : "13/ZMTP - ZeroMQ Message Transport Protocol" - [http://rfc.zeromq.org/spec:13 rfc.zeromq.org]
-: zmtp20 : "15/ZMTP - ZeroMQ Message Transport Protocol" - [http://rfc.zeromq.org/spec:15 rfc.zeromq.org]
-: curvezmq : "The CurveZMQ Secure Handshake" - [http://curvezmq.org curvezmq.org]
-[[/bibliography]]

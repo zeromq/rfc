@@ -1,4 +1,4 @@
-The ZMTP CURVE mechanism provides secure authentication and confidentiality for ZMTP v3.0. This mechanism implements the CurveZMQ security handshake[((bibcite curvezmq))]. It is intended for use on public networks where security requirements are high.
+The ZMTP CURVE mechanism provides secure authentication and confidentiality for [http://rfc.zeromq.org/spec:23 ZMTP 3.0]. This mechanism implements the [http://curvezmq.org CurveZMQ security protocol]. It is intended for use on public networks where security requirements are high.
 
 * Name: rfc.zeromq.org/spec:25/ZMTP-CURVE
 * Editor: Pieter Hintjens <ph@imatix.com>
@@ -6,72 +6,22 @@ The ZMTP CURVE mechanism provides secure authentication and confidentiality for 
 
 ++ Preamble
 
-Copyright (c) 2009-2013 iMatix Corporation
+Copyright (c) 2013 iMatix Corporation.
 
 This Specification is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 3 of the License, or (at your option) any later version. This Specification is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details. You should have received a copy of the GNU General Public License along with this program; if not, see <http://www.gnu.org/licenses>.
 
-This Specification is a free and open standard[((bibcite fandos))] and is governed by the Digital Standards Organization's Consensus-Oriented Specification System (COSS)[((bibcite coss))].
+This Specification is a [http://www.digistan.org/open-standard:definition free and open standard] and is governed by the Digital Standards Organization's [http://www.digistan.org/spec:1/COSS Consensus-Oriented Specification System].
 
-The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in RFC 2119[((bibcite rfc2119))].
+The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in [http://tools.ietf.org/html/rfc2119 RFC 2119].
 
 ++ Goals
 
-The ZMTP CURVE mechanism provides secure authentication and confidentiality for ZMTP[((bibcite zmtp30))]. This mechanism implements the CurveZMQ security handshake[((bibcite curvezmq))], which is a mapping of the CurveCP[((bibcite curvecp))] handshake for TCP transports.
+The ZMTP CURVE mechanism provides secure authentication and confidentiality for [http://rfc.zeromq.org/spec:23 ZMTP 3.0]. This mechanism implements the [http://curvezmq.org CurveZMQ security protocol], which is a mapping of the [http://curvecp.org CurveCP] handshake, adapted for TCP transports.
 
 ++ Implementation
 
 The CURVE mechanism uses the greeting as-server field to identify which peer is "client" and which peer is "server".
 
-The client authenticates itself to the server by sending a HELLO command. The server accepts or rejects this authentication. If it accepts it, it replies with a WELCOME command. Otherwise, it closes the connection. The client then sends an INITIATE command, which the server parses and validates. The server responds with a READY command. The client MAY send messages after receiving a READY command from the server. The server MAY start to send messages immediately after sending a READY command.
+The mechanism starts with a HELLO command from client to server, and continues with a handshake until each party has authenticated the other and is ready to send confidential information.
 
-The following ABNF grammar defines the CURVE security handshake and message flow:
-
-[[code]]
-curve = C:hello S:welcome
-        C:initiate S:ready
-     *( C:message | S:message )
-
-hello = command-size "HELLO   " hello-body
-hello-body = cn_client cn_nonce nullbox padding
-cn_client = 32OCTET         ; Client short-term public key C'
-cn_nonce = 8OCTET           ; Client short-term nonce
-nullbox = 80OCTET           ; Box [64 * %x0](C'->S)
-padding = 80%x00            ; Anti-amplification padding
-
-welcome = command-size "WELCOME " welcome-body
-welcome-body = sv_nonce cookie-box
-sv_nonce = 16OCTET          ; Server long-term nonce
-cookie-box 144OCTET         ; Box [S' + cookie](C'->S)
-
-initiate = command-size "INITIATE" initiate-body
-initiate-body = cn_client cn_cookie cn_nonce vouch-box
-cn_client = 32OCTET         ; Client short-term public key C'
-cn_cookie = 96OCTET         ; Server connection cookie
-vouch-box = 112OCTET        ; Box [C + nonce + vouch](C'->S')
-data-box = 116OCTET         ; Box [M](A'->B') (from A to B)
-
-ready = command-size "READY   " ready-body
-ready-body = cn_nonce data-box
-cn_nonce = 8OCTET           ; Server short-term nonce
-data-box = 116OCTET         ; Box [M](A'->B') (from A to B)
-
-message = command-size "MESSAGE " message-body
-message-body
-cn_nonce = 8OCTET           ; Server/client short-term nonce
-data-box = 116OCTET         ; Box [M](A'->B') (from A to B)
-[[/code]]
-
-Note: the above grammar is not complete; specifically it does not define variable length messages nor metadata.
-
-All command bodies consist of an 8-character command name, padded with hyphens, followed by formatted binary fields. The ZMTP v3.0 specification defines the grammar for command-size. Note that messages are not sent as ZMTP message frames but as encrypted MESSAGE commands.
-
-++ References
-
-[[bibliography]]
-: rfc2119 : "Key words for use in RFCs to Indicate Requirement Levels" - [http://tools.ietf.org/html/rfc2119 ietf.org]
-: fandos : "Definition of a Free and Open Standard" - [http://www.digistan.org/open-standard:definition digistan.org]
-: coss : "Consensus Oriented Specification System" - [http://www.digistan.org/spec:1/COSS digistan.org]
-: zmtp30 : "23/ZMTP - ZeroMQ Message Transport Protocol" - [http://rfc.zeromq.org/spec:23 rfc.zeromq.org]
-: curvezmq : "The CurveZMQ Secure Handshake" - [http://curvezmq.org curvezmq.org]
-: curvecp : "CurveCP: Usable security for the Internet" - [http://curvecp.org curvecp.org]
-[[/bibliography]]
+All command bodies consist of an 8-character command name, padded with spaces, followed by formatted binary fields. The http://rfc.zeromq.org/spec:23 ZMTP 3.0 specification] defines the grammar for the command size. The [http://rfc.zeromq.org/spec:26 CurveZMQ specification] defines the grammar for the command bodies.

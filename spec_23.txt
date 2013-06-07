@@ -2,7 +2,7 @@ The ZeroMQ Message Transport Protocol (ZMTP) is a transport layer protocol for e
 
 * Name: rfc.zeromq.org/spec:23/ZMTP
 * Editor: Pieter Hintjens <ph@imatix.com>
-* Contributors: Martin Hurton <mh@imatix.com>
+* Contributors: Martin Hurton <mh@imatix.com>, Ciprian Dorin Craciun <ciprian.craciun@gmail.com>
 * State: draft
 
 ++ Preamble
@@ -220,6 +220,8 @@ The value SHALL be 0 to 2,147,483,647 (2^31-1 or INT32_MAX in C/C++) octets of o
 
 The security mechanism SHALL provide a way for peers to exchange metadata in the form of a key-value dictionary. The precise encoding of the metadata depends on the mechanism.
 
+Metadata names SHALL be case-insensitive.
+
 These metadata properties are defined:
 
 * "Socket-Type", which specifies the sender's socket type. See the section "The Socket Type Property" below. The sender SHOULD specify the Socket-Type.
@@ -229,6 +231,8 @@ These metadata properties are defined:
 * "Resource", which specifies the a resource to connect to. See the section "The Resource Property" below. The sender MAY specify a Resource.
 
 The implementation MAY provide other metadata properties such as implementation name, platform name, and so on. For interoperability, metadata names and semantics MAY be defined as RFCs.
+
+Metadata names starting with "X-" SHALL be reserved for application use.
 
 ++++ The Socket-Type Property
 
@@ -438,78 +442,35 @@ An XPUB socket SHALL create a queue and accept outgoing messages when a peer con
 
 When its queue is full, a peer becomes unavailable, and the XPUB socket SHALL drop further messages to that peer. An XPUB socket SHALL NOT block on sending.
 
-An XSUB peer creates a subscription by sending a message consisting of the octet %x1 followed by the subscription body. An XSUB peer destroys a subscription by sending a message consisting of the octet %x0 followed by the subscription body.
+An XSUB peer creates a subscription by sending its XPUB peer a message consisting of the octet %x01 followed by the subscription body. An XSUB peer destroys a subscription by sending a message consisting of the octet %x00 followed by the subscription body.
 
-Same as ZMQ_PUB except that you can receive subscriptions from the peers
-in form of incoming messages. Subscription message is a byte 1 (for
-subscriptions) or byte 0 (for unsubscriptions) followed by the subscription
-body. Messages without a sub/unsub prefix are also received, but have no
-effect on subscription status.
+The XPUB socket SHALL filter outgoing messages by using the subscription body as a prefix match for the message. When an XSUB peer has multiple subscriptions, the XPUB socket SHALL send it a message that matches any of these subscriptions. An empty subscription body SHALL match all messages.
 
-[horizontal]
-.Summary of ZMQ_XPUB characteristics
-Compatible peer sockets:: 'ZMQ_SUB', 'ZMQ_XSUB'
-Direction:: Unidirectional
-Send/receive pattern:: Send messages, receive subscriptions
-Incoming routing strategy:: N/A
-Outgoing routing strategy:: Fan out
-Action in mute state:: Drop
+An XSUB peer MAY send non-subscription messages (starting with an octet %x02-%xff), and an XPUB socket SHOULD pass these to the calling application or drop them silently, depending on the socket configuration.
 
 +++ The XSUB Socket Type
 
-A socket of type 'ZMQ_SUB' is used by a _subscriber_ to subscribe to data
-distributed by a _publisher_. Initially a 'ZMQ_SUB' socket is not subscribed to
-any messages, use the 'ZMQ_SUBSCRIBE' option of linkzmq:zmq_setsockopt[3] to
-specify which messages to subscribe to. The _zmq_send()_ function is not
-implemented for this socket type.
+An XSUB socket MAY be connected to any number of XPUB peers. It SHALL receive incoming messages from its peers using a fair-queuing strategy.
 
-[horizontal]
-.Summary of ZMQ_SUB characteristics
-Compatible peer sockets:: 'ZMQ_PUB', 'ZMQ_XPUB'
-Direction:: Unidirectional
-Send/receive pattern:: Receive only
-Incoming routing strategy:: Fair-queued
-Outgoing routing strategy:: N/A
-Action in mute state:: Drop
+//An XSUB socket SHALL create a queue and accept outgoing messages immediately when initiating a connection to a peer, and SHALL maintain this queue whether or not the connection is established.//
 
-Same as ZMQ_SUB except that you subscribe by sending subscription messages to
-the socket. Subscription message is a byte 1 (for subscriptions) or byte 0
-(for unsubscriptions) followed by the subscription body. Messages without a
-sub/unsub prefix may also be sent, but have no effect on subscription status.
+//An XSUB socket SHALL create a queue and accept outgoing messages when a peer connects to it. If this peer disconnects, the XSUB socket SHALL destroy its queue and MAY destroy all undeliverable messages it contains.//
 
-[horizontal]
-.Summary of ZMQ_XSUB characteristics
-Compatible peer sockets:: 'ZMQ_PUB', 'ZMQ_XPUB'
-Direction:: Unidirectional
-Send/receive pattern:: Receive messages, send subscriptions
-Incoming routing strategy:: Fair-queued
-Outgoing routing strategy:: N/A
-Action in mute state:: Drop
+//When its queue is full, a peer becomes unavailable, and the XSUB socket SHALL NOT route further messages to that peer. When an XSUB socket has no available peers, it SHALL block on sending, and not accept further messages. An XSUB socket SHALL NOT discard messages that it cannot queue.//
+
+//(PH: to review.)//
 
 +++ The PAIR Socket Type
 
-A socket of type 'ZMQ_PAIR' can only be connected to a single peer at any one
-time.  No message routing or filtering is performed on messages sent over a
-'ZMQ_PAIR' socket.
+A PAIR socket MAY be connected to at most one PAIR peer. It SHALL receive incoming messages from its peers using a fair-queuing strategy.
 
-When a 'ZMQ_PAIR' socket enters the 'mute' state due to having reached the
-high water mark for the connected peer, or if no peer is connected, then
-any linkzmq:zmq_send[3] operations on the socket shall block until the peer
-becomes available for sending; messages are not discarded.
+A PAIR socket SHALL not filter or modify messages in any way.
 
-NOTE: 'ZMQ_PAIR' sockets are designed for inter-thread communication across
-the linkzmq:zmq_inproc[7] transport and do not implement functionality such
-as auto-reconnection. 'ZMQ_PAIR' sockets are considered experimental and may
-have other missing or broken aspects.
+A PAIR socket SHALL create a queue and accept outgoing messages immediately when initiating a connection to a peer, and SHALL maintain this queue whether or not the connection is established.
 
-[horizontal]
-.Summary of ZMQ_PAIR characteristics
-Compatible peer sockets:: 'ZMQ_PAIR'
-Direction:: Bidirectional
-Send/receive pattern:: Unrestricted
-Incoming routing strategy:: N/A
-Outgoing routing strategy:: N/A
-Action in mute state:: Block
+A PAIR socket SHALL create a queue and accept outgoing messages when a peer connects to it. If this peer disconnects, the PAIR socket SHALL destroy its queue and SHALL destroy all undeliverable messages it contains. 
+
+If the queue for its single peer is full, or if it is not connected to a peer, the PAIR socket SHALL block on sending, and not accept further messages. A PAIR socket SHALL NOT discard messages that it cannot queue.
 
 ++ Worked Example
 
@@ -607,9 +568,4 @@ As soon as the server has sent its own READY command, it may also send messages 
 * Attackers can use the size of messages (even without breaking encryption) to collect information about the meaning. Thus, on an encrypted connection, message data SHOULD be padded to a randomized minimum size.
 
 * Attackers can use the simple presence or absence of traffic to collect information about the peer ("Person X has come on line"). Thus, on an encrypted connection, the peer SHOULD send random garbage data ("noise") when there is no other traffic. To fully mask traffic, a peer MAY throttle messages so there is no visible difference between noise and real data.
-
-
-
-
-++++ Heartbeating
 

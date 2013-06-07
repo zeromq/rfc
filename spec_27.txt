@@ -3,6 +3,7 @@ This document specifies ZAP, the ZeroMQ Authentication Protocol. The use case fo
 * Name: rfc.zeromq.org/spec:27/ZAP
 * Editor: Pieter Hintjens <ph@imatix.com>
 * State: draft
+* See also: http://rfc.zeromq.org/spec:23/ZMTP, http://rfc.zeromq.org/spec:24/ZMTP-PLAIN, http://rfc.zeromq.org/spec:25/ZMTP-CURVE, http://rfc.zeromq.org/spec:26/CURVEZMQ.
 
 ++ Preamble
 
@@ -48,7 +49,7 @@ ZAP makes no assumptions about the security mechanisms we use, nor how they work
 
 +++ ZMTP 3.0 Compatibility
 
-ZAP is designed to support ZMTP 3.0 implementations (i.e., provide a way to implement ZMTP 3.0 authentication) though it is not limited to this use case. This document specifies how the ZMTP PLAIN and CURVE mechanisms are implemented over ZAP, though these may get their own RFCs later.
+ZAP is designed to support http://rfc.zeromq.org/spec:23/ZMTP implementations (i.e., provide a way to implement ZMTP 3.0 authentication) though it is not limited to this use case. This document specifies how the ZMTP PLAIN and CURVE mechanisms are implemented over ZAP, though these may get their own RFCs later.
 
 +++ Message Format and Version Detection
 
@@ -76,29 +77,31 @@ The request message SHALL consist of the following message frames:
 
 * An address delimiter frame, which SHALL have a length of zero.
 * The version frame, which SHALL contain the three octets "1.0".
-* The //sequence number//, which SHALL contain an integer value expressed as an ASCII string.
-* The //domain//, which SHALL contain an ASCII string that MAY be empty.
-* The //mechanism//, which SHALL contain an ASCII string, and which MAY NOT be empty.
-* The //credentials//, an opaque frame.
+* The //request id//, an opaque binary blob.
+* The //domain//, which SHALL contain a string.
+* The //mechanism//, which SHALL contain a string.
+* The //credentials//, which SHALL be one or more opaque frames.
 
 The reply message SHALL consist of the following message frames:
 
 * An address delimiter frame, which SHALL have a length of zero.
 * The version frame, which SHALL contain the three octets "1.0".
-* The //sequence number//, which SHALL contain an integer value expressed as an ASCII string.
-* The //status code//, which SHALL contain an ASCII string.
-* The //status text//, which SHALL contain an ASCII string.
-* The //user id//, which SHALL contain an ASCII string that MAY be empty.
+* The //request id//, an opaque binary blob.
+* The //status code//, which SHALL contain a string.
+* The //status text//, which SHALL contain a string.
+* The //user id//, which SHALL contain a string.
 
 The various fields have these meanings:
 
-* sequence number: this SHOULD be unique for each request issued by a given server. The reply SHALL echo the sequence without modifying it.
+* request id: the meaning of this is defined by the sending server only. The reply SHALL echo the request id without modifying it.
 * domain: this requests authentication within some domain. The significance of domains are an application issue and not relevant to ZAP.
-* mechanism: this specifies the security mechanism to authenticate against.
-* credentials: these provide the user credentials to authenticate.
+* mechanism: this specifies the security mechanism to authenticate against. The mechanism SHALL NOT be empty.
+* credentials: these provide the user credentials to authenticate. The number of frames needed is defined by each mechanism.
 * status code: this shall be "200" to indicate success, "300" to indicate a temporary error, "400" to indicate authentication failure, and "500" to indicate an internal error (system failure).
 * status text: this shall be a text that further explains the status, and MAY be empty.
 * user id: this provides the user identity in case of a 200 status, for use by applications. For other statuses, it SHALL be empty.
+
+All string fields are at most 255 characters and are ASCII only.
 
 +++ Socket Types
 
@@ -126,20 +129,20 @@ The PLAIN mechanism defines a simple username/password mechanism for ZMTP v3.0 t
 To perform authentication for the PLAIN mechanism:
 
 * The mechanism SHALL be the 5 characters "PLAIN".
-* The credentials SHALL consist of a username and password, each consisting of a 1-octet size indicator followed by that number of characters.
+* The credentials SHALL consist of two string frames: a username and a password.
 
 +++ The CURVE Mechanism
 
-The CURVE mechanism provides secure authentication and confidentiality for ZMTP v3.0. This mechanism implements the CurveZMQ security handshake. It is intended for use on public networks where security requirements are high.
+The CURVE mechanism provides secure authentication and confidentiality for ZMTP v3.0. This mechanism implements http://rfc.zeromq.org/spec:26/CURVEZMQ security mechanism. It is intended for use on public networks where security requirements are high.
 
 To perform authentication for the CURVE mechanism:
 
 * The mechanism SHALL be the 5 characters "CURVE".
-* The credentials SHALL consist of a 32-byte client long-term public key.
+* The credentials SHALL consist of a 32-byte long-term public key of the peer being authenticated.
 
 +++ Discovery
 
-ZAP does not define how to discover handlers on the network. Some plausible options are hard-coded TCP endpoints or beacon discovery (as implemented by rfc.zeromq.org/spec:20/ZRE.
+ZAP does not define how to discover handlers on the network. Some plausible options are hard-coded TCP endpoints or beacon discovery (as implemented by http://rfc.zeromq.org/spec:20/ZRE).
 
 ++ Reference Implementation
 

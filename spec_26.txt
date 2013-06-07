@@ -3,6 +3,7 @@ This document describes CurveZMQ, a protocol for secure messaging across the Int
 * Name: rfc.zeromq.org/spec:26/CURVEZMQ
 * Editor: Pieter Hintjens <ph@imatix.com>
 * State: draft
+* See also: http://rfc.zeromq.org/spec:23/ZMTP, http://rfc.zeromq.org/spec:25/ZMTP-CURVE.
 
 ++ Preamble
 

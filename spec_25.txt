@@ -3,6 +3,7 @@ The ZMTP CURVE mechanism provides secure authentication and confidentiality for 
 * Name: rfc.zeromq.org/spec:25/ZMTP-CURVE
 * Editor: Pieter Hintjens <ph@imatix.com>
 * State: raw
+* See also: http://rfc.zeromq.org/spec:23/ZMTP, http://rfc.zeromq.org/spec:24/ZMTP-PLAIN.
 
 ++ Preamble
 

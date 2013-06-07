@@ -15,7 +15,6 @@ This Specification is a [http://www.digistan.org/open-standard:definition free a
 
 The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in [http://tools.ietf.org/html/rfc2119 RFC 2119].
 
-
 ++ Goals
 
 The ZeroMQ Message Transport Protocol (ZMTP) is a transport layer protocol for exchanging messages between two peers over a connected transport layer such as TCP. This document describes version 3.0 of ZMTP. ZMTP solves a number of problems we face when using TCP carry messages:
@@ -40,7 +39,7 @@ The ZeroMQ Message Transport Protocol (ZMTP) is a transport layer protocol for e
 
 +++ Changes from Previous Versions
 
-The changes in version 3 of the specification are a simpler version numbering scheme, the addition of security mechanisms, the removal of hard-coded connection metadata (socket type and identity) from the greeting, and the addition of connection metadata.
+The changes in version 3 of the specification are a simpler version numbering scheme, the addition of security mechanisms, the removal of hard-coded connection metadata (socket type and identity) from the greeting, and the addition of connection metadata. This document also defines the behavior of each socket type to ensure interoperability.
 
 ++ Implementation
 
@@ -236,33 +235,36 @@ The implementation MAY provide other metadata properties such as implementation 
 The Socket-Type announces the ZeroMQ socket type of the sending peer. The Socket-Type SHALL match this grammar:
 
 [[code]]
-socket-type = "PAIR" | "XPUB" | "XSUB" | "REQ" | "REP"
-            | "DEALER" | "ROUTER" | "PULL" | "PUSH"
+socket-type = "REQ" | "REP" 
+            | "DEALER" | "ROUTER" 
+            | "PUSH" | "PULL" 
+            | "PAIR" 
+            | "XPUB" | "XSUB"
 [[/code]]
 
 The peer SHOULD enforce that the other peer is using a valid socket type. This table shows the legal combinations (as "*"):
 
 [[code]]
-       | PAIR | XPUB | XSUB | REQ  | REP  |DEALER|ROUTER| PULL | PUSH |
--------+------+------+------+------+------+------+------+------+------+
-PAIR   |  *   |      |      |      |      |      |      |      |      |
--------+------+------+------+------+------+------+------+------+------+
-XPUB   |      |      |  *   |      |      |      |      |      |      |
--------+------+------+------+------+------+------+------+------+------+
-XSUB   |      |  *   |      |      |      |      |      |      |      |
--------+------+------+------+------+------+------+------+------+------+
-REQ    |      |      |      |      |  *   |      |  *   |      |      |
--------+------+------+------+------+------+------+------+------+------+
-REP    |      |      |      |  *   |      |  *   |      |      |      |
--------+------+------+------+------+------+------+------+------+------+
-DEALER |      |      |      |      |  *   |  *   |  *   |      |      |
--------+------+------+------+------+------+------+------+------+------+
-ROUTER |      |      |      |  *   |      |  *   |  *   |      |      |
--------+------+------+------+------+------+------+------+------+------+
-PULL   |      |      |      |      |      |      |      |      |  *   |
--------+------+------+------+------+------+------+------+------+------+
-PUSH   |      |      |      |      |      |      |      |  *   |      |
--------+------+------+------+------+------+------+------+------+------+
+       | REQ | REP | DEALER | ROUTER | PUSH | PULL | XPUB | XSUB | PAIR |
+-------+-----+-----+--------+--------+------+------+------+------+------+
+REQ    |     |  *  |        |   *    |      |      |      |      |      |
+-------+-----+-----+--------+--------+------+------+------+------+------+
+REP    |  *  |     |   *    |        |      |      |      |      |      |
+-------+-----+-----+--------+--------+------+------+------+------+------+
+DEALER |     |  *  |   *    |   *    |      |      |      |      |      |
+-------+-----+-----+--------+--------+------+------+------+------+------+
+ROUTER |  *  |     |   *    |   *    |      |      |      |      |      |
+-------+-----+-----+--------+--------+------+------+------+------+------+
+PUSH   |     |     |        |        |      |  *   |      |      |      |
+-------+-----+-----+--------+--------+------+------+------+------+------+
+PULL   |     |     |        |        |  *   |      |      |      |      |
+-------+-----+-----+--------+--------+------+------+------+------+------+
+XPUB   |     |     |        |        |      |      |      |  *   |      |
+-------+-----+-----+--------+--------+------+------+------+------+------+
+XSUB   |     |     |        |        |      |      |  *   |      |      |
+-------+-----+-----+--------+--------+------+------+------+------+------+
+PAIR   |     |     |        |        |      |      |      |      |  *   |
+-------+-----+-----+--------+--------+------+------+------+------+------+
 [[/code]]
 
 When a peer validates the socket type, it MUST handle errors by silently disconnecting the other peer and possibly logging the error for debugging purposes.
@@ -323,6 +325,191 @@ From [[http://rfc.zeromq.org/spec:13 ZMTP 2.0] onwards, the protocol contains th
 * If the least significant bit is 1, the peer is using ZMTP 2.0 or later and has sent us the ZMTP signature. We read a further octet, which indicates the ZMTP version. If this is 1 or 2, we have a ZMTP 2.0 peer. If this is 3, we have a ZMTP 3.0 peer.
 
 * When we have detected a ZMTP 1.0 peer, we have already sent 10 octets, which the other peer interprets as the start of an identity frame. We continue by sending the body of the identity frame (zero or more octets). From then, we encode and decode all frames on that connection using the ZMTP 1.0 framing syntax.
+
+++ Socket Type Semantics
+
+In order to ensure interoperability, we aim to define both the socket-specific semantics of the API to calling applications, and the behavior of peers talking to each other over the network.
+
+These rules apply to all sockets:
+
+* All sockets SHALL accept connections (binding to an address) and make connections.
+
+* All sockets SHALL establish connections opportunistically, that is: they connect to an endpoint asynchronously, and if the connection is broken, SHOULD reconnect after a suitable delay.
+
+* A message SHALL be sent or received atomically; that is, all frames or none. On sending, the peer SHALL queue all frames of a message in memory until the final frame is sent.
+
+* A message SHALL NOT be delivered more than once to any peer.
+
+* All messages between two immediate peers SHALL be delivered in order, with some exceptions as noted below.
+
++++ The REQ Socket Type
+
+A REQ peer MAY be connected to any number of REP or ROUTER peers. It SHALL accept one request message at a time from the calling application and send this to a peer selected using a round-robin routing strategy. The REQ peer SHALL expect a reply message from the same peer.
+
+The request and reply messages sent on the wire SHALL have this format:
+
+* A delimiter, consisting of an empty frame, added by the REQ socket.
+* One or more data frames, comprising the message visible to the application.
+
+When a REQ socket has no connected peers, it SHALL block on sending. A REQ socket has no defined semantics for avoiding locking when a peer does not reply.
+
+Since a REQ socket processes at most one message at a time, it uses no queuing strategy.
+
+//(PH: do we need strategies to protect REP sockets against blocking when a peer dies?)//
+
++++ The REP Socket Type
+
+A REP peer MAY be connected to any number of REQ or DEALER peers. It SHALL receive request messages from its peers, using a fair-queuing strategy, and pass these one-by-one to its calling application. The REP peer waits for a reply from the application and SHALL send this to the original requesting peer.
+
+The request and reply messages sent on the wire SHALL have this format:
+
+* An address envelope consisting of zero or more frames, each containing one identity.
+* A delimiter, consisting of an empty frame.
+* One or more data frames, comprising the message visible to the application.
+
+When receiving a request, the REP socket SHALL remove and store the address envelope, including the delimiter. It shall pass the data frames to the calling application. When the application sends a reply, the REP socket SHALL prepend the address envelope and delimiter, then send this to the original requesting peer.
+
+Since a REP socket processes at most one message at a time, it uses no queuing strategy.
+
+//(PH: do we need strategies to protect REP sockets against malformed requests?)//
+
++++ The DEALER Socket Type
+
+A DEALER socket MAY be connected to any number of REP or ROUTER peers. It SHALL route outgoing messages to available peers using a round-robin strategy. It SHALL receive incoming messages from its peers using a fair-queuing strategy. 
+
+A DEALER socket SHALL not filter or modify messages in any way.
+
+A DEALER socket SHALL create a queue and accept outgoing messages immediately when initiating a connection to a peer, and SHALL maintain this queue whether or not the connection is established.
+
+A DEALER socket SHALL create a queue and accept outgoing messages when a peer connects to it. If this peer disconnects, the DEALER socket SHALL destroy its queue and MAY destroy all undeliverable messages it contains. 
+
+When its queue is full, a peer becomes unavailable, and the DEALER socket SHALL NOT route further messages to that peer. When a DEALER socket has no available peers, it SHALL block on sending, and not accept further messages. A DEALER socket SHALL NOT discard messages that it cannot queue.
+
+//The DEALER socket may alternatively requeue undeliverable messages for other peers. Note that this can result in out-of-order delivery. (PH: to review.)//
+
++++ The ROUTER Socket Type
+
+A ROUTER socket MAY be connected to any number of REQ, DEALER, or ROUTER peers. It SHALL route outgoing messages to peers based on explicit addressing. It SHALL receive incoming messages from its peers using a fair-queuing strategy.
+
+The ROUTER socket SHALL identify each connected peer using an "identity", which is a binary string. The peer connecting to a ROUTER socket MAY specify a unique identity, in which case the ROUTER socket SHALL use this value. If the peer does not specify an identity, or if it specifies an identity that is already in use, the ROUTER socket SHALL generate a random identity for the peer.
+
+A ROUTER socket SHALL accept messages to send in this format:
+
+* An identity frame.
+* One or more data frames.
+
+And it SHALL remove the identity frame, use this to find the peer to route to, and then send the data frames to that peer. On incoming messages, the ROUTER socket SHALL read the data frames, prepend the identity of the originating peer, and then supply the resulting frames to the calling application.
+
+A ROUTER socket SHALL maintain a queue and accept outgoing messages when it has a successful connection to a peer. If this peer disconnects, the ROUTER socket SHALL destroy its queue and SHALL destroy all undeliverable messages it contains.
+
+When an application attempts to send a message for which there is no outgoing queue, or for which the queue is full, the ROUTER socket SHALL either silently drop the message, or return an error, depending on configuration. A ROUTER socket SHALL NOT block on sending.
+
++++ The PUSH Socket Type
+
+A PUSH socket MAY be connected to any number of PULL peers. It SHALL route outgoing messages to available peers using a round-robin strategy. It silently drop any incoming messages.
+
+A PUSH socket SHALL not filter or modify outgoing messages in any way.
+
+A PUSH socket SHALL create a queue and accept outgoing messages immediately when initiating a connection to a peer, and SHALL maintain this queue whether or not the connection is established.
+
+A PUSH socket SHALL create a queue and accept outgoing messages when a peer connects to it. If this peer disconnects, the PUSH socket SHALL destroy its queue and MAY destroy all undeliverable messages it contains. 
+
+When its queue is full, a peer becomes unavailable, and the PUSH socket SHALL NOT route further messages to that peer. When a PUSH socket has no available peers, it SHALL block on sending, and not accept further messages. A PUSH socket SHALL NOT discard messages that it cannot queue.
+
+//The PUSH socket may alternatively requeue undeliverable messages for other peers. Note that this can result in out-of-order delivery. (PH: to review.)//
+
++++ The PULL Socket Type
+
+A PULL socket MAY be connected to any number of PUSH peers. It SHALL receive incoming messages from its peers using a fair-queuing strategy. It SHALL not send messages to peers.
+
+A PULL socket SHALL not filter or modify incoming messages in any way.
+
+Since a PULL socket does not send messages, it uses no outgoing queuing strategy.
+
++++ The XPUB Socket Type
+
+An XPUB socket MAY be connected to any number of XSUB peers. It SHALL send every outgoing message to all connected peers, filtered by peer subscriptions.
+
+An XPUB socket SHALL not modify outgoing messages in any way.
+
+An XPUB socket SHALL create a queue and accept outgoing messages immediately when initiating a connection to a peer, and SHALL maintain this queue whether or not the connection is established.
+
+An XPUB socket SHALL create a queue and accept outgoing messages when a peer connects to it. If this peer disconnects, the XPUB socket SHALL destroy its queue and SHALL destroy all undeliverable messages it contains. 
+
+When its queue is full, a peer becomes unavailable, and the XPUB socket SHALL drop further messages to that peer. An XPUB socket SHALL NOT block on sending.
+
+An XSUB peer creates a subscription by sending a message consisting of the octet %x1 followed by the subscription body. An XSUB peer destroys a subscription by sending a message consisting of the octet %x0 followed by the subscription body.
+
+Same as ZMQ_PUB except that you can receive subscriptions from the peers
+in form of incoming messages. Subscription message is a byte 1 (for
+subscriptions) or byte 0 (for unsubscriptions) followed by the subscription
+body. Messages without a sub/unsub prefix are also received, but have no
+effect on subscription status.
+
+[horizontal]
+.Summary of ZMQ_XPUB characteristics
+Compatible peer sockets:: 'ZMQ_SUB', 'ZMQ_XSUB'
+Direction:: Unidirectional
+Send/receive pattern:: Send messages, receive subscriptions
+Incoming routing strategy:: N/A
+Outgoing routing strategy:: Fan out
+Action in mute state:: Drop
+
++++ The XSUB Socket Type
+
+A socket of type 'ZMQ_SUB' is used by a _subscriber_ to subscribe to data
+distributed by a _publisher_. Initially a 'ZMQ_SUB' socket is not subscribed to
+any messages, use the 'ZMQ_SUBSCRIBE' option of linkzmq:zmq_setsockopt[3] to
+specify which messages to subscribe to. The _zmq_send()_ function is not
+implemented for this socket type.
+
+[horizontal]
+.Summary of ZMQ_SUB characteristics
+Compatible peer sockets:: 'ZMQ_PUB', 'ZMQ_XPUB'
+Direction:: Unidirectional
+Send/receive pattern:: Receive only
+Incoming routing strategy:: Fair-queued
+Outgoing routing strategy:: N/A
+Action in mute state:: Drop
+
+Same as ZMQ_SUB except that you subscribe by sending subscription messages to
+the socket. Subscription message is a byte 1 (for subscriptions) or byte 0
+(for unsubscriptions) followed by the subscription body. Messages without a
+sub/unsub prefix may also be sent, but have no effect on subscription status.
+
+[horizontal]
+.Summary of ZMQ_XSUB characteristics
+Compatible peer sockets:: 'ZMQ_PUB', 'ZMQ_XPUB'
+Direction:: Unidirectional
+Send/receive pattern:: Receive messages, send subscriptions
+Incoming routing strategy:: Fair-queued
+Outgoing routing strategy:: N/A
+Action in mute state:: Drop
+
++++ The PAIR Socket Type
+
+A socket of type 'ZMQ_PAIR' can only be connected to a single peer at any one
+time.  No message routing or filtering is performed on messages sent over a
+'ZMQ_PAIR' socket.
+
+When a 'ZMQ_PAIR' socket enters the 'mute' state due to having reached the
+high water mark for the connected peer, or if no peer is connected, then
+any linkzmq:zmq_send[3] operations on the socket shall block until the peer
+becomes available for sending; messages are not discarded.
+
+NOTE: 'ZMQ_PAIR' sockets are designed for inter-thread communication across
+the linkzmq:zmq_inproc[7] transport and do not implement functionality such
+as auto-reconnection. 'ZMQ_PAIR' sockets are considered experimental and may
+have other missing or broken aspects.
+
+[horizontal]
+.Summary of ZMQ_PAIR characteristics
+Compatible peer sockets:: 'ZMQ_PAIR'
+Direction:: Bidirectional
+Send/receive pattern:: Unrestricted
+Incoming routing strategy:: N/A
+Outgoing routing strategy:: N/A
+Action in mute state:: Block
 
 ++ Worked Example
 
@@ -420,3 +607,9 @@ As soon as the server has sent its own READY command, it may also send messages 
 * Attackers can use the size of messages (even without breaking encryption) to collect information about the meaning. Thus, on an encrypted connection, message data SHOULD be padded to a randomized minimum size.
 
 * Attackers can use the simple presence or absence of traffic to collect information about the peer ("Person X has come on line"). Thus, on an encrypted connection, the peer SHOULD send random garbage data ("noise") when there is no other traffic. To fully mask traffic, a peer MAY throttle messages so there is no visible difference between noise and real data.
+
+
+
+
+++++ Heartbeating
+

@@ -173,7 +173,7 @@ When the client specifies the RESYNC option, the 'cache' dictionary field tells 
 
 ++++ The ICANHAZ-OK Command
 
-When a server accepts a subscription it MUST reply with an ICANHAZ-OK command. If the server refuses a subscription it MUST reply with a SRSLY command, and terminate the client connection.
+When a server accepts a subscription it MUST reply with an ICANHAZ-OK command. If the server refuses a subscription it SHALL reply with a SRSLY command, and discard any further commands from this client. 
 
 ++++ The NOM Command
 
@@ -201,15 +201,15 @@ A peer SHALL respond to a HUGZ command with a HUGZ-OK command. This allows one p
 
 ++++ The KTHXBAI Command
 
-The client SHOULD end a connection by sending the KTHXBAI command to the server. The server SHALL not respond to this command.
+The client MAY end a connection by sending the KTHXBAI command to the server. The server SHALL not respond to this command.
 
 ++++ The SRSLY Command
 
-The server SHALL respond to any failed attempt to access a resource on the server with a SRSLY command. This includes failed authentication and failed subscriptions.
+The server SHALL respond to any failed attempt to access a resource on the server with a SRSLY command. This includes failed authentication and failed subscriptions. When a client receives a SRSLY command it SHOULD close the connection and if needed, reconnect with new authentication credentials.
 
 ++++ The RTFM Command
 
-The server SHALL respond to an invalid command by sending RTFM. Note that the server SHALL not send RTFM to clients which send an invalid protocol signature.
+The server SHALL respond to an invalid command by sending RTFM. Note that the server SHALL not send RTFM to clients which send an invalid protocol signature. When a client receives a RTFM command it SHOULD close the connection and not reconnect.
 
 ++ Security Aspects
 

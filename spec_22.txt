@@ -148,7 +148,7 @@ C4 is meant to provide a reusable optimal collaboration model for open source so
 
 * All Public Contracts SHOULD have space for extensibility and experimentation.
 
-* A patch that modifies a Public Contract SHOULD not break existing applications unless there is prior consensus on the value of doing this.
+* A patch that modifies a stable Public Contract SHOULD not break existing applications unless there is overriding consensus on the value of doing this.
 
 * A patch that introduces new features to a Public Contract SHOULD do so using new names.
 

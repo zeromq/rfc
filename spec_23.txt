@@ -359,7 +359,7 @@ When a REQ socket has no connected peers, it SHALL block on sending. A REQ socke
 
 Since a REQ socket processes at most one message at a time, it uses no queuing strategy.
 
-//(PH: do we need strategies to protect REP sockets against blocking when a peer dies?)//
+//(PH: do we need strategies to protect REQ sockets against blocking when a peer dies?)//
 
 +++ The REP Socket Type
 
@@ -569,3 +569,12 @@ As soon as the server has sent its own READY command, it may also send messages 
 
 * Attackers can use the simple presence or absence of traffic to collect information about the peer ("Person X has come on line"). Thus, on an encrypted connection, the peer SHOULD send random garbage data ("noise") when there is no other traffic. To fully mask traffic, a peer MAY throttle messages so there is no visible difference between noise and real data.
 
+++ Topics for Discussion
+
+This draft is open for discussion. The following topics at least are still on the table:
+
+* Heartbeating, as a mechanism to detect stalled connections that do not report TCP errors. In this mechanism the connecting peer would send a PING and expect a PONG, or any other traffic, within a certain time. If there was no answer the connecting peer would disconnect, and attempt a new connection. It is unclear whether binding peers need the ability to detect and disconnect stale peers.
+
+* Credits, as a signaling mechanism for asynchronous flow control. This allows fine control over the amount of queued data. In this scenario, the receiving peer (DEALER, PULL, REP) would send credit which would be used up by messages routed to it. The minimal use-case is for PUSH/DEALER-to-PULL/DEALER round-robin routing. Credit could be bytes, or messages.
+
+* Explicit rejection message in case of failed security negotiation. This would give peers more help in deciding whether to retry or return a fatal error to their application. The value in not giving explicit errors on security failures is that it makes life harder for attackers.

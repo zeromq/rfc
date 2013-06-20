@@ -139,7 +139,7 @@ The command size is not part of the command encoding but is assumed to be a prop
 
 +++ CurveZMQ Commands
 
-We explain how each command is encrypted, and we explain the contents of each command. Note that we work with four pairs of keys:
+We explain how each command is encrypted, the contents of each command, and the semantics of each command. Note that we work with four pairs of keys:
 
 * The client and server each have a long-term key pair (public and secret keys), called C and S.
 * The client and server each generate a connection key pair for the connection, called C' and S'.
@@ -153,7 +153,7 @@ CurveZMQ uses the same cryptography as CurveCP, so keys are 32 octets (256 bits)
 
 ++++ The HELLO Command
 
-The client SHALL send a HELLO command after opening the stream connection. This command SHALL be 200 octets long and have the following fields:
+The first command on a CurveZMQ connection is the HELLO command. The client SHALL send a HELLO command after opening the stream connection. This command SHALL be 200 octets long and have the following fields:
 
 * The command ID, which is "HELLO   " as 8 octets.
 
@@ -163,11 +163,11 @@ The client SHALL send a HELLO command after opening the stream connection. This 
 
 * The client's public connection key C' (32 octets). The client SHALL generate a unique key pair for each connection it creates to a server. It SHALL discard this key pair when it closes the connection, and it MUST NOT store its secret key in long-term storage, nor share it in any way.
 
-* A client short nonce (8 octets). The nonce SHALL be implicitly prefixed with the 16 characters "CurveZMQHELLO---" to form the 24-octet nonce used to encrypt and decrypt the signature box.
+* A client short nonce (8 octets). The nonce SHALL be implicitly prefixed with the 16 characters @@"CurveZMQHELLO---"@@ to form the 24-octet nonce used to encrypt and decrypt the signature box.
 
 * The signature box (80 octets). This SHALL contain 64 zero octets, encrypted from the client's connection key C' to the server's long-term key S.
 
-The server SHALL validate all fields and SHALL reject and disconnect clients who send malformed HELLO commands.
+The server SHALL validate all fields and SHALL reject and disconnect clients who send malformed HELLO commands. When the server gets a valid HELLO command, it SHALL generate a new connection key pair, and encode both the public and secret key in a WELCOME command, as explained below. The server SHALL not keep this connection key pair and SHOULD keep minimal state for the client until the client responds with a valid INITIATE command. This protects against denial-of-service attacks where unauthenticated clients send many HELLO commands to consume server resources.
 
 Note that the client uses an 8 octet "short nonce" in the HELLO, INITIATE, and MESSAGE commands. This nonce SHALL be unique in each command within a connection. The client SHALL NOT send more than 2^64-1 commands in one connection. The client MAY use any strategy to generate unique short nonces, including the CurveCP strategy of an incremental counter.
 
@@ -185,13 +185,17 @@ Note that the server uses a 16-octet "long nonce" in the WELCOME command and whe
 
 The cookie consists of two fields:
 
-* A server long nonce (16 octets). This nonce SHALL be implicitly prefixed by the 8 characters "COOKIE--" to form a 24-octet nonce used to encrypt and decrypt the cookie box.
+* A server long nonce (16 octets). This nonce SHALL be implicitly prefixed by the 8 characters @@"COOKIE--"@@ to form a 24-octet nonce used to encrypt and decrypt the cookie box.
 
-* A cookie box (80 octets) that holds the client public connection key C' (32 octets) and the server secret connection key s' (32 octets), encrypted to and from a secret short-term "cookie key". The server MUST discard from its memory the cookie key after a short interval, for example 60 seconds, or as soon as the client sends a valid INITIATE command. The server SHALL generate a new connection key pair and cookie for each HELLO command it receives. It SHALL immediately discard this key pair, after creating the cookie.
+* A cookie box (80 octets) that holds the client public connection key C' (32 octets) and the server secret connection key s' (32 octets), encrypted to and from a secret short-term "cookie key". The server MUST discard from its memory the cookie key after a short interval, for example 60 seconds, or as soon as the client sends a valid INITIATE command. 
+
+The server SHALL generate a new cookie for each WELCOME command it sends.
 
 The client SHALL validate all fields and SHALL reject and disconnect from servers which send malformed WELCOME commands.
 
 ++++ The INITIATE Command
+
+When the client receives a WELCOME command it can decrypt this to receive the server's connection key S', and the cookie, which it must send back to the server. The cookie is the only memory of the server's secret connection key s'.
 
 The client SHALL respond to a valid WELCOME with an INITIATE command. This command SHALL be at least 224 octets long and have the following fields:
 
@@ -205,7 +209,7 @@ The client SHALL respond to a valid WELCOME with an INITIATE command. This comma
 
 The vouch itself consists of two fields:
 
-* A client long nonce (16 octets). This nonce SHALL be implicitly prefixed with the 8 characters "VOUCH---" to give a 24-octet nonce, used to encrypt and decrypt the vouch box. This nonce SHALL be unique for all INITIATE commands from this client long-term key. A valid strategy is to use 16 random octets from a sufficiently good entropy source.
+* A client long nonce (16 octets). This nonce SHALL be implicitly prefixed with the 8 characters @@"VOUCH---"@@ to give a 24-octet nonce, used to encrypt and decrypt the vouch box. This nonce SHALL be unique for all INITIATE commands from this client long-term key. A valid strategy is to use 16 random octets from a sufficiently good entropy source.
 
 * The vouch box (48 octets), that encrypts the client's connection key C' (32 octets) from the client long-term key C to the server long-term key S.
 
@@ -213,23 +217,27 @@ The metadata consists of a list of properties consisting of name and value as si
 
 The server SHALL validate all fields and SHALL reject and disconnect clients who send malformed INITIATE commands.
 
+After decrypting the INITIATE command, the server MAY authenticate the client based on its public long-term key C. If the client does not pass authentication, the server SHALL not respond except by closing the connection. If the client passes authentication the server SHALL send a READY command and MAY then immediately send MESSAGE commands.
+
 ++++ The READY Command
 
-The server SHALL respond to a valid INITIATE command with a READY command. This command SHALL be 32 or more octets long and have the following fields:
+The server SHALL respond to a valid INITIATE command with a READY command. This command SHALL be at least 32 octets long and have the following fields:
 
 * The command ID, which is "READY   " as 8 octets.
 
-* A server short nonce (8 octets). The nonce SHALL be implicitly prefixed with the 16 characters "CurveZMQREADY---" to form the 24-octet nonce used to encrypt and decrypt the ready box.
+* A server short nonce (8 octets). The nonce SHALL be implicitly prefixed with the 16 characters @@"CurveZMQREADY---"@@ to form the 24-octet nonce used to encrypt and decrypt the ready box.
 
 * The ready box (16 or more octets). This shall contain metadata of the same format as sent in the INITIATE command, encrypted from the server's connection key S' to the client's connection key C'.
 
 The client SHALL validate all fields and SHALL reject and disconnect from servers who send malformed READY commands.
 
+The client MAY validate the meta-data. If the client accepts the meta-data, it SHALL then expect MESSAGE commands from the server.
+
 Note that the server uses an 8 octet "short nonce" in the READY and MESSAGE commands. This nonce SHALL be unique in each of these command within a connection. The server SHALL NOT send more than 2^64-2 MESSAGE commands in one connection. The server MAY use any strategy to generate unique short nonces, including the CurveCP strategy of an incremental counter.
 
 ++++ The MESSAGE Command
 
-The client MAY send MESSAGE commands when it has received a valid READY command. The server MAY send MESSAGE commands when it has sent a READY command. This command SHALL be 33 or more octets long and have the following fields:
+The client MAY send MESSAGE commands when it has received a valid READY command. The server MAY send MESSAGE commands when it has sent a READY command. This command SHALL be at least 33 octets long and have the following fields:
 
 * The command ID, which is "MESSAGE " as 8 octets.
 
@@ -365,4 +373,4 @@ As an interim solution, we have taken CurveCP's security handshake alone, and im
 
 ++ CurveZMQ Reference Implementation
 
-The reference implementation for CurveZMQ, which tracks this specification and always implements the latest stable version, is the [https://github.com/imatix/clab CLAB/cl_curve class]. This class includes examples of using CurveZMQ at the application layer, in its selftest method.
+The reference implementation for CurveZMQ, which tracks this specification and always aims to implement the latest stable version, is the [https://github.com/zeromq/curvezmq project]. This class includes examples of using CurveZMQ at the application layer.

@@ -402,8 +402,6 @@ When a REQ socket has no connected peers, it SHALL block on sending. A REQ socke
 
 Since a REQ socket processes at most one message at a time, it uses no queuing strategy.
 
-//(PH: do we need strategies to protect REQ sockets against blocking when a peer dies?)//
-
 +++ The REP Socket Type
 
 A REP peer MAY be connected to any number of REQ or DEALER peers. It SHALL receive request messages from its peers, using a fair-queuing strategy, and pass these one-by-one to its calling application. The REP peer waits for a reply from the application and SHALL send this to the original requesting peer.
@@ -418,8 +416,6 @@ When receiving a request, the REP socket SHALL remove and store the address enve
 
 Since a REP socket processes at most one message at a time, it uses no queuing strategy.
 
-//(PH: do we need strategies to protect REP sockets against malformed requests?)//
-
 +++ The DEALER Socket Type
 
 A DEALER socket MAY be connected to any number of REP or ROUTER peers. It SHALL route outgoing messages to available peers using a round-robin strategy. It SHALL receive incoming messages from its peers using a fair-queuing strategy. 
@@ -431,8 +427,6 @@ A DEALER socket SHALL create a queue and accept outgoing messages immediately wh
 A DEALER socket SHALL create a queue and accept outgoing messages when a peer connects to it. If this peer disconnects, the DEALER socket SHALL destroy its queue and MAY destroy all undeliverable messages it contains. 
 
 When its queue is full, a peer becomes unavailable, and the DEALER socket SHALL NOT route further messages to that peer. When a DEALER socket has no available peers, it SHALL block on sending, and not accept further messages. A DEALER socket SHALL NOT discard messages that it cannot queue.
-
-//The DEALER socket may alternatively requeue undeliverable messages for other peers. Note that this can result in out-of-order delivery. (PH: to review.)//
 
 +++ The ROUTER Socket Type
 
@@ -462,8 +456,6 @@ A PUSH socket SHALL create a queue and accept outgoing messages immediately when
 A PUSH socket SHALL create a queue and accept outgoing messages when a peer connects to it. If this peer disconnects, the PUSH socket SHALL destroy its queue and MAY destroy all undeliverable messages it contains. 
 
 When its queue is full, a peer becomes unavailable, and the PUSH socket SHALL NOT route further messages to that peer. When a PUSH socket has no available peers, it SHALL block on sending, and not accept further messages. A PUSH socket SHALL NOT discard messages that it cannot queue.
-
-//The PUSH socket may alternatively requeue undeliverable messages for other peers. Note that this can result in out-of-order delivery. (PH: to review.)//
 
 +++ The PULL Socket Type
 
@@ -624,6 +616,16 @@ As soon as the server has sent its own READY command, it may also send messages 
 ++ Topics for Discussion
 
 This draft is open for discussion. The following topics at least are still on the table:
+
+* If we move the socket type back into the greeting, we can formalize the grammar to include things like subscription messages for XSUB sockets. This is rather hard when socket types are stored as metadata.
+
+* Peers announce REQ and REP sockets but not PUB and SUB sockets, which is somewhat inconsistent. We might better add PUB and SUB to the supported socket types, to make the spec less surprising.
+
+* Do we need strategies to protect REQ sockets against blocking when a peer dies?
+
+* Do we need strategies to protect REP sockets against malformed requests?
+
+* Do we want DEALER and PUSH sockets to requeue undeliverable messages to other peers? This can improve reliability but results in out-of-order messages, and is not robust against messages lost in transit, or already delivered to the other peer.
 
 * Heartbeating, as a mechanism to detect stalled connections that do not report TCP errors. In this mechanism the connecting peer would send a PING and expect a PONG, or any other traffic, within a certain time. If there was no answer the connecting peer would disconnect, and attempt a new connection. It is unclear whether binding peers need the ability to detect and disconnect stale peers.
 

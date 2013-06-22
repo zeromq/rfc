@@ -1,0 +1,47 @@
+This document specifies the semantics of the ZeroMQ pipeline pattern, which covers the PUSH and PULL socket types. This specification is intended to guide implementations of these socket types so that users can depend on reliable semantics.
+
+* Name: rfc.zeromq.org/spec:30/PIPELINE
+* Editor: Pieter Hintjens <ph@imatix.com>
+* State: draft
+
+++ Preamble
+
+Copyright (c) 2013 iMatix Corporation.
+
+This Specification is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 3 of the License, or (at your option) any later version. This Specification is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details. You should have received a copy of the GNU General Public License along with this program; if not, see <http://www.gnu.org/licenses>.
+
+This Specification is a [http://www.digistan.org/open-standard:definition free and open standard] and is governed by the Digital Standards Organization"s [http://www.digistan.org/spec:1/COSS Consensus-Oriented Specification System].
+
+The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in [http://tools.ietf.org/html/rfc2119 RFC 2119].
+
+++ Goals
+
+This specification is intended to formally document the names and expected behaviour of the PUSH and PULL socket types, which together form the ZeroMQ pipeline pattern. Conforming implementations of these sockets SHOULD respect this specification, thus ensuring that applications can depend on predictable behavior. This specification is not transport specific, but not all behaviour will be reproducible on all transports.
+
+++ Overall Goals of this Pattern
+
+The pattern is intended for service-oriented architectures of various kinds. 
+
+++ The PUSH Socket Type
+
+A PUSH socket MAY be connected to any number of PULL peers, and can only send messages. It SHALL route outgoing messages to available peers using a round-robin strategy. It silently drop any incoming messages.
+
+A PUSH socket SHALL not filter or modify outgoing messages in any way.
+
+A PUSH socket SHALL create a queue and accept outgoing messages immediately when initiating a peer connection, and SHALL maintain this queue whether or not the connection is established.
+
+A PUSH socket SHALL create a queue and accept outgoing messages when a peer connects to it. If this peer disconnects, the PUSH socket SHALL destroy its queue and MAY destroy all undeliverable messages it contains. 
+
+When its queue is full, a peer becomes unavailable, and the PUSH socket SHALL NOT route further messages to that peer. When a PUSH socket has no available peers, it SHALL block on sending, and not accept further messages. A PUSH socket SHALL NOT discard messages that it cannot queue.
+
+++ The PULL Socket Type
+
+A PULL socket MAY be connected to any number of PUSH peers, and can only receive messages. It SHALL receive incoming messages from its peers using a fair-queuing strategy. It SHALL not send messages to peers.
+
+A PULL socket SHALL not filter or modify incoming messages in any way.
+
+Since a PULL socket does not send messages, it uses no outgoing queuing strategy.
+
+++ Security Aspects
+
+This specification has no security aspects.

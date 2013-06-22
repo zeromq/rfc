@@ -1,0 +1,73 @@
+This document specifies the semantics of the ZeroMQ publish-subscribe pattern, which covers the PUB, XPUB, SUB, and XSUB socket types. This specification is intended to guide implementations of these socket types so that users can depend on reliable semantics.
+
+* Name: rfc.zeromq.org/spec:29/PUBSUB
+* Editor: Pieter Hintjens <ph@imatix.com>
+* State: draft
+
+++ Preamble
+
+Copyright (c) 2013 iMatix Corporation.
+
+This Specification is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 3 of the License, or (at your option) any later version. This Specification is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details. You should have received a copy of the GNU General Public License along with this program; if not, see <http://www.gnu.org/licenses>.
+
+This Specification is a [http://www.digistan.org/open-standard:definition free and open standard] and is governed by the Digital Standards Organization"s [http://www.digistan.org/spec:1/COSS Consensus-Oriented Specification System].
+
+The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in [http://tools.ietf.org/html/rfc2119 RFC 2119].
+
+++ Goals
+
+This specification is intended to formally document the names and expected behaviour of the PUB, XPUB, SUB, and XSUB socket types, which together form the ZeroMQ publish-subscribe pattern. Conforming implementations of these sockets SHOULD respect this specification, thus ensuring that applications can depend on predictable behavior. This specification is not transport specific, but not all behaviour will be reproducible on all transports.
+
+++ Overall Goals of this Pattern
+
+The pattern is intended for event and data distribution, usually from a small number of publishers to a large number of subscribers, but also from many publishers to a few subscribers. For many-to-many use-cases the pattern provides raw socket types (XPUB, XSUB) to construct distribution proxies, also called brokers.
+
+++ The PUB Socket Type
+
+A PUB socket MAY be connected to any number of SUB or XSUB peers, and may only send messages. It SHALL send every outgoing message to all connected peers, possibly filtered by peer subscriptions.
+
+A PUB socket SHALL not modify outgoing messages in any way.
+
+A PUB socket SHALL create a queue and accept outgoing messages immediately when initiating a peer connection, and SHALL maintain this queue whether or not the connection is established.
+
+A PUB socket SHALL create a queue and accept outgoing messages when a peer connects to it. If this peer disconnects, the PUB socket SHALL destroy its queue and SHALL destroy all undeliverable messages it contains. 
+
+When its queue is full, a peer becomes unavailable, and the PUB socket SHALL drop further messages to that peer. A PUB socket SHALL NOT block on sending.
+
+The subscription and filtering mechanisms depend on the transport protocol and are defined in the relevant documents. For example for TCP, refer to http://rfc.zeromq.org/spec:23/ZMTP.
+
+++ The XPUB Socket Type
+
+An XPUB socket MAY be connected to any number of SUB or XSUB peers, and may both send and receive messages. It SHALL send every outgoing message to all connected peers, possibly filtered by peer subscriptions. It SHALL receive incoming messages from its peers using a fair-queuing strategy.
+
+An XPUB socket SHALL not modify outgoing messages in any way.
+
+An XPUB socket SHALL create a queue and accept outgoing messages immediately when initiating a peer connection, and SHALL maintain this queue whether or not the connection is established.
+
+An XPUB socket SHALL create a queue and accept outgoing messages when a peer connects to it. If this peer disconnects, the XPUB socket SHALL destroy its queue and SHALL destroy all undeliverable messages it contains. 
+
+When its queue is full, a peer becomes unavailable, and the XPUB socket SHALL drop further messages to that peer. An XPUB socket SHALL NOT block on sending.
+
+++ The SUB Socket Type
+
+A SUB socket MAY be connected to any number of PUB or XPUB peers. It SHALL receive incoming messages from its peers using a fair-queuing strategy, and possibly filtered by subscriptions.
+
+A SUB socket SHALL create a queue and accept incoming messages immediately when initiating a peer connection, and SHALL maintain this queue whether or not the connection is established.
+
+A SUB socket SHALL create a queue and accept outgoing messages when a peer connects to it. If this peer disconnects, the SUB socket SHALL destroy its queue and MAY destroy all undeliverable messages it contains.
+
+When its queue is full, a peer becomes unavailable, and the SUB socket SHALL NOT route further messages to that peer. When an SUB socket has no available peers, it SHALL block on sending, and not accept further messages. An SUB socket SHALL NOT discard messages that it cannot queue.
+
+++ The XSUB Socket Type
+
+An XSUB socket MAY be connected to any number of XPUB peers. It SHALL receive incoming messages from its peers using a fair-queuing strategy. It MAY also send every outgoing message to all connected peers, filtered by peer subscriptions.
+
+An XSUB socket SHALL create a queue and accept outgoing messages immediately when initiating a peer connection, and SHALL maintain this queue whether or not the connection is established.
+
+An XSUB socket SHALL create a queue and accept outgoing messages when a peer connects to it. If this peer disconnects, the XSUB socket SHALL destroy its queue and MAY destroy all undeliverable messages it contains.
+
+When its queue is full, a peer becomes unavailable, and the XSUB socket SHALL NOT route further messages to that peer. When an XSUB socket has no available peers, it SHALL block on sending, and not accept further messages. An XSUB socket SHALL NOT discard messages that it cannot queue.
+
+++ Security Aspects
+
+This specification has no security aspects.

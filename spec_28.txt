@@ -1,0 +1,94 @@
+This document specifies the semantics of the ZeroMQ request-reply pattern, which covers the REQ, REP, DEALER, and ROUTER socket types. This specification is intended to guide implementations of these socket types so that users can depend on reliable semantics.
+
+* Name: rfc.zeromq.org/spec:28/REQREP
+* Editor: Pieter Hintjens <ph@imatix.com>
+* State: draft
+
+++ Preamble
+
+Copyright (c) 2013 iMatix Corporation.
+
+This Specification is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 3 of the License, or (at your option) any later version. This Specification is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details. You should have received a copy of the GNU General Public License along with this program; if not, see <http://www.gnu.org/licenses>.
+
+This Specification is a [http://www.digistan.org/open-standard:definition free and open standard] and is governed by the Digital Standards Organization"s [http://www.digistan.org/spec:1/COSS Consensus-Oriented Specification System].
+
+The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in [http://tools.ietf.org/html/rfc2119 RFC 2119].
+
+++ Goals
+
+This specification is intended to formally document the names and expected behaviour of the REQ, REP, DEALER, and ROUTER socket types, which together form the ZeroMQ request-reply pattern. Conforming implementations of these sockets SHOULD respect this specification, thus ensuring that applications can depend on predictable behavior. This specification is not transport specific, but not all behaviour will be reproducible on all transports.
+
+++ Overall Goals of this Pattern
+
+The request-reply pattern is intended for service-oriented architectures of various kinds. It comes in two basic flavors: synchronous (REQ and REP), and asynchronous (DEALER and ROUTER). The DEALER and ROUTER sockets are building blocks for many higher-level protocols such as rfc.zeromq.org/spec:18/MDP.
+
+++ The REQ Socket Type
+
+A REQ peer MAY be connected to any number of REP or ROUTER peers and can both send and receive messages. It SHALL accept one request message at a time from the calling application and send this to a peer selected using a round-robin routing strategy. The REQ peer SHALL expect a reply message from the same peer.
+
+The request and reply messages SHALL have this format on the wire:
+
+* A delimiter, consisting of an empty frame, added by the REQ socket.
+* One or more data frames, comprising the message visible to the application.
+
+When a REQ socket has no connected peers, it SHALL block on sending. A REQ socket has no defined semantics for avoiding locking when a peer does not reply.
+
+Since a REQ socket processes at most one message at a time, it uses no queuing strategy.
+
+++ The REP Socket Type
+
+A REP peer MAY be connected to any number of REQ or DEALER peers and can both receive and send messages. It SHALL receive request messages from its peers, using a fair-queuing strategy, and pass these one-by-one to its calling application. The REP peer waits for a reply from the application and SHALL send this to the original requesting peer.
+
+The request and reply messages SHALL have this format on the wire:
+
+* An address envelope consisting of zero or more frames, each containing one identity.
+* A delimiter, consisting of an empty frame.
+* One or more data frames, comprising the message visible to the application.
+
+When receiving a request, the REP socket SHALL remove and store the address envelope, including the delimiter. It shall pass the data frames to the calling application. When the application sends a reply, the REP socket SHALL prepend the address envelope and delimiter, then send this to the original requesting peer.
+
+Since a REP socket processes at most one message at a time, it uses no queuing strategy.
+
+++ The DEALER Socket Type
+
+General behavior:
+
+* MAY be connected to any number of REP or ROUTER peers, and can both send and receive messages. 
+* SHALL not filter or modify outgoing or incoming messages in any way.
+* SHALL maintain a double queue for each connected peer, allowing outgoing and incoming messages to be queued independently.
+* SHALL create a double queue when initiating an outgoing connection to a peer, and SHALL maintain the double queue whether or not the connection is established.
+* SHALL create a double queue when a peer connects to it. If this peer disconnects, the DEALER socket SHALL destroy its double queue and SHALL destroy all undeliverable messages it contains.
+* SHOULD constrain incoming and outgoing queue sizes to a runtime-configurable limit.
+
+For processing outgoing messages, a DEALER socket:
+
+* SHALL consider a peer as available only when it has a outgoing queue that is not full.
+* SHALL route outgoing messages to available peers using a round-robin strategy.
+* SHALL block on sending when it has no available peers, or return a suitable error.
+* SHALL not accept further messages when it has no available peers.
+* SHALL NOT discard messages that it cannot queue.
+
+For processing incoming message processing:
+
+* SHALL receive incoming messages from its peers using a fair-queuing strategy.
+
+++ The ROUTER Socket Type
+
+A ROUTER socket MAY be connected to any number of REQ, DEALER, or ROUTER peers, and can both send and receive messages. It SHALL route outgoing messages to peers based on explicit addressing. It SHALL receive incoming messages from its peers using a fair-queuing strategy.
+
+The ROUTER socket SHALL identify each connected peer using an "identity", which is a binary string. The peer connecting to a ROUTER socket MAY specify a unique identity, in which case the ROUTER socket SHALL use this value. If the peer does not specify an identity, or if it specifies an identity that is already in use, the ROUTER socket SHALL generate a random identity for the peer.
+
+A ROUTER socket SHALL accept messages to send in this format:
+
+* An identity frame.
+* One or more data frames.
+
+And it SHALL remove the identity frame, use this to find the peer to route to, and then send the data frames to that peer. On incoming messages, the ROUTER socket SHALL read the data frames, prepend the identity of the originating peer, and then supply the resulting frames to the calling application.
+
+A ROUTER socket SHALL maintain a queue and accept outgoing messages when it has a successful peer connection. If this peer disconnects, the ROUTER socket SHALL destroy its queue and SHALL destroy all undeliverable messages it contains.
+
+When an application attempts to send a message for which there is no outgoing queue, or for which the queue is full, the ROUTER socket SHALL either silently drop the message, or return an error, depending on configuration. A ROUTER socket SHALL NOT block on sending.
+
+++ Security Aspects
+
+This specification has no security aspects.

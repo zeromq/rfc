@@ -1,0 +1,37 @@
+This document specifies ISPRINT, a format for representing binary data as printable text. ISPRINT is a derivative of ASCII-85 but modified for better usability, particularly for use in source code.
+
+* Name: rfc.zeromq.org/spec:32/ISPRINT
+* Editor: Pieter Hintjens <ph@imatix.com>
+* State: draft
+
+++ Preamble
+
+Copyright (c) 2013 iMatix Corporation.
+
+This Specification is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 3 of the License, or (at your option) any later version. This Specification is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details. You should have received a copy of the GNU General Public License along with this program; if not, see <http://www.gnu.org/licenses>.
+
+This Specification is a [http://www.digistan.org/open-standard:definition free and open standard] and is governed by the Digital Standards Organization's [http://www.digistan.org/spec:1/COSS Consensus-Oriented Specification System].
+
+The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in [http://tools.ietf.org/html/rfc2119 RFC 2119].
+
+++ Problem Statement
+
+When representing binary values in code and in text files (such as configuration data), the developer must choose a printable representation. The usual choices are base-16 (each byte is printed as two hexadecimal values), or base-64 (as used in MIME encoding). For better efficiency, the developer might choose base-85, but the existing designs for that encoding are not string safe (they generate quotes and back slashes).
+
+ISPRINT is designed to be more compact than base-16 or base-64, while being more usable than base-85. 
+
+The specific goals of this specification are:
+
+* To provide the most efficient textual representation possible.
+* To be easy to use in source code, when enclosed in double or single quotes.
+* To be safe to pass on the command line, when enclosed in single quotes.
+* To be easy to implement in any programming language.
+
+++ Formal Specification
+
+The 
+
+
+++ Reference Implementation
+
+A reference implementation in C is provided in the RFC repository at https://github.com/zeromq/rfc/src/spec_32.c.

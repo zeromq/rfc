@@ -2,8 +2,7 @@ This document specifies ZAP, the ZeroMQ Authentication Protocol. The use case fo
 
 * Name: rfc.zeromq.org/spec:27/ZAP
 * Editor: Pieter Hintjens <ph@imatix.com>
-* State: draft
-* See also: http://rfc.zeromq.org/spec:23/ZMTP, http://rfc.zeromq.org/spec:24/ZMTP-PLAIN, http://rfc.zeromq.org/spec:25/ZMTP-CURVE, http://rfc.zeromq.org/spec:26/CURVEZMQ.
+* See also: http://rfc.zeromq.org/spec:23/ZMTP, http://rfc.zeromq.org/spec:24/ZMTP-NULL, http://rfc.zeromq.org/spec:24/ZMTP-PLAIN, http://rfc.zeromq.org/spec:25/ZMTP-CURVE, http://rfc.zeromq.org/spec:26/CURVEZMQ.
 
 ++ Preamble
 
@@ -77,29 +76,41 @@ The request message SHALL consist of the following message frames:
 
 * An address delimiter frame, which SHALL have a length of zero.
 * The version frame, which SHALL contain the three octets "1.0".
-* The //request id//, an opaque binary blob.
+* The //request id//, which MAY contain an opaque binary blob.
 * The //domain//, which SHALL contain a string.
+* The //origin id//, the origin network address in IPv4 or IPv6 format.
 * The //mechanism//, which SHALL contain a string.
-* The //credentials//, which SHALL be one or more opaque frames.
+* The //credentials//, which SHALL be zero or more opaque frames.
 
 The reply message SHALL consist of the following message frames:
 
 * An address delimiter frame, which SHALL have a length of zero.
 * The version frame, which SHALL contain the three octets "1.0".
-* The //request id//, an opaque binary blob.
+* The //request id//, which MAY contain an opaque binary blob.
 * The //status code//, which SHALL contain a string.
-* The //status text//, which SHALL contain a string.
+* The //status text//, which MAY contain a string.
 * The //user id//, which SHALL contain a string.
+* The //metadata//, which MAY contain a blob.
 
 The various fields have these meanings:
 
 * request id: the meaning of this is defined by the sending server only. The reply SHALL echo the request id without modifying it.
 * domain: this requests authentication within some domain. The significance of domains are an application issue and not relevant to ZAP.
+* origin id: this provides the IP address of the client, to allow address-based filtering. Note that this is not reliable and should not be used as a security mechanism.
 * mechanism: this specifies the security mechanism to authenticate against. The mechanism SHALL NOT be empty.
 * credentials: these provide the user credentials to authenticate. The number of frames needed is defined by each mechanism.
 * status code: this shall be "200" to indicate success, "300" to indicate a temporary error, "400" to indicate authentication failure, and "500" to indicate an internal error (system failure).
 * status text: this shall be a text that further explains the status, and MAY be empty.
 * user id: this provides the user identity in case of a 200 status, for use by applications. For other statuses, it SHALL be empty.
+* metadata: this provides metadata to be returned to the client in case of a 200 status. The metadata SHALL use the ZMTP 3.0 format:
+
+[[code]]
+metadata = *property
+property = name value
+name = OCTET 1*name-char
+name-char = ALPHA | DIGIT | "-" | "_" | "." | "+"
+value = 4OCTET *OCTET       ; Size in network byte order
+[[/code]]
 
 All string fields are at most 255 characters and are ASCII only.
 
@@ -121,6 +132,15 @@ In a proxy architecture the handler SHOULD forward ZAP messages with no modifica
 * The handler MUST send the whole received message (including the first identity frame) on to external handlers.
 
 More generally, a terminal (non-proxy) handler that deals with an unknown number of intermediaries between it and the servers MUST accept an address envelope consisting of N identity frames followed by an empty address delimiter frame. It MUST save this envelope before processing the request, and MUST send the same envelope back with the reply. This is what a REP socket does, so in general terminal handlers will use REP sockets.
+
++++ The NULL Mechanism
+
+The NULL mechanism provides no security credentials but allows a server to filter bogus clients on the basis of IP address.
+
+To perform filtering for the NULL mechanism:
+
+* The mechanism SHALL be the 5 characters "NULL".
+* There SHALL be no credentials frames.
 
 +++ The PLAIN Mechanism
 

@@ -2,7 +2,6 @@ This document specifies the semantics of the ZeroMQ exclusive pair pattern, whic
 
 * Name: rfc.zeromq.org/spec:31/EXPAIR
 * Editor: Pieter Hintjens <ph@imatix.com>
-* State: draft
 
 ++ Preamble
 
@@ -24,15 +23,26 @@ PAIR is not a general-purpose socket but is intended for specific use cases wher
 
 ++ The PAIR Socket Type
 
-A PAIR socket MAY be connected to at most one PAIR peer. It SHALL receive incoming messages from its peers using a fair-queuing strategy.
+General behavior:
 
-A PAIR socket SHALL not filter or modify messages in any way.
+* MAY be connected to at most one PAIR peers, and MAY both send and receive messages. 
+* SHALL not filter or modify outgoing or incoming messages in any way.
+* SHALL maintain a double queue for its peer, allowing outgoing and incoming messages to be queued independently.
+* SHALL create a double queue when initiating an outgoing connection to a peer, and SHALL maintain the double queue whether or not the connection is established.
+* SHALL create a double queue when a peer connects to it. If this peer disconnects, the PAIR socket SHALL destroy its double queue and SHALL discard any messages it contains.
+* SHOULD constrain incoming and outgoing queue sizes to a runtime-configurable limit.
 
-A PAIR socket SHALL create a queue and accept outgoing messages immediately when initiating a peer connection, and SHALL maintain this queue whether or not the connection is established.
+For processing outgoing messages:
 
-A PAIR socket SHALL create a queue and accept outgoing messages when a peer connects to it. If this peer disconnects, the PAIR socket SHALL destroy its queue and SHALL destroy all undeliverable messages it contains. 
+* SHALL consider its peer as available only when it has a outgoing queue that is not full.
+* SHALL block on sending, or return a suitable error, when it has no available peer.
+* SHALL not accept further messages when it has no available peer.
+* SHALL NOT discard messages that it cannot queue.
 
-If the queue for its single peer is full, or if it is not connected to a peer, the PAIR socket SHALL block on sending, and not accept further messages. A PAIR socket SHALL NOT discard messages that it cannot queue.
+For processing incoming messages:
+
+* SHALL receive incoming messages from its single peer if it has one.
+* SHALL deliver these to its calling application.
 
 ++ Security Aspects
 

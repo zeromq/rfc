@@ -2,7 +2,6 @@ This document specifies the semantics of the ZeroMQ publish-subscribe pattern, w
 
 * Name: rfc.zeromq.org/spec:29/PUBSUB
 * Editor: Pieter Hintjens <ph@imatix.com>
-* State: draft
 
 ++ Preamble
 
@@ -22,51 +21,124 @@ This specification is intended to formally document the names and expected behav
 
 The pattern is intended for event and data distribution, usually from a small number of publishers to a large number of subscribers, but also from many publishers to a few subscribers. For many-to-many use-cases the pattern provides raw socket types (XPUB, XSUB) to construct distribution proxies, also called brokers.
 
+The exact subscription and filtering mechanisms depend on the transport protocol and are defined in the relevant documents. For TCP, refer to http://rfc.zeromq.org/spec:23/ZMTP.
+
 ++ The PUB Socket Type
 
-A PUB socket MAY be connected to any number of SUB or XSUB peers, and may only send messages. It SHALL send every outgoing message to all connected peers, possibly filtered by peer subscriptions.
+The PUB socket type provides basic one-way broadcasting to a set of subscribers. Over TCP, it does filtering on outgoing messages but nonetheless a message will be sent multiple times over the network to reach multiple subscribers. PUB is used mainly for transient event distribution where stability of the network (e.g. consistently low memory usage) is more important than reliability of traffic.
 
-A PUB socket SHALL not modify outgoing messages in any way.
+General behavior:
 
-A PUB socket SHALL create a queue and accept outgoing messages immediately when initiating a peer connection, and SHALL maintain this queue whether or not the connection is established.
+* MAY be connected to any number of SUB or XSUB subscribers, and SHALL only send messages.
+* SHALL maintain a single outgoing message queue for each connected subscriber.
+* SHALL create a queue when initiating an outgoing connection to a subscriber, and SHALL maintain the queue whether or not the connection is established.
+* SHALL create a queue when a subscriber connects to it. If this subscriber disconnects, the PUB socket SHALL destroy its queue and SHALL discard any messages it contains.
+* SHOULD constrain queue sizes to a runtime-configurable limit.
+* SHALL silently discard any messages that subscribers send it.
 
-A PUB socket SHALL create a queue and accept outgoing messages when a peer connects to it. If this peer disconnects, the PUB socket SHALL destroy its queue and SHALL destroy all undeliverable messages it contains. 
+For processing outgoing messages:
 
-When its queue is full, a peer becomes unavailable, and the PUB socket SHALL drop further messages to that peer. A PUB socket SHALL NOT block on sending.
+* SHALL not modify outgoing messages in any way.
+* MAY, depending on the transport, send all messages to all subscribers.
+* MAY, depending on the transport, send messages only to subscribers who have a matching subscription.
+* SHALL perform a binary comparison of the subscription against the start of the first frame of the message.
+* SHALL silently drop the message if the queue for a subscriber is full.
+* SHALL NOT block on sending.
 
-The subscription and filtering mechanisms depend on the transport protocol and are defined in the relevant documents. For example for TCP, refer to http://rfc.zeromq.org/spec:23/ZMTP.
+For processing subscriptions:
+
+* SHALL receive SUBSCRIBE and CANCEL commands from subscribers depending on the transport protocol used.
+* SHALL NOT deliver these commands to its calling application.
 
 ++ The XPUB Socket Type
 
-An XPUB socket MAY be connected to any number of SUB or XSUB peers, and may both send and receive messages. It SHALL send every outgoing message to all connected peers, possibly filtered by peer subscriptions. It SHALL receive incoming messages from its peers using a fair-queuing strategy.
+The XPUB socket type extends the PUB socket with the ability to receive messages from anonymous subscribers, and the exposure of subscription commands to the application. XPUB is usually used in proxies but is also useful for advanced applications.
 
-An XPUB socket SHALL not modify outgoing messages in any way.
+General behavior:
 
-An XPUB socket SHALL create a queue and accept outgoing messages immediately when initiating a peer connection, and SHALL maintain this queue whether or not the connection is established.
+* MAY be connected to any number of SUB or XSUB subscribers, and MAY both send and receive messages.
+* SHALL maintain a double queue for each connected subscriber, allowing outgoing and incoming messages to be queued independently.
+* SHALL create a double queue when initiating an outgoing connection to a subscriber, and SHALL maintain the double queue whether or not the connection is established.
+* SHALL create a double queue when a subscriber connects to it. If this subscriber disconnects, the XPUB socket SHALL destroy its double queue and SHALL discard any messages it contains.
+* SHOULD constrain incoming and outgoing queue sizes to a runtime-configurable limit.
 
-An XPUB socket SHALL create a queue and accept outgoing messages when a peer connects to it. If this peer disconnects, the XPUB socket SHALL destroy its queue and SHALL destroy all undeliverable messages it contains. 
+For processing outgoing messages:
 
-When its queue is full, a peer becomes unavailable, and the XPUB socket SHALL drop further messages to that peer. An XPUB socket SHALL NOT block on sending.
+* SHALL not modify outgoing messages in any way.
+* MAY, depending on the transport, send all messages to all subscribers.
+* MAY, depending on the transport, send messages only to subscribers who have a matching subscription.
+* SHALL perform a binary comparison of the subscription against the start of the first frame of the message.
+* SHALL silently drop the message if the queue for a subscriber is full.
+* SHALL NOT block on sending.
+
+For processing incoming messages:
+
+* SHALL receive incoming messages from its subscribers using a fair-queuing strategy.
+* SHALL deliver these messages to its calling application.
+
+For processing subscriptions:
+
+* SHALL receive SUBSCRIBE and CANCEL commands from subscribers depending on the transport protocol used.
+* SHALL deliver these commands to its calling application.
+* MAY, depending on configuration, normalize commands delivered to its calling application so that multiple identical subscriptions result in a single command only.
+* SHALL, if the subscriber peer disconnects prematurely, generate a suitable CANCEL command for the calling application.
 
 ++ The SUB Socket Type
 
-A SUB socket MAY be connected to any number of PUB or XPUB peers. It SHALL receive incoming messages from its peers using a fair-queuing strategy, and possibly filtered by subscriptions.
+The SUB socket type provides a basic one-way listener for a set of publishers.
 
-A SUB socket SHALL create a queue and accept incoming messages immediately when initiating a peer connection, and SHALL maintain this queue whether or not the connection is established.
+General behavior:
 
-A SUB socket SHALL create a queue and accept outgoing messages when a peer connects to it. If this peer disconnects, the SUB socket SHALL destroy its queue and MAY destroy all undeliverable messages it contains.
+* MAY be connected to any number of PUB or XPUB publishers, and SHALL only receive messages.
+* SHALL maintain a single incoming message queue for each connected publisher.
+* SHALL create a queue when initiating an outgoing connection to a publisher, and SHALL maintain the queue whether or not the connection is established.
+* SHALL create a queue when a publisher connects to it. If this publisher disconnects, the SUB socket SHALL destroy its queue and SHALL discard any messages it contains.
+* SHOULD constrain queue sizes to a runtime-configurable limit.
 
-When its queue is full, a peer becomes unavailable, and the SUB socket SHALL NOT route further messages to that peer. When an SUB socket has no available peers, it SHALL block on sending, and not accept further messages. An SUB socket SHALL NOT discard messages that it cannot queue.
+For processing incoming messages:
+
+* SHALL silently discard messages if the queue for a publisher is full.
+* SHALL receive incoming messages from its publishers using a fair-queuing strategy.
+* SHALL not modify incoming messages in any way.
+* MAY, depending on the transport, filter messages according to subscriptions, using a prefix match algorithm.
+* SHALL deliver messages to its calling application.
+
+For processing subscriptions:
+
+* MAY send SUBSCRIBE and CANCEL commands to publishers depending on the transport protocol used.
 
 ++ The XSUB Socket Type
 
-An XSUB socket MAY be connected to any number of XPUB peers. It SHALL receive incoming messages from its peers using a fair-queuing strategy. It MAY also send every outgoing message to all connected peers, filtered by peer subscriptions.
+The XSUB socket type extends the SUB socket with the ability to send messages and subscription commands upstream to publishers. XSUB is usually used in proxies but is also useful for advanced applications.
 
-An XSUB socket SHALL create a queue and accept outgoing messages immediately when initiating a peer connection, and SHALL maintain this queue whether or not the connection is established.
+General behavior:
 
-An XSUB socket SHALL create a queue and accept outgoing messages when a peer connects to it. If this peer disconnects, the XSUB socket SHALL destroy its queue and MAY destroy all undeliverable messages it contains.
+* MAY be connected to any number of PUB or XPUB publishers, and MAY both send and receive messages.
+* SHALL maintain a double queue for each connected publisher, allowing outgoing and incoming messages to be queued independently.
+* SHALL create a double queue when initiating an outgoing connection to a publisher, and SHALL maintain the double queue whether or not the connection is established.
+* SHALL create a double queue when a publisher connects to it. If this publisher disconnects, the XSUB socket SHALL destroy its double queue and SHALL discard any messages it contains.
+* SHOULD constrain incoming and outgoing queue sizes to a runtime-configurable limit.
 
-When its queue is full, a peer becomes unavailable, and the XSUB socket SHALL NOT route further messages to that peer. When an XSUB socket has no available peers, it SHALL block on sending, and not accept further messages. An XSUB socket SHALL NOT discard messages that it cannot queue.
+For processing incoming messages:
+
+* SHALL not modify incoming messages in any way.
+* SHALL silently discard messages if the incoming queue for a publisher is full.
+* SHALL receive incoming messages from its publishers using a fair-queuing strategy.
+* MAY, depending on the transport, filter messages according to subscriptions, using a prefix match algorithm.
+* SHALL deliver messages to its calling application.
+
+For processing outgoing messages:
+
+* SHALL not modify outgoing messages in any way.
+* SHALL send all messages to all connected publishers.
+* SHALL silently drop the message if the outgoing queue for a publisher is full.
+* SHALL NOT block on sending.
+
+For processing subscriptions:
+
+* SHALL accept subscription commands from its calling application.
+* SHALL send SUBSCRIBE and CANCEL commands to publishers depending on the transport protocol used.
+* When closing a connection to a publisher SHOULD send CANCEL commands for all subscriptions.
 
 ++ Security Aspects
 

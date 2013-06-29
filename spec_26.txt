@@ -2,7 +2,6 @@ This document describes CurveZMQ, a protocol for secure messaging across the Int
 
 * Name: rfc.zeromq.org/spec:26/CURVEZMQ
 * Editor: Pieter Hintjens <ph@imatix.com>
-* State: draft
 * See also: http://rfc.zeromq.org/spec:23/ZMTP, http://rfc.zeromq.org/spec:25/ZMTP-CURVE.
 
 ++ Preamble
@@ -87,15 +86,15 @@ The following ABNF grammar defines the CurveZMQ protocol from a high level:
 curvezmq = C:hello S:welcome C:initiate S:ready *message
 
 ;   HELLO command, 200 octets
-hello = "HELLO   " version padding hello-client hello-nonce hello-box
+hello = "HELLO" %x0 version padding hello-client hello-nonce hello-box
 hello-version = %x1 %x0     ; CurveZMQ major-minor version
-hello-padding = 70%x00      ; Anti-amplification padding
+hello-padding = 72%x00      ; Anti-amplification padding
 hello-client = 32OCTET      ; Client public connection key C'
 hello-nonce = 8OCTET        ; Short nonce, prefixed by "CurveZMQHELLO---"
 hello-box = 80OCTET         ; Signature, Box [64 * %x0](C'->S)
 
 ;   WELCOME command, 168 octets
-welcome = "WELCOME " welcome-nonce welcome-box
+welcome = "WELCOME" %x0 welcome-nonce welcome-box
 welcome-nonce = 16OCTET     ; Long nonce, prefixed by "WELCOME-"
 welcome-box = 144OCTET      ; Box [S' + cookie](S->C')
 ;   This is the text sent encrypted in the box
@@ -103,8 +102,8 @@ cookie = cookie-nonce cookie-box
 cookie-nonce = 16OCTET      ; Long nonce, prefixed by "COOKIE--"
 cookie-box = 80OCTET        ; Box [C' + s'](K)
 
-;   INITIATE command, 224+ octets
-initiate = "INITIATE" initiate-cookie initiate-nonce initiate-box
+;   INITIATE command, 225+ octets
+initiate = "INITIATE" %x0 initiate-cookie initiate-nonce initiate-box
 initiate-cookie = 96OCTET   ; Server-provided cookie
 initiate-nonce = 8OCTET     ; Short nonce, prefixed by "CurveZMQINITIATE"
 initiate-box = 112*OCTET    ; Box [C + vouch + metadata](C'->S')
@@ -120,13 +119,13 @@ value = value-size value-data
 value-size = 4OCTET         ; Size in network order
 value-data = *OCTET         ; 0 or more octets
 
-;   READY command, 32+ octets
-ready = "READY   " ready-nonce ready-box
+;   READY command, 30+ octets
+ready = "READY" %x0 ready-nonce ready-box
 ready-nonce = 8OCTET        ; Short nonce, prefixed by "CurveZMQREADY---"
 ready-box = 16*OCTET        ; Box [metadata](S'->C')
 
 ;   MESSAGE command, 33+ octets
-message = "MESSAGE " message_nonce message-box
+message = "MESSAGE" %x0 message_nonce message-box
 message-nonce = 8OCTET      ; Short nonce, prefixed by "CurveZMQMESSAGE-"
 message-box = 17*OCTET      ; Box [payload](S'->C') or (C'->S')
 ;   This is the text sent encrypted in the box

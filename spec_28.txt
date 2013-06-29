@@ -2,7 +2,6 @@ This document specifies the semantics of the ZeroMQ request-reply pattern, which
 
 * Name: rfc.zeromq.org/spec:28/REQREP
 * Editor: Pieter Hintjens <ph@imatix.com>
-* State: draft
 
 ++ Preamble
 
@@ -20,24 +19,43 @@ This specification is intended to formally document the names and expected behav
 
 ++ Overall Goals of this Pattern
 
-The request-reply pattern is intended for service-oriented architectures of various kinds. It comes in two basic flavors: synchronous (REQ and REP), and asynchronous (DEALER and ROUTER). The DEALER and ROUTER sockets are building blocks for many higher-level protocols such as rfc.zeromq.org/spec:18/MDP.
+The request-reply pattern is intended for service-oriented architectures of various kinds. It comes in two basic flavors: synchronous (REQ and REP), and asynchronous (DEALER and ROUTER), which may be mixed in various ways. The DEALER and ROUTER sockets are building blocks for many higher-level protocols such as rfc.zeromq.org/spec:18/MDP.
 
 ++ The REQ Socket Type
 
-A REQ peer MAY be connected to any number of REP or ROUTER peers and can both send and receive messages. It SHALL accept one request message at a time from the calling application and send this to a peer selected using a round-robin routing strategy. The REQ peer SHALL expect a reply message from the same peer.
+The REQ socket type acts as the client for a set of anonymous services, sending requests and receiving replies using a lock-step round-robin algorithm. It is designed for simple request-reply models where reliability against failing peers is not an issue.
+
+General behavior:
+
+* MAY be connected to any number of REP or ROUTER peers.
+* SHALL send and then receive exactly one message at a time.
 
 The request and reply messages SHALL have this format on the wire:
 
 * A delimiter, consisting of an empty frame, added by the REQ socket.
 * One or more data frames, comprising the message visible to the application.
 
-When a REQ socket has no connected peers, it SHALL block on sending. A REQ socket has no defined semantics for avoiding locking when a peer does not reply.
+For processing outgoing messages:
 
-Since a REQ socket processes at most one message at a time, it uses no queuing strategy.
+* SHALL prefix the outgoing message with an empty delimiter frame.
+* SHALL route outgoing messages to connected peers using a round-robin strategy.
+* SHALL block on sending, or return a suitable error, when it has no connected peers.
+* SHALL NOT discard messages that it cannot send to a connected peer.
+
+For processing incoming messages:
+
+* SHALL accept an incoming message only from the last peer that it sent a request to.
+* SHALL discard silently any messages received from other peers.
 
 ++ The REP Socket Type
 
-A REP peer MAY be connected to any number of REQ or DEALER peers and can both receive and send messages. It SHALL receive request messages from its peers, using a fair-queuing strategy, and pass these one-by-one to its calling application. The REP peer waits for a reply from the application and SHALL send this to the original requesting peer.
+The REP socket type acts as as service for a set of client peers, receiving requests and sending replies back to the requesting peers. It is designed for simple remote-procedure call models.
+
+General behavior:
+
+* MAY be connected to any number of REQ or DEALER peers.
+* SHALL not filter or modify outgoing or incoming messages in any way.
+* SHALL receive and then send exactly one message at a time.
 
 The request and reply messages SHALL have this format on the wire:
 
@@ -45,49 +63,72 @@ The request and reply messages SHALL have this format on the wire:
 * A delimiter, consisting of an empty frame.
 * One or more data frames, comprising the message visible to the application.
 
-When receiving a request, the REP socket SHALL remove and store the address envelope, including the delimiter. It shall pass the data frames to the calling application. When the application sends a reply, the REP socket SHALL prepend the address envelope and delimiter, then send this to the original requesting peer.
+For processing incoming messages:
 
-Since a REP socket processes at most one message at a time, it uses no queuing strategy.
+* SHALL receive incoming messages from its peers using a fair-queuing strategy.
+* SHALL remove and store the address envelope, including the delimiter.
+* SHALL pass the remaining data frames to its calling application.
+
+For processing outgoing messages:
+
+* SHALL wait for a single reply message from its calling application.
+* SHALL prepend the address envelope and delimiter.
+* SHALL deliver this message back to the originating peer.
+* SHALL silently discard the reply, or return an error, if the originating peer is no longer connected.
+* SHALL not block on sending.
 
 ++ The DEALER Socket Type
 
+The DEALER socket type talks to a set of anonymous peers, sending and receiving messages using round-robin algorithms. It is reliable, insofar as it does not drop messages. DEALER works as an asynchronous replacement for REQ, for clients that talk to REP or ROUTER servers. It is also used in request-reply proxies.
+
 General behavior:
 
-* MAY be connected to any number of REP or ROUTER peers, and can both send and receive messages. 
+* MAY be connected to any number of REP or ROUTER peers, and MAY both send and receive messages. 
 * SHALL not filter or modify outgoing or incoming messages in any way.
 * SHALL maintain a double queue for each connected peer, allowing outgoing and incoming messages to be queued independently.
 * SHALL create a double queue when initiating an outgoing connection to a peer, and SHALL maintain the double queue whether or not the connection is established.
-* SHALL create a double queue when a peer connects to it. If this peer disconnects, the DEALER socket SHALL destroy its double queue and SHALL destroy all undeliverable messages it contains.
+* SHALL create a double queue when a peer connects to it. If this peer disconnects, the DEALER socket SHALL destroy its double queue and SHALL discard any messages it contains.
 * SHOULD constrain incoming and outgoing queue sizes to a runtime-configurable limit.
 
-For processing outgoing messages, a DEALER socket:
+For processing outgoing messages:
 
 * SHALL consider a peer as available only when it has a outgoing queue that is not full.
 * SHALL route outgoing messages to available peers using a round-robin strategy.
-* SHALL block on sending when it has no available peers, or return a suitable error.
+* SHALL block on sending, or return a suitable error, when it has no available peers.
 * SHALL not accept further messages when it has no available peers.
 * SHALL NOT discard messages that it cannot queue.
 
-For processing incoming message processing:
+For processing incoming messages:
 
 * SHALL receive incoming messages from its peers using a fair-queuing strategy.
+* SHALL deliver these to its calling application.
 
 ++ The ROUTER Socket Type
 
-A ROUTER socket MAY be connected to any number of REQ, DEALER, or ROUTER peers, and can both send and receive messages. It SHALL route outgoing messages to peers based on explicit addressing. It SHALL receive incoming messages from its peers using a fair-queuing strategy.
+The ROUTER socket type talks to a set of peers, using explicit addressing so that each outgoing message is sent to a specific peer connection. ROUTER works as an asynchronous replacement for REP, and is often used as the basis for servers that talk to DEALER clients.
 
-The ROUTER socket SHALL identify each connected peer using an "identity", which is a binary string. The peer connecting to a ROUTER socket MAY specify a unique identity, in which case the ROUTER socket SHALL use this value. If the peer does not specify an identity, or if it specifies an identity that is already in use, the ROUTER socket SHALL generate a random identity for the peer.
+General behavior:
 
-A ROUTER socket SHALL accept messages to send in this format:
+* MAY be connected to any number of REQ, DEALER, or ROUTER peers, and MAY both send and receive messages. 
+* SHALL maintain a double queue for each connected peer, allowing outgoing and incoming messages to be queued independently.
+* SHALL create a double queue when initiating an outgoing connection to a peer, and SHALL maintain the double queue whether or not the connection is established.
+* SHALL create a double queue when a peer connects to it. If this peer disconnects, the ROUTER socket SHALL destroy its double queue and SHALL discard any messages it contains.
+* SHALL identify each double queue using a unique "identity" binary string.
+* SHOULD allow the peer to specify its identity explicitly through the Identity metadata property.
+* SHOULD constrain incoming and outgoing queue sizes to a runtime-configurable limit.
 
-* An identity frame.
-* One or more data frames.
+For processing incoming messages:
 
-And it SHALL remove the identity frame, use this to find the peer to route to, and then send the data frames to that peer. On incoming messages, the ROUTER socket SHALL read the data frames, prepend the identity of the originating peer, and then supply the resulting frames to the calling application.
+* SHALL receive incoming messages from its peers using a fair-queuing strategy.
+* SHALL prefix each incoming message with a frame containing the identity of the originating double queue.
+* SHALL deliver the resulting messages to its calling application.
 
-A ROUTER socket SHALL maintain a queue and accept outgoing messages when it has a successful peer connection. If this peer disconnects, the ROUTER socket SHALL destroy its queue and SHALL destroy all undeliverable messages it contains.
+For processing outgoing messages:
 
-When an application attempts to send a message for which there is no outgoing queue, or for which the queue is full, the ROUTER socket SHALL either silently drop the message, or return an error, depending on configuration. A ROUTER socket SHALL NOT block on sending.
+* SHALL remove the first frame from each outgoing message and use this as the identity of a double queue.
+* SHALL route the message to the outgoing queue if that queue exists, and has space.
+* SHALL either silently drop the message, or return an error, depending on configuration, if the queue does not exist, or is full.
+* SHALL NOT block on sending.
 
 ++ Security Aspects
 

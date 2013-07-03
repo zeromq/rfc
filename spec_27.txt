@@ -78,7 +78,7 @@ The request message SHALL consist of the following message frames:
 * The version frame, which SHALL contain the three octets "1.0".
 * The //request id//, which MAY contain an opaque binary blob.
 * The //domain//, which SHALL contain a string.
-* The //origin id//, the origin network address in IPv4 or IPv6 format.
+* The //address//, the origin network IP address.
 * The //mechanism//, which SHALL contain a string.
 * The //credentials//, which SHALL be zero or more opaque frames.
 
@@ -96,12 +96,12 @@ The various fields have these meanings:
 
 * request id: the meaning of this is defined by the sending server only. The reply SHALL echo the request id without modifying it.
 * domain: this requests authentication within some domain. The significance of domains are an application issue and not relevant to ZAP.
-* origin id: this provides the IP address of the client, to allow address-based filtering. Note that this is not reliable and should not be used as a security mechanism.
+* address: this provides the IP address of the client, to allow address-based filtering. It SHALL be an IPv4 dotted string, or an IPv6 canonical string representation.
 * mechanism: this specifies the security mechanism to authenticate against. The mechanism SHALL NOT be empty.
 * credentials: these provide the user credentials to authenticate. The number of frames needed is defined by each mechanism.
 * status code: this shall be "200" to indicate success, "300" to indicate a temporary error, "400" to indicate authentication failure, and "500" to indicate an internal error (system failure).
 * status text: this shall be a text that further explains the status, and MAY be empty.
-* user id: this provides the user identity in case of a 200 status, for use by applications. For other statuses, it SHALL be empty.
+* user id: this MAY provide the user identity in case of a 200 status, for use by applications. For other statuses, it SHALL be empty.
 * metadata: this provides metadata to be returned to the client in case of a 200 status. The metadata SHALL use the ZMTP 3.0 format:
 
 [[code]]
@@ -163,6 +163,98 @@ To perform authentication for the CURVE mechanism:
 +++ Discovery
 
 ZAP does not define how to discover handlers on the network. Some plausible options are hard-coded TCP endpoints or beacon discovery (as implemented by http://rfc.zeromq.org/spec:20/ZRE).
+
+++ Example Exchanges
+
+These examples show the messages //as sent on the wire//. The messages received or sent by applications (specifically, for REQ, REP, or ROUTER sockets) will have different addressing envelopes at the start. We do not show the frame sizes or flags, only frame contents.
+
++++ Example of NULL Authentication
+
+This shows an authentication request sent by a server to a handler, for a client using the NULL mechanism:
+
+[[code]]
++-+
+| |                 Empty delimiter frame
++-+---+
+| 1.0 |             Version number   
++-----++
+| 0001 |            Request ID, for example "0001"
++------+
+| test |            Domain, empty in this case
++------+-------+
+| 192.168.55.1 |    Address
++------+-------+
+| NULL |            Mechanism
++------+
+[[/code]]
+
+If the server application uses a REQ socket, it SHALL NOT send the delimiter frame. If it uses a DEALER socket, it SHALL send the delimiter frame.
+
+This shows an example reply from the handler to the server:
+
+[[code]]
++-+
+| |                 Empty delimiter frame
++-+---+
+| 1.0 |             Version number   
++-----++
+| 0001 |            Request ID echoed from request
++-----++
+| 200 |             Status code
++----++
+| OK |              Status text
++----++
+| joe |             User id
++-+---+
+| |                 Metadata, empty
++-+
+[[/code]]
+
+If the server application uses a REP socket, it SHALL NOT receive nor send the delimiter frame. If it uses a ROUTER socket, it SHALL receive and send the delimiter frame, and shall additionally receive and send an identity frame before the delimiter frame.
+
++++ Example of PLAIN Authentication
+
+This shows an authentication request sent by a server to a handler, for a client using the NULL mechanism:
+
+[[code]]
++-+
+| |                 Empty delimiter frame
++-+---+
+| 1.0 |             Version number   
++-----++
+| 0001 |            Request ID, for example "0001"
++------+
+| test |            Domain, empty in this case
++------+-------+
+| 192.168.55.1 |    Address
++-------+------+
+| PLAIN |           Mechanism
++-------+
+| admin |           Username
++-------++
+| secret |          Password
++--------+
+[[/code]]
+
+This shows an example reply from the handler to the server:
+
+[[code]]
++-+
+| |                 Empty delimiter frame
++-+---+
+| 1.0 |             Version number   
++-----++
+| 0001 |            Request ID echoed from request
++-----++
+| 200 |             Status code
++----++
+| OK |              Status text
++----++
+| joe |             User id
++-+---+
+| |                 Metadata, empty
++-+
+[[/code]]
 
 ++ Reference Implementation
 

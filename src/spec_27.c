@@ -39,15 +39,15 @@ server_task (void *args, zctx_t *ctx, void *pipe)
     int rc = zsocket_connect (requestor, "inproc://zeromq.zap.01");
     assert (rc != -1);
 
-    byte credentials [] = { 5, 'a','d','m','i','n', 8, 'p','a','s','s','w','o','r','d' };
-
     //  Create a valid ZAP request and send it
     zmsg_t *request = zmsg_new ();
     zmsg_addstr (request, "1.0");       //  ZAP version 1.0
-    zmsg_addstr (request, "1");         //  Sequence number
+    zmsg_addstr (request, "0001");      //  Sequence number
     zmsg_addstr (request, "test");      //  Domain
+    zmsg_addstr (request, "192.168.55.1");  //  Address
     zmsg_addstr (request, "PLAIN");     //  Mechanism
-    zmsg_addmem (request, credentials, sizeof (credentials));
+    zmsg_addstr (request, "admin");     //  Username
+    zmsg_addstr (request, "secret");    //  Password
     zmsg_send (&request, requestor);
     
     //  Get reply and print it out
@@ -60,8 +60,8 @@ server_task (void *args, zctx_t *ctx, void *pipe)
     zmsg_addstr (request, "1.0");       //  ZAP version 1.0
     zmsg_addstr (request, "2");         //  Sequence number
     zmsg_addstr (request, "test");      //  Domain
+    zmsg_addstr (request, "192.168.55.1");  //  Address
     zmsg_addstr (request, "BOGUS");     //  Mechanism
-    zmsg_addmem (request, credentials, sizeof (credentials));
     zmsg_send (&request, requestor);
     
     //  Get reply and print it out
@@ -131,15 +131,37 @@ external_handler (void *args)
         char *domain = zmsg_popstr (request);
         free (domain);
         
+        //  Get IP address, but discard it
+        char *address = zmsg_popstr (request);
+        free (address);
+        
         //  Get and validate mechanism
         char *mechanism = zmsg_popstr (request);
-        if (strneq (mechanism, "PLAIN")) {
+        if (streq (mechanism, "NULL")) {
+            status_code = "200";
+            status_text = "OK";
+        }
+        else
+        if (streq (mechanism, "PLAIN")) {
+            char *username = zmsg_popstr (request);
+            char *password = zmsg_popstr (request);
+            if (streq (username, "admin")
+            &&  streq (password, "secret")) {
+                status_code = "200";
+                status_text = "OK";
+            }
+            else {
+                status_code = "400";
+                status_text = "Invalid username or password";
+            }
+            free (username);
+            free (password);
+        }
+        else {
             status_code = "400";
             status_text = "Security mechanism not supported";
         }
         free (mechanism);
-        
-        //  We don't check the credentials in this example
         zmsg_destroy (&request);
         
         zmsg_t *reply = zmsg_new ();

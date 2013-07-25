@@ -123,7 +123,7 @@ handshake = 1*command
 traffic = *(command | message)
 
 ;   A command is a single long or short frame
-command = command-size frame-body
+command = command-size command-body
 command-size = %x04 short-size | %x06 long-size
 short-size = OCTET          ; Body is 0 to 255 octets
 long-size = 8OCTET          ; Body is 0 to 2^63-1 octets

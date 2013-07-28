@@ -41,15 +41,15 @@ plain = C:hello S:welcome
         C:initiate S:ready
      *( C:message | S:message )
      
-hello = command-size "HELLO" %x0 username password
+hello = command-size %d5 "HELLO" username password
 username = OCTET *VCHAR
 password = OCTET *VCHAR
 
-welcome = command-size "WELCOME" %x0
+welcome = command-size %d7 "WELCOME"
 
-initiate = command-size "INITIATE" %x0 metadata
+initiate = command-size %d8 "INITIATE" metadata
 
-ready = command-size "READY" %x0 metadata
+ready = command-size %d5 "READY" metadata
 [[/code]]
 
 All command bodies consist of an 8-character command name, padded with spaces, followed by formatted binary fields. The ZMTP 3.0 specification defines the grammar for message, command-size, and metadata.

@@ -48,7 +48,7 @@ ZAP makes no assumptions about the security mechanisms we use, nor how they work
 
 +++ ZMTP 3.0 Compatibility
 
-ZAP is designed to support http://rfc.zeromq.org/spec:23/ZMTP implementations (i.e., provide a way to implement ZMTP 3.0 authentication) though it is not limited to this use case. This document specifies how the ZMTP PLAIN and CURVE mechanisms are implemented over ZAP, though these may get their own RFCs later.
+ZAP is designed to support http://rfc.zeromq.org/spec:23/ZMTP implementations (i.e., provide a way to implement ZMTP 3.0 authentication) though it is not limited to this use case. This document specifies how the ZMTP NULL, PLAIN and CURVE mechanisms are implemented over ZAP.
 
 +++ Message Format and Version Detection
 
@@ -214,7 +214,7 @@ If the server application uses a REP socket, it SHALL NOT receive nor send the d
 
 +++ Example of PLAIN Authentication
 
-This shows an authentication request sent by a server to a handler, for a client using the NULL mechanism:
+This shows an authentication request sent by a server to a handler, for a client using the PLAIN mechanism:
 
 [[code]]
 +-+

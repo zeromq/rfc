@@ -123,12 +123,13 @@ handshake = 1*command
 traffic = *(command | message)
 
 ;   A command is a single long or short frame
-command = command-size frame-body
+command = command-size command-body
 command-size = %x04 short-size | %x06 long-size
 short-size = OCTET          ; Body is 0 to 255 octets
 long-size = 8OCTET          ; Body is 0 to 2^63-1 octets
-command-body = command-name %x0 command-data
-command-name = 1*VCHAR
+command-body = command-name command-data
+command-name = OCTET 1*255command-name-char
+command-name-char = ALPHA
 command-data = *OCTET
 
 ;   A message is one or more frames
@@ -248,10 +249,10 @@ When a peer uses the NULL security mechanism, the as-server field MUST be zero. 
 
 [[code]]
 null = ready *message
-ready = command-size "READY" %x0 metadata
+ready = command-size %d5 "READY" metadata
 metadata = *property
 property = name value
-name = OCTET 1*name-char
+name = OCTET 1*255name-char
 name-char = ALPHA | DIGIT | "-" | "_" | "." | "+"
 value = 4OCTET *OCTET       ; Size in network byte order
 [[/code]]
@@ -408,14 +409,14 @@ The implementation SHOULD follow http://rfc.zeromq.org/spec:29/PUBSUB for the se
 When using ZMTP, message filtering SHALL happen at the publisher side (the PUB or XPUB socket). To create a subscription, the SUB or XSUB peer SHALL send a SUBSCRIBE command, which has this grammar:
 
 [[code]]
-subscribe = command-size "SUBSCRIBE" %x0 subscription
+subscribe = command-size %d9 "SUBSCRIBE" subscription
 subscription = *OCTET
 [[/code]]
 
 To cancel a subscription, the SUB or XSUB peer SHALL send a CANCEL command, which has this grammar:
 
 [[code]]
-cancel = command-size "CANCEL" %x0 subscription
+cancel = command-size %d6 "CANCEL" subscription
 [[/code]]
 
 The subscription is a binary string that specifies what messages the subscriber wants. A subscription of "A" SHALL match all messages starting with "A". An empty subscription SHALL match all messages. 
@@ -441,7 +442,7 @@ ZMTP provides connection heartbeating to address some specific problems:
 To invoke a single heartbeat, the peer MAY, at any point after the security handshake is complete, send a PING command:
 
 [[code]]
-ping = command-size "PING" %x0 ping-ttl ping-context
+ping = command-size %d4 "PING" ping-ttl ping-context
 ping-ttl = 2OCTET
 ping-context = *OCTET
 [[/code]]
@@ -451,7 +452,7 @@ The ping-ttl is a 16-bit unsigned integer in network order that MAY be zero or M
 When a peer receives a PING command it SHALL respond with a PONG command that echoes the ping-context, if that is not empty:
 
 [[code]]
-pong = command-size "PONG" %x0 ping-context
+pong = command-size %d4 "PONG" ping-context
 ping-context = *OCTET
 [[/code]]
 
@@ -548,10 +549,10 @@ A DEALER client connects to a ROUTER server. Both client and server are running 
    0     1
  flags  size
      
-+---+---+---+---+---+------+
-| R | E | A | D | Y | %x00 |
-+---+---+---+---+---+------+
-  2   3   4   5   6    7 
++------+---+---+---+---+---+
+| %x05 | R | E | A | D | Y |
++------+---+---+---+---+---+
+   2     3   4   5   6   7 
  Command name "READY"
  
 +----+---+---+---+---+---+---+---+---+---+---+---+
@@ -585,9 +586,9 @@ A DEALER client connects to a ROUTER server. Both client and server are running 
 +------+----+
 | %x04 | 28 |
 +------+----+
-+---+---+---+---+---+------+
-| R | E | A | D | Y | %x00 |
-+---+---+---+---+---+------+
++------+---+---+---+---+---+
+| %x05 | R | E | A | D | Y |
++------+---+---+---+---+---+
 +----+---+---+---+---+---+---+---+---+---+---+---+
 | 11 | S | o | c | k | e | t | - | T | y | p | e |
 +----+---+---+---+---+---+---+---+---+---+---+---+

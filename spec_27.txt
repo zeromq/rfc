@@ -264,4 +264,4 @@ This shows an example reply from the handler to the server:
 
 ++ Reference Implementation
 
-A minimal empty reference implementation is provided in the RFC repository at https://github.com/zeromq/rfc/src/spec_27.c. This implementation demonstrates a server talking to a proxy handler over {{inproc://}}, talking to an external terminal handler over TCP. The terminal handler implements a PLAIN authentication mechanism.
+A minimal empty reference implementation is provided in the RFC repository at https://github.com/zeromq/rfc/blob/master/src/spec_27.c. This implementation demonstrates a server talking to a proxy handler over {{inproc://}}, talking to an external terminal handler over TCP. The terminal handler implements a PLAIN authentication mechanism.

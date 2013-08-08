@@ -117,8 +117,8 @@ cookie-nonce = 16OCTET      ; Long nonce, prefixed by "COOKIE--"
 cookie-box = 80OCTET        ; Box [C' + s'](K)
 
 ;   INITIATE command, 225+ octets
-initiate = %d8 "INITIATE" initiate-cookie initiate-nonce initiate-box
-initiate-cookie = 96OCTET   ; Server-provided cookie
+initiate = %d8 "INITIATE" cookie initiate-nonce initiate-box
+initiate-cookie = cookie    ; Server-provided cookie
 initiate-nonce = 8OCTET     ; Short nonce, prefixed by "CurveZMQINITIATE"
 initiate-box = 112*OCTET    ; Box [C + vouch + metadata](C'->S')
 ;   This is the text sent encrypted in the box

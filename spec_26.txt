@@ -44,17 +44,17 @@ Additionally, CurveZMQ could be used for data sent from one peer to another over
 
 +++ Overall Operation of CurveZMQ
 
-To start a secure connection the client needs the server long term key. It then generates a short term key pair and sends a HELLO command to the server that contains its short term public key. The HELLO command is worthless to an attacker; it doesn't identify the client.
+To start a secure connection the client needs the server long-term key. It then generates a short term key pair and sends a HELLO command to the server that contains its short term public key. The HELLO command is worthless to an attacker; it doesn't identify the client.
 
 The server, when it gets a HELLO, generates its own short term key pair (one connection uses four keys in total), and encodes this new private key in a "cookie", which it sends back to the client as a WELCOME command. It also sends its short term public key, encrypted so only the client can read it. It then discards this short term key pair.
 
 At this stage, the server hasn't stored any state for the client. It's generated a keypair, sent that back to the client in a way only the client can read, and thrown it away.
 
-The client comes back with an INITIATE command that provides the server with its cookie back, and the client long term public key, encrypted so only the server can read it. As far as the client is concerned, the server is now authenticated, so it can also send back metadata in the command.
+The client comes back with an INITIATE command that provides the server with its cookie back, and the client long-term public key, encrypted as a "vouch" so only the server can read it. As far as the client is concerned, the server is now authenticated, so it can also send back metadata in the command.
 
-The server reads the INITIATE and can now authenticate the client long term key. It also unpacks the cookie and gets its short term key pair for the connection. As far as the server is now concerned, the client is now authenticated, so the server can send its metadata safely. Both sides can then send messages and commands.
+The server reads the INITIATE and can now authenticate the client long-term key. It also unpacks the cookie and gets its short term key pair for the connection. As far as the server is now concerned, the client is now authenticated, so the server can send its metadata safely. Both sides can then send messages and commands.
 
-This handshake provides a number of protections but mainly, //perfect forward security// (you cannot crack data encrypted using the short term keys even if you record it, and then later get access to the long term keys) and //protection of client identity// (the client long term key is not sent in clear-text). 
+This handshake provides a number of protections but mainly, //perfect forward security// (you cannot crack data encrypted using the short term keys even if you record it, and then later get access to the long-term keys) and //protection of client identity// (the client long-term key is not sent in clear-text). 
 
 +++ General Design
 
@@ -91,6 +91,8 @@ In a CurveZMQ architecture, the clients MUST know the server public key before t
 * Where all clients share the same public key, that the server checks. In this case access to the server will be restricted to authorized clients. This fits the model of a private network over public infrastructure. Note that the client public key can be stolen, but cannot be used unless an attacker also steals the client secret key.
 
 * Where each client has its own key, that the server checks. In this case the server can grant access to clients according to their authenticated identity. Again, an attacker may steal the client public key but cannot do anything with this unless it can also steal the client's secret key.
+
+Elliptic curve encryption depends on mixing a unique number into each encryption operation. This "number used once", or "nonce", is chosen by the sender, stops replay attacks, and protects the keys from cryptoanalysis. We use two kinds of nonces in CurveZMQ. A long nonce protects long-term keys, and is 16 octets from a good random number generator. A short nonce protects short-term connection keys and is an 8-octet sequential number.
 
 +++ High-level Grammar
 
@@ -182,7 +184,7 @@ The first command on a CurveZMQ connection is the HELLO command. The client SHAL
 
 The server SHALL validate all fields and SHALL reject and disconnect clients who send malformed HELLO commands. When the server gets a valid HELLO command, it SHALL generate a new connection key pair, and encode both the public and secret key in a WELCOME command, as explained below. The server SHALL not keep this connection key pair and SHOULD keep minimal state for the client until the client responds with a valid INITIATE command. This protects against denial-of-service attacks where unauthenticated clients send many HELLO commands to consume server resources.
 
-Note that the client uses an 8 octet "short nonce" in the HELLO, INITIATE, and MESSAGE commands. This nonce SHALL be unique in each command within a connection. The client SHALL NOT send more than 2^64-1 commands in one connection. The client MAY use any strategy to generate unique short nonces, including the CurveCP strategy of an incremental counter.
+Note that the client uses an 8 octet "short nonce" in the HELLO, INITIATE, and MESSAGE commands. This nonce SHALL be unique in each command within a connection. The client SHALL NOT send more than 2^64-1 commands in one connection. The client MAY use any strategy to generate unique short nonces, including using an incremental counter.
 
 ++++ The WELCOME Command
 
@@ -194,7 +196,7 @@ The server SHALL respond to a valid HELLO command with a WELCOME command. This c
 
 * A welcome box (144 octets) that encrypts the server public connection key S' (32 octets) and the server cookie (96 octets), from the server long-term key S to the client's connection key C'.
 
-Note that the server uses a 16-octet "long nonce" in the WELCOME command and when creating a cookie. This nonce SHALL be unique for this server long term key. The recommended simplest strategy is to use 16 random octets from a sufficiently good entropy source.
+Note that the server uses a 16-octet "long nonce" in the WELCOME command and when creating a cookie. This nonce SHALL be unique for this server long-term key. The recommended simplest strategy is to use 16 random octets from a sufficiently good entropy source.
 
 The cookie consists of two fields:
 
@@ -246,7 +248,7 @@ The client SHALL validate all fields and SHALL reject and disconnect from server
 
 The client MAY validate the meta-data. If the client accepts the meta-data, it SHALL then expect MESSAGE commands from the server.
 
-Note that the server uses an 8 octet "short nonce" in the READY and MESSAGE commands. This nonce SHALL be unique in each of these command within a connection. The server SHALL NOT send more than 2^64-2 MESSAGE commands in one connection. The server MAY use any strategy to generate unique short nonces, including the CurveCP strategy of an incremental counter.
+Note that the server uses an 8 octet "short nonce" in the READY and MESSAGE commands. This nonce SHALL be unique in each of these command within a connection. The server SHALL NOT send more than 2^64-2 MESSAGE commands in one connection. The server MAY use any strategy to generate unique short nonces, including an incremental counter.
 
 ++++ The MESSAGE Command
 

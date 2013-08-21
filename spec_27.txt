@@ -79,6 +79,7 @@ The request message SHALL consist of the following message frames:
 * The //request id//, which MAY contain an opaque binary blob.
 * The //domain//, which SHALL contain a string.
 * The //address//, the origin network IP address.
+* The //identity//, the ZeroMQ socket IDENT information 
 * The //mechanism//, which SHALL contain a string.
 * The //credentials//, which SHALL be zero or more opaque frames.
 
@@ -97,6 +98,7 @@ The various fields have these meanings:
 * request id: the meaning of this is defined by the sending server only. The reply SHALL echo the request id without modifying it.
 * domain: this requests authentication within some domain. The significance of domains are an application issue and not relevant to ZAP.
 * address: this provides the IP address of the client, to allow address-based filtering. It SHALL be an IPv4 dotted string, or an IPv6 canonical string representation.
+* identity: this provides the zeromq identity set for the socket.  It SHALL be a string no longer then 255 in lenght. 
 * mechanism: this specifies the security mechanism to authenticate against. The mechanism SHALL NOT be empty.
 * credentials: these provide the user credentials to authenticate. The number of frames needed is defined by each mechanism.
 * status code: this shall be "200" to indicate success, "300" to indicate a temporary error, "400" to indicate authentication failure, and "500" to indicate an internal error (system failure).
@@ -184,6 +186,8 @@ This shows an authentication request sent by a server to a handler, for a client
 +------+-------+
 | 192.168.55.1 |    Address
 +------+-------+
+| BOB  |            Identity
++------+
 | NULL |            Mechanism
 +------+
 [[/code]]
@@ -228,6 +232,8 @@ This shows an authentication request sent by a server to a handler, for a client
 +------+-------+
 | 192.168.55.1 |    Address
 +-------+------+
+| BOB   |           Identity
++-------+
 | PLAIN |           Mechanism
 +-------+
 | admin |           Username

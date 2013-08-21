@@ -45,6 +45,7 @@ server_task (void *args, zctx_t *ctx, void *pipe)
     zmsg_addstr (request, "0001");      //  Sequence number
     zmsg_addstr (request, "test");      //  Domain
     zmsg_addstr (request, "192.168.55.1");  //  Address
+    zmsg_addstr (request, "BOB");     //  Identity
     zmsg_addstr (request, "PLAIN");     //  Mechanism
     zmsg_addstr (request, "admin");     //  Username
     zmsg_addstr (request, "secret");    //  Password
@@ -55,13 +56,31 @@ server_task (void *args, zctx_t *ctx, void *pipe)
     zmsg_dump (reply);
     zmsg_destroy (&reply);
     
-    //  Create an invalid ZAP request and send it
+    //  Create an invalid (Mechanism) ZAP request and send it
     request = zmsg_new ();
     zmsg_addstr (request, "1.0");       //  ZAP version 1.0
     zmsg_addstr (request, "2");         //  Sequence number
     zmsg_addstr (request, "test");      //  Domain
     zmsg_addstr (request, "192.168.55.1");  //  Address
+    zmsg_addstr (request, "BOB");     //  Identity
     zmsg_addstr (request, "BOGUS");     //  Mechanism
+    zmsg_send (&request, requestor);
+    
+    //  Get reply and print it out
+    reply = zmsg_recv (requestor);
+    zmsg_dump (reply);
+    zmsg_destroy (&reply);
+    
+    //  Create an invalid (Identity) ZAP request and send it
+    request = zmsg_new ();
+    zmsg_addstr (request, "1.0");       //  ZAP version 1.0
+    zmsg_addstr (request, "2");         //  Sequence number
+    zmsg_addstr (request, "test");      //  Domain
+    zmsg_addstr (request, "192.168.55.1");  //  Address
+    zmsg_addstr (request, "ALICE");          //  Identity
+    zmsg_addstr (request, "PLAIN");     //  Mechanism
+    zmsg_addstr (request, "admin");     //  Username
+    zmsg_addstr (request, "secret");    //  Password
     zmsg_send (&request, requestor);
     
     //  Get reply and print it out
@@ -106,8 +125,8 @@ external_handler (void *args)
     int rc = zsocket_connect (handler, "tcp://localhost:9999");
     assert (rc != -1);
     
-    char *status_code = "200";
-    char *status_text = "OK";
+    char *status_code = "400";
+    char *status_text = "Default Deny";
     
     while (true) {
         //  Get request, print it for fun
@@ -134,34 +153,45 @@ external_handler (void *args)
         //  Get IP address, but discard it
         char *address = zmsg_popstr (request);
         free (address);
-        
-        //  Get and validate mechanism
-        char *mechanism = zmsg_popstr (request);
-        if (streq (mechanism, "NULL")) {
-            status_code = "200";
-            status_text = "OK";
-        }
-        else
-        if (streq (mechanism, "PLAIN")) {
-            char *username = zmsg_popstr (request);
-            char *password = zmsg_popstr (request);
-            if (streq (username, "admin")
-            &&  streq (password, "secret")) {
+
+        // Get Identity infomation 
+        char *ident = zmsg_popstr(request);
+
+        if (streq(ident, "BOB")) {
+
+            //  Get and validate mechanism
+            char *mechanism = zmsg_popstr (request);
+            if (streq (mechanism, "NULL")) {
                 status_code = "200";
                 status_text = "OK";
             }
+            else if (streq (mechanism, "PLAIN")) {
+                char *username = zmsg_popstr (request);
+                char *password = zmsg_popstr (request);
+                if (streq (username, "admin")
+                &&  streq (password, "secret")) {
+                    status_code = "200";
+                    status_text = "OK";
+                }
+                else {
+                    status_code = "400";
+                    status_text = "Invalid username or password";
+                }
+                free (username);
+                free (password);
+            }
             else {
                 status_code = "400";
-                status_text = "Invalid username or password";
+                status_text = "Security mechanism not supported";
             }
-            free (username);
-            free (password);
-        }
+        } 
         else {
-            status_code = "400";
-            status_text = "Security mechanism not supported";
+          status_code = "400";
+          status_text = "Domain is not acceptable";
         }
+
         free (mechanism);
+        free (ident);
         zmsg_destroy (&request);
         
         zmsg_t *reply = zmsg_new ();

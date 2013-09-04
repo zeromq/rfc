@@ -42,13 +42,13 @@ The changes in version 3.0 of the specification are a simpler version numbering 
 
 +++ Recent Change History
 
+28 July 2013:
+
+* Command names changed to length + content. TODO: update libzmq.
+
 22 June 2013:
 
 * Allow commands to be mixed with messages at any point in the protocol.
-
-* Commands always consist of a name (printable text), a binary zero, and a payload of zero or more octets. This makes general purpose processing (tracing, logging) easier.
-
-* The "READY   " command name used by the NULL mechanism is now "READY\0". Similar changes made to ZMTP-PLAIN and CurveZMQ specifications.
 
 * Subscriptions are now managed via SUBSCRIBE and CANCEL commands instead of special messages. TODO: update libzmq.
 

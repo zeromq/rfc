@@ -123,9 +123,12 @@ The following ABNF grammar defines either direction of a ZMTP connection:
 [[code]]
 connection  = greeting content
 greeting    = anonymous / identity
-anonymous   = %x01 final
-identity    = length final (%x01-ff) *OCTET
+anonymous   = %x01 idflags
+identity    = length idflags (%x01-ff) *OCTET
+idflags     = %00       
 [[/code]]
+
+The flags octet (idflags) of an identity frame SHALL not be validated and SHOULD be set to zero.
 
 +++ The Content Layer
 
@@ -190,8 +193,9 @@ zmtp        = *connection
 
 connection  = greeting content
 greeting    = anonymous / identity
-anonymous   = %x01 final
-identity    = length final (%x01-ff) *OCTET
+anonymous   = %x01 idflags
+identity    = length idflags (%x01-ff) *OCTET
+idflags     = %00       
 
 message     = *more-frame final-frame
 more-frame  = length more body
@@ -214,7 +218,7 @@ neutral     = message
 
 ++ Known Issues
 
-The protocol has no version numbering. The connection layer should specify a version and other information, such as the content types accepted. The ZMTP/1.0 greeting message can be extended with a header for a potential ZMTP/1.1 version using a heuristic: if the greeting consists of one part of size 0 to 255, the peer is using a ZMTP/1.0 connection. If the greeting consists of two parts, where the first is a valid header and the second is a valid identity, the peer is using a ZMTP/1.1 connection.
+The protocol has no version numbering. This has been fixed in later versions of ZMTP and implementors are recommended to implement at least [http://rfc.zeromq.org/spec:15 ZMTP/2.0].
 
 There is no exchange or validation of content types in the wire format. That is, a peer must //know in advance// the type of content it expects from another peer in order to properly interpret that content as broadcast, addressed, or neutral. This could be resolved by adding a content type indicator to the connection header as proposed above.
 

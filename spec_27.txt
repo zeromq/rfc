@@ -34,7 +34,7 @@ ZAP is such an protocol, specifically aimed at authentication.
 
 One undesirable side-effect of building distributed applications is that the number of components increases. This makes it harder to build products that are simple to install and use. If we designed ZAP naively to use a TCP transport and external handler, we would end up with additional services to install and run even for the simplest application.
 
-So, ZAP uses an //inprocess bridge// design. That is, ZAP itself requires that the handler run as a thread within the same process as the servers. When an application uses multiple processes, each process will contain a ZAP handler. 
+So, ZAP uses an //inprocess bridge// design. That is, ZAP itself requires that the handler run as a thread within the same process as the servers. When an application uses multiple processes, each process will contain a ZAP handler.
 
 A ZAP handler can then talk to further components if the architecture needs it. ZAP does not specify this dialog but we assume that the ZAP messages can be forwarded as-is, with the addition of routing information for replies.
 
@@ -79,7 +79,7 @@ The request message SHALL consist of the following message frames:
 * The //request id//, which MAY contain an opaque binary blob.
 * The //domain//, which SHALL contain a string.
 * The //address//, the origin network IP address.
-* The //identity//, the ZeroMQ socket IDENT information 
+* The //identity//, the identity of the originating ZeroMQ socket.
 * The //mechanism//, which SHALL contain a string.
 * The //credentials//, which SHALL be zero or more opaque frames.
 
@@ -98,7 +98,7 @@ The various fields have these meanings:
 * request id: the meaning of this is defined by the sending server only. The reply SHALL echo the request id without modifying it.
 * domain: this requests authentication within some domain. The significance of domains are an application issue and not relevant to ZAP.
 * address: this provides the IP address of the client, to allow address-based filtering. It SHALL be an IPv4 dotted string, or an IPv6 canonical string representation.
-* identity: this provides the zeromq identity set for the socket.  It SHALL be a string no longer then 255 in lenght. 
+* identity: this provides the identity of the originating socket. It SHALL be a binary string no longer than 255 bytes.
 * mechanism: this specifies the security mechanism to authenticate against. The mechanism SHALL NOT be empty.
 * credentials: these provide the user credentials to authenticate. The number of frames needed is defined by each mechanism.
 * status code: this shall be "200" to indicate success, "300" to indicate a temporary error, "400" to indicate authentication failure, and "500" to indicate an internal error (system failure).
@@ -141,7 +141,7 @@ The NULL mechanism provides no security credentials but allows a server to filte
 
 To perform filtering for the NULL mechanism:
 
-* The mechanism SHALL be the 5 characters "NULL".
+* The mechanism SHALL be the 4 characters "NULL".
 * There SHALL be no credentials frames.
 
 +++ The PLAIN Mechanism
@@ -178,7 +178,7 @@ This shows an authentication request sent by a server to a handler, for a client
 +-+
 | |                 Empty delimiter frame
 +-+---+
-| 1.0 |             Version number   
+| 1.0 |             Version number
 +-----++
 | 0001 |            Request ID, for example "0001"
 +------+
@@ -200,7 +200,7 @@ This shows an example reply from the handler to the server:
 +-+
 | |                 Empty delimiter frame
 +-+---+
-| 1.0 |             Version number   
+| 1.0 |             Version number
 +-----++
 | 0001 |            Request ID echoed from request
 +-----++
@@ -224,7 +224,7 @@ This shows an authentication request sent by a server to a handler, for a client
 +-+
 | |                 Empty delimiter frame
 +-+---+
-| 1.0 |             Version number   
+| 1.0 |             Version number
 +-----++
 | 0001 |            Request ID, for example "0001"
 +------+
@@ -248,7 +248,7 @@ This shows an example reply from the handler to the server:
 +-+
 | |                 Empty delimiter frame
 +-+---+
-| 1.0 |             Version number   
+| 1.0 |             Version number
 +-----++
 | 0001 |            Request ID echoed from request
 +-----++

@@ -32,6 +32,10 @@ Additionally, it aims to:
 
 * Be simple to implement, given NaCl or libsodium support in a given language.
 
++++ Security
+
+CurveZMQ uses the Curve25519 elliptic curve, which was designed by Daniel J. Bernstein to achieve good performance with short key sizes (256 bits). The protocol establishes short-term session keys for every connection to achieve perfect forward security. Session keys are held in memory and destroyed when the connection is closed. CurveZMQ also addresses replay attacks, amplification attacks, MIM attacks, key thefts, client identification, and various denial-of-service attacks. These are inherited from CurveCP, and are explained later.
+
 +++ Use Cases
 
 There are two main use cases for CurveZMQ:
@@ -390,4 +394,4 @@ As an interim solution, we have taken CurveCP's security handshake alone, and im
 
 ++ CurveZMQ Reference Implementation
 
-The reference implementation for CurveZMQ, which tracks this specification and always aims to implement the latest stable version, is the [https://github.com/zeromq/curvezmq project]. This class includes examples of using CurveZMQ at the application layer.
+The reference implementation for CurveZMQ, which tracks this specification and always aims to implement the latest stable version, is the [https://github.com/zeromq/libcurve Curve project].

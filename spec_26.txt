@@ -32,6 +32,10 @@ Additionally, it aims to:
 
 * Be simple to implement, given NaCl or libsodium support in a given language.
 
++++ Security
+
+CurveZMQ uses the Curve25519 elliptic curve, which was designed by Daniel J. Bernstein to achieve good performance with short key sizes (256 bits). The protocol establishes short-term session keys for every connection to achieve perfect forward security. Session keys are held in memory and destroyed when the connection is closed. CurveZMQ also addresses replay attacks, amplification attacks, MIM attacks, key thefts, client identification, and various denial-of-service attacks. These are inherited from CurveCP, and are explained later.
+
 +++ Use Cases
 
 There are two main use cases for CurveZMQ:
@@ -44,17 +48,19 @@ Additionally, CurveZMQ could be used for data sent from one peer to another over
 
 +++ Overall Operation of CurveZMQ
 
-To start a secure connection the client needs the server long term key. It then generates a short term key pair and sends a HELLO command to the server that contains its short term public key. The HELLO command is worthless to an attacker; it doesn't identify the client.
+Clients and servers have long-term permanent keys, and for each connection, they create and securely exchange short-term transient keys. Each key is a public/secret keypair, following the elliptic curve security model.
+
+To start a secure connection the client needs the server permanent public key. It then generates a transient key pair and sends a HELLO command to the server that contains its short term public key. The HELLO command is worthless to an attacker; it doesn't identify the client.
 
 The server, when it gets a HELLO, generates its own short term key pair (one connection uses four keys in total), and encodes this new private key in a "cookie", which it sends back to the client as a WELCOME command. It also sends its short term public key, encrypted so only the client can read it. It then discards this short term key pair.
 
 At this stage, the server hasn't stored any state for the client. It's generated a keypair, sent that back to the client in a way only the client can read, and thrown it away.
 
-The client comes back with an INITIATE command that provides the server with its cookie back, and the client long term public key, encrypted so only the server can read it. As far as the client is concerned, the server is now authenticated, so it can also send back metadata in the command.
+The client comes back with an INITIATE command that provides the server with its cookie back, and the client permanent public key, encrypted as a "vouch" so only the server can read it. As far as the client is concerned, the server is now authenticated, so it can also send back metadata in the command.
 
-The server reads the INITIATE and can now authenticate the client long term key. It also unpacks the cookie and gets its short term key pair for the connection. As far as the server is now concerned, the client is now authenticated, so the server can send its metadata safely. Both sides can then send messages and commands.
+The server reads the INITIATE and can now authenticate the client permanent public key. It also unpacks the cookie and gets its short term key pair for the connection. As far as the server is now concerned, the client is now authenticated, so the server can send its metadata safely. Both sides can then send messages and commands.
 
-This handshake provides a number of protections but mainly, //perfect forward security// (you cannot crack data encrypted using the short term keys even if you record it, and then later get access to the long term keys) and //protection of client identity// (the client long term key is not sent in clear-text). 
+This handshake provides a number of protections but mainly, //perfect forward security// (you cannot crack data encrypted using the short term keys even if you record it, and then later get access to the permanent keys) and //protection of client identity// (the client permanent public key is not sent in clear-text). 
 
 +++ General Design
 
@@ -67,7 +73,7 @@ C:HELLO
 S:READY
 [[/code]]
 
-After this exchange each side has the other's public connection key. The client then sends an INITIATE command, and the server responds with READY:
+After this exchange each side has the other's public transient key. The client then sends an INITIATE command, and the server responds with READY:
 
 [[code]]
 C:INITIATE
@@ -92,6 +98,8 @@ In a CurveZMQ architecture, the clients MUST know the server public key before t
 
 * Where each client has its own key, that the server checks. In this case the server can grant access to clients according to their authenticated identity. Again, an attacker may steal the client public key but cannot do anything with this unless it can also steal the client's secret key.
 
+Elliptic curve encryption depends on mixing a unique number into each encryption operation. This "number used once", or "nonce", is chosen by the sender, stops replay attacks, and protects the keys from cryptoanalysis. We use two kinds of nonces in CurveZMQ. A long nonce protects permanent keys, and is 16 octets from a good random number generator. A short nonce protects transient keys and is an 8-octet sequential number.
+
 +++ High-level Grammar
 
 The following ABNF grammar defines the CurveZMQ protocol from a high level:
@@ -103,7 +111,7 @@ curvezmq = C:hello S:welcome C:initiate S:ready *message
 hello = %d5 "HELLO" version padding hello-client hello-nonce hello-box
 hello-version = %x1 %x0     ; CurveZMQ major-minor version
 hello-padding = 72%x00      ; Anti-amplification padding
-hello-client = 32OCTET      ; Client public connection key C'
+hello-client = 32OCTET      ; Client public transient key C'
 hello-nonce = 8OCTET        ; Short nonce, prefixed by "CurveZMQHELLO---"
 hello-box = 80OCTET         ; Signature, Box [64 * %x0](C'->S)
 
@@ -117,8 +125,8 @@ cookie-nonce = 16OCTET      ; Long nonce, prefixed by "COOKIE--"
 cookie-box = 80OCTET        ; Box [C' + s'](K)
 
 ;   INITIATE command, 225+ octets
-initiate = %d8 "INITIATE" initiate-cookie initiate-nonce initiate-box
-initiate-cookie = 96OCTET   ; Server-provided cookie
+initiate = %d8 "INITIATE" cookie initiate-nonce initiate-box
+initiate-cookie = cookie    ; Server-provided cookie
 initiate-nonce = 8OCTET     ; Short nonce, prefixed by "CurveZMQINITIATE"
 initiate-box = 112*OCTET    ; Box [C + vouch + metadata](C'->S')
 ;   This is the text sent encrypted in the box
@@ -154,8 +162,8 @@ The command size is not part of the command encoding but is assumed to be a prop
 
 We explain how each command is encrypted, the contents of each command, and the semantics of each command. Note that we work with four pairs of keys:
 
-* The client and server each have a long-term key pair (public and secret keys), called C and S.
-* The client and server each generate a connection key pair for the connection, called C' and S'.
+* The client and server each have a permanent key pair (public and secret keys), called C and S.
+* The client and server each generate a transient key pair for the connection, called C' and S'.
 
 We use the CurveCP notation "Box [X](C->S)" to mean a cryptographic box that encrypts X "from C to S", meaning only C can create the box and only S can open it. A box is a one-way transfer of information from C to S where both sender and recipient can be certain the transfer is secret, secure, and authentic (if it arrives, which is not guaranteed). When S opens the box, it knows that C created it. The actual steps for creating and opening a box are:
 
@@ -174,15 +182,15 @@ The first command on a CurveZMQ connection is the HELLO command. The client SHAL
 
 * An anti-amplification padding field. This SHALL be 70 octets, all zero. This filler field ensures the HELLO command is larger than the WELCOME command, so an attacker who spoofs a sender IP address cannot use the server to overwhelm that innocent 3rd party with response data.
 
-* The client's public connection key C' (32 octets). The client SHALL generate a unique key pair for each connection it creates to a server. It SHALL discard this key pair when it closes the connection, and it MUST NOT store its secret key in long-term storage, nor share it in any way.
+* The client's public transient key C' (32 octets). The client SHALL generate a unique key pair for each connection it creates to a server. It SHALL discard this key pair when it closes the connection, and it MUST NOT store its secret key in permanent storage, nor share it in any way.
 
 * A client short nonce (8 octets). The nonce SHALL be implicitly prefixed with the 16 characters @@"CurveZMQHELLO---"@@ to form the 24-octet nonce used to encrypt and decrypt the signature box.
 
-* The signature box (80 octets). This SHALL contain 64 zero octets, encrypted from the client's connection key C' to the server's long-term key S.
+* The signature box (80 octets). This SHALL contain 64 zero octets, encrypted from the client's transient key C' to the server's permanent key S.
 
-The server SHALL validate all fields and SHALL reject and disconnect clients who send malformed HELLO commands. When the server gets a valid HELLO command, it SHALL generate a new connection key pair, and encode both the public and secret key in a WELCOME command, as explained below. The server SHALL not keep this connection key pair and SHOULD keep minimal state for the client until the client responds with a valid INITIATE command. This protects against denial-of-service attacks where unauthenticated clients send many HELLO commands to consume server resources.
+The server SHALL validate all fields and SHALL reject and disconnect clients who send malformed HELLO commands. When the server gets a valid HELLO command, it SHALL generate a new transient key pair, and encode both the public and secret key in a WELCOME command, as explained below. The server SHALL not keep this transient key pair and SHOULD keep minimal state for the client until the client responds with a valid INITIATE command. This protects against denial-of-service attacks where unauthenticated clients send many HELLO commands to consume server resources.
 
-Note that the client uses an 8 octet "short nonce" in the HELLO, INITIATE, and MESSAGE commands. This nonce SHALL be unique in each command within a connection. The client SHALL NOT send more than 2^64-1 commands in one connection. The client MAY use any strategy to generate unique short nonces, including the CurveCP strategy of an incremental counter.
+Note that the client uses an 8 octet "short nonce" in the HELLO, INITIATE, and MESSAGE commands. This nonce SHALL be unique in each command within a connection. The client SHALL NOT send more than 2^64-1 commands in one connection. The client MAY use any strategy to generate unique short nonces, including using an incremental counter.
 
 ++++ The WELCOME Command
 
@@ -192,15 +200,15 @@ The server SHALL respond to a valid HELLO command with a WELCOME command. This c
 
 * A server long nonce (16 octets). This nonce SHALL be implicitly prefixed by the 8 characters "WELCOME-" to form a 24-octet nonce used to encrypt and decrypt the welcome box.
 
-* A welcome box (144 octets) that encrypts the server public connection key S' (32 octets) and the server cookie (96 octets), from the server long-term key S to the client's connection key C'.
+* A welcome box (144 octets) that encrypts the server public transient key S' (32 octets) and the server cookie (96 octets), from the server permanent key S to the client's transient key C'.
 
-Note that the server uses a 16-octet "long nonce" in the WELCOME command and when creating a cookie. This nonce SHALL be unique for this server long term key. The recommended simplest strategy is to use 16 random octets from a sufficiently good entropy source.
+Note that the server uses a 16-octet "long nonce" in the WELCOME command and when creating a cookie. This nonce SHALL be unique for this server permanent key. The recommended simplest strategy is to use 16 random octets from a sufficiently good entropy source.
 
 The cookie consists of two fields:
 
 * A server long nonce (16 octets). This nonce SHALL be implicitly prefixed by the 8 characters @@"COOKIE--"@@ to form a 24-octet nonce used to encrypt and decrypt the cookie box.
 
-* A cookie box (80 octets) that holds the client public connection key C' (32 octets) and the server secret connection key s' (32 octets), encrypted to and from a secret short-term "cookie key". The server MUST discard from its memory the cookie key after a short interval, for example 60 seconds, or as soon as the client sends a valid INITIATE command. 
+* A cookie box (80 octets) that holds the client public transient key C' (32 octets) and the server secret transient key s' (32 octets), encrypted to and from a secret short-term "cookie key". The server MUST discard from its memory the cookie key after a short interval, for example 60 seconds, or as soon as the client sends a valid INITIATE command. 
 
 The server SHALL generate a new cookie for each WELCOME command it sends.
 
@@ -208,7 +216,7 @@ The client SHALL validate all fields and SHALL reject and disconnect from server
 
 ++++ The INITIATE Command
 
-When the client receives a WELCOME command it can decrypt this to receive the server's connection key S', and the cookie, which it must send back to the server. The cookie is the only memory of the server's secret connection key s'.
+When the client receives a WELCOME command it can decrypt this to receive the server's transient key S', and the cookie, which it must send back to the server. The cookie is the only memory of the server's secret transient key s'.
 
 The client SHALL respond to a valid WELCOME with an INITIATE command. This command SHALL be at least 225 octets long and have the following fields:
 
@@ -218,19 +226,19 @@ The client SHALL respond to a valid WELCOME with an INITIATE command. This comma
 
 * A client short nonce (8 octets). The nonce SHALL be implicitly prefixed with the 16 characters "CurveZMQINITIATE" to form the 24-octet nonce used to encrypt and decrypt the vouch box.
 
-* The initiate box (112 or more octets), by which the client securely sends its public long-term key C to the server. The initiate box holds the client public long-term key C (32 octets), the vouch (64 octets), and the metadata (0 or more octets), encrypted from the client's connection key C' to the server's connection key S'.
+* The initiate box (112 or more octets), by which the client securely sends its permanent public key C to the server. The initiate box holds the client permanent public key C (32 octets), the vouch (64 octets), and the metadata (0 or more octets), encrypted from the client's transient key C' to the server's transient key S'.
 
 The vouch itself consists of two fields:
 
-* A client long nonce (16 octets). This nonce SHALL be implicitly prefixed with the 8 characters @@"VOUCH---"@@ to give a 24-octet nonce, used to encrypt and decrypt the vouch box. This nonce SHALL be unique for all INITIATE commands from this client long-term key. A valid strategy is to use 16 random octets from a sufficiently good entropy source.
+* A client long nonce (16 octets). This nonce SHALL be implicitly prefixed with the 8 characters @@"VOUCH---"@@ to give a 24-octet nonce, used to encrypt and decrypt the vouch box. This nonce SHALL be unique for all INITIATE commands from this client permanent key. A valid strategy is to use 16 random octets from a sufficiently good entropy source.
 
-* The vouch box (48 octets), that encrypts the client's connection key C' (32 octets) from the client long-term key C to the server long-term key S.
+* The vouch box (48 octets), that encrypts the client's transient key C' (32 octets) from the client permanent key C to the server permanent key S.
 
 The metadata consists of a list of properties consisting of name and value as size-specified strings. The name SHALL be 1 to 255 characters. Zero-sized names are not valid. The case (upper or lower) of names SHALL NOT be significant. The value SHALL be 0 to 2^31-1 octets of opaque binary data. Zero-sized values are allowed. The semantics of the value depend on the property. The value size field SHALL be four octets, in network order. Note that this size field will mostly not be aligned in memory.
 
 The server SHALL validate all fields and SHALL reject and disconnect clients who send malformed INITIATE commands.
 
-After decrypting the INITIATE command, the server MAY authenticate the client based on its public long-term key C. If the client does not pass authentication, the server SHALL not respond except by closing the connection. If the client passes authentication the server SHALL send a READY command and MAY then immediately send MESSAGE commands.
+After decrypting the INITIATE command, the server MAY authenticate the client based on its permanent public key C. If the client does not pass authentication, the server SHALL not respond except by closing the connection. If the client passes authentication the server SHALL send a READY command and MAY then immediately send MESSAGE commands.
 
 ++++ The READY Command
 
@@ -240,13 +248,13 @@ The server SHALL respond to a valid INITIATE command with a READY command. This 
 
 * A server short nonce (8 octets). The nonce SHALL be implicitly prefixed with the 16 characters @@"CurveZMQREADY---"@@ to form the 24-octet nonce used to encrypt and decrypt the ready box.
 
-* The ready box (16 or more octets). This shall contain metadata of the same format as sent in the INITIATE command, encrypted from the server's connection key S' to the client's connection key C'.
+* The ready box (16 or more octets). This shall contain metadata of the same format as sent in the INITIATE command, encrypted from the server's transient key S' to the client's transient key C'.
 
 The client SHALL validate all fields and SHALL reject and disconnect from servers who send malformed READY commands.
 
 The client MAY validate the meta-data. If the client accepts the meta-data, it SHALL then expect MESSAGE commands from the server.
 
-Note that the server uses an 8 octet "short nonce" in the READY and MESSAGE commands. This nonce SHALL be unique in each of these command within a connection. The server SHALL NOT send more than 2^64-2 MESSAGE commands in one connection. The server MAY use any strategy to generate unique short nonces, including the CurveCP strategy of an incremental counter.
+Note that the server uses an 8 octet "short nonce" in the READY and MESSAGE commands. This nonce SHALL be unique in each of these command within a connection. The server SHALL NOT send more than 2^64-2 MESSAGE commands in one connection. The server MAY use any strategy to generate unique short nonces, including an incremental counter.
 
 ++++ The MESSAGE Command
 
@@ -256,7 +264,7 @@ The client MAY send MESSAGE commands when it has received a valid READY command.
 
 * A short nonce (8 octets). The nonce SHALL be implicitly prefixed with the 16 characters "CurveZMQMESSAGES" (from server) or "CurveZMQMESSAGEC" (from client) to form the 24-octet nonce used to encrypt and decrypt the message box.
 
-* The message box (17 or more octets). This shall contain the message data, encrypted from the sender's connection key the recipient's connection key.
+* The message box (17 or more octets). This shall contain the message data, encrypted from the sender's transient key the recipient's transient key.
 
 The message payload consists of a flags field (1 octet) followed by zero or more octets of payload data. The flags field consists of a single octet containing various control flags. Bit 0 is the least significant bit (rightmost bit):
 
@@ -280,7 +288,7 @@ While CurveCP defines a security handshake and traffic control for messages sent
 
 * We add a READY command to send connection metadata from server to client, after security has been established.
 
-* In INITIATE and MESSAGE commands from the client, we do not send the client public connection key since it is redundant in a connected protocol.
+* In INITIATE and MESSAGE commands from the client, we do not send the client public transient key since it is redundant in a connected protocol.
 
 * In MESSAGE commands, the payload can be of any size from zero to 2^63-1 octets, whereas CurveCP limits packets to fit in UDP frames.
 
@@ -316,21 +324,21 @@ NaCl (and this document) uses the syntax "Box [X](S->R)" to define a cryptograph
 
 Keys in CurveCP are 32 octets (256 bits) and nonces are 24 octets. These are the default sizes proposed by NaCl. These sizes are hard-coded into the CurveCP packet formats, and CurveZMQ uses the same sizes. There is no option for users to choose weaker security. However we would expect future versions of CurveZMQ to use longer key sizes.
 
-Each peer (client or server) has a //long-term// key which is known to the other party beforehand. CurveCP uses the long-term keys at the start of a connection to provide authentication and to securely exchange //connection// keys (which CurveCP calls "short-term"). The long-term keys are never used to encrypt data. The connection keys are unique to the connection, and both peers discard these when the connection is finished. Thus, even if an attacker records encrypted boxes, and later seizes the long-term keys, he cannot open those boxes (so-called "perfect forward secrecy").
+Each peer (client or server) has a //permanent// key which is known to the other party beforehand. CurveCP uses the permanent keys at the start of a connection to provide authentication and to securely exchange //transient// transient keys (which CurveCP calls "short-term"). The permanent keys are never used to encrypt data. The transient keys are unique to the connection, and both peers discard these when the connection is finished. Thus, even if an attacker records encrypted boxes, and later seizes the permanent keys, he cannot open those boxes (so-called "perfect forward secrecy").
 
 Each "key" is in fact a pair of keys, one public and one secret. Data is encrypted with the public key (and other information) and decrypted with the secret key. The public key may be known to other peers (shared across some secure medium), while the secret keys are never known to other peers.
 
-To establish a connection, the client must know the server's public long-term key, while the server may know a set of client public long-term keys. During the handshake, the client sends its public long-term key to the server, protected by the connection keys. The server may thus authenticate the client, while the client's public long-term key cannot be extracted from the traffic by an attacker.
+To establish a connection, the client must know the server's permanent public key, while the server may know a set of client permanent public keys. During the handshake, the client sends its permanent public key to the server, protected by the transient keys. The server may thus authenticate the client, while the client's permanent public key cannot be extracted from the traffic by an attacker.
 
 The packet flow in CurveCP is as follows:
 
-* The client generates a connection key pair and sends the public key to the server as a **Hello** packet. This packet has a signature (Box [zeros](C'->S)) that prevents tampering.
+* The client generates a transient key pair and sends the public key to the server as a **Hello** packet. This packet has a signature (Box [zeros](C'->S)) that prevents tampering.
 
 * The server generates a new, random key pair and send this to the client as a **Cookie** packet, with the public key in clear, and the secret key in a box (the "cookie") that only the server can open, and at most for two minutes.
 
-* The client sends the cookie back to the server, along with its public long-term key to the server as an **Initiate** packet. At this point the server may authenticate the client's identity and establish the connection, opening the cookie to get the connection keys for the connection.
+* The client sends the cookie back to the server, along with its permanent public key to the server as an **Initiate** packet. At this point the server may authenticate the client's identity and establish the connection, opening the cookie to get the transient keys for the connection.
 
-* Client and server can now send **Message** packets that hold data, in boxes locked with the connection keys. CurveCP uses a fixed maximum message size designed to fit into UDP packets.
+* Client and server can now send **Message** packets that hold data, in boxes locked with the transient keys. CurveCP uses a fixed maximum message size designed to fit into UDP packets.
 
 +++ Specific Defenses
 
@@ -346,17 +354,17 @@ We list the specific attacks that CurveCP's security design aims to prevent:
 
 * //Amplification attacks,// in which an attacker makes many small unauthenticated requests but uses a fake origin address so large responses are sent to that innocent party, overwhelming it. Only a Hello packets are unauthenticated, and they are padded to be larger than Cookie packets.
 
-* //Man-in-the-middle attacks,// in which an attacker sitting between client and server substitutes its own keys so it can play "server" to the client and play "client" to the server, and thus be able to open all boxes. Since long-term keys are known beforehand, an attacker cannot successfully imitate a server, nor a client if the server does client authentication.
+* //Man-in-the-middle attacks,// in which an attacker sitting between client and server substitutes its own keys so it can play "server" to the client and play "client" to the server, and thus be able to open all boxes. Since permanent keys are known beforehand, an attacker cannot successfully imitate a server, nor a client if the server does client authentication.
 
-* //Key theft attacks,// in which an attacker records encrypted data, then seizes the secret keys at some later stage, perhaps by physically attacking the client or server computer. Client and server use connection keys that they throw away when they close the connection.
+* //Key theft attacks,// in which an attacker records encrypted data, then seizes the secret keys at some later stage, perhaps by physically attacking the client or server computer. Client and server use transient keys that they throw away when they close the connection.
 
-* //Identifying the client,// in which an attacker traces the identity of a client by extracting its public long-term key from packets. The client sends this only in an Initiate packet, protected by the connection keys.
+* //Identifying the client,// in which an attacker traces the identity of a client by extracting its permanent public key from packets. The client sends this only in an Initiate packet, protected by the transient keys.
 
 * //Denial-of-Service attacks,// in which an attacker forces the server to perform expensive operations before authentication, thus exhausting the server. CurveCP uses high-speed high-security elliptic-curve cryptography so that a typical CPU can perform public-key operations faster than a typical Internet connection can ask for those operations. The server does not allocate memory until a client sends the Initiate packet.
 
 +++ Authentication
 
-A CurveCP client must know the server public long-term key in order to start a connection. A server may differentiate the clients through their public long-term keys. Servers may thus accept unauthenticated clients, but clients will always authenticate the server. CurveCP uses the long-term keys to securely vouch for connection keys so that every box can be authenticated, but cannot be opened after the connection has closed (and each peer discards its connection keys).
+A CurveCP client must know the server permanent public key in order to start a connection. A server may differentiate the clients through their permanent public keys. Servers may thus accept unauthenticated clients, but clients will always authenticate the server. CurveCP uses the permanent keys to securely vouch for transient keys so that every box can be authenticated, but cannot be opened after the connection has closed (and each peer discards its transient keys).
 
 CurveCP does not use client IP addresses as part of its security model. Firstly, because IP addresses are not secure, and secondly this means a CurveCP connection is independent of the IP endpoints (so can migrate across network changes).
 
@@ -370,9 +378,9 @@ To implement or use CurveCP you need to be aware of some issues and limitations 
 
 **CurveCP makes no attempt to defend against traffic analysis attacks.** When an application sends packets that correspond to real data (for example a password being typed, a voice-over-IP call, or a compressed video stream), an attacker can extract useful data from the timing, addressing, and size of encrypted packets. To protect against traffic analysis attacks, we could pad packets with random data, send bogus data randomly, and blur the difference between heartbeat xmessages and data messages.
 
-**CurveCP does not explain how keys are exchanged.** To some extent, CurveCP is so simple and robust because it completely ignores this problem. However any realistic implementation must solve this problem. At the very least, clients can be configured with the server public key, and generate their own keys randomly. This lets clients be sure they are talking securely to the correct server. The server however will not be able to authenticate clients without knowing their public long-term keys in advance.
+**CurveCP does not explain how keys are exchanged.** To some extent, CurveCP is so simple and robust because it completely ignores this problem. However any realistic implementation must solve this problem. At the very least, clients can be configured with the server public key, and generate their own keys randomly. This lets clients be sure they are talking securely to the correct server. The server however will not be able to authenticate clients without knowing their permanent public keys in advance.
 
-**CurveCP enforces a 1-to-many relationship from servers to clients.** One change we might propose to CurveCP would be the addition of the server public connection key in Message packets from the server, so that clients could work with many servers (a common pattern in ZeroMQ applications).
+**CurveCP enforces a 1-to-many relationship from servers to clients.** One change we might propose to CurveCP would be the addition of the server public transient key in Message packets from the server, so that clients could work with many servers (a common pattern in ZeroMQ applications).
 
 **CurveCP depends on NaCl.** The protocol is bound to the NaCl crypto library that is today the primary implementation of the necessary algorithms. NaCl is a young library and not as widely available, stable, or fast as it might be. This affects CurveZMQ equally.
 
@@ -386,4 +394,4 @@ As an interim solution, we have taken CurveCP's security handshake alone, and im
 
 ++ CurveZMQ Reference Implementation
 
-The reference implementation for CurveZMQ, which tracks this specification and always aims to implement the latest stable version, is the [https://github.com/zeromq/curvezmq project]. This class includes examples of using CurveZMQ at the application layer.
+The reference implementation for CurveZMQ, which tracks this specification and always aims to implement the latest stable version, is the [https://github.com/zeromq/libcurve Curve project].

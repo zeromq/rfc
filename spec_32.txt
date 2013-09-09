@@ -15,9 +15,13 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 
 ++ Problem Statement
 
-When representing binary values in code and in text files (such as configuration data), the developer must choose a printable representation. The usual choices are Base16 (each byte is printed as two hexadecimal values), or Base64 (as used in MIME encoding). For better efficiency, the developer might choose Base85, but the existing designs (such as [http://en.wikipedia.org/wiki/Ascii85 Ascii85]) for that encoding are not string safe (they generate quotes and back slashes).
+When representing binary values in code and in text files (such as configuration data), the developer must choose a printable representation. The simplest choice is Base16, where each byte is printed as two hexadecimal values.
 
-Z85 is designed to be more compact than Base16 or Base64, while being more usable than Ascii85. 
+For better efficiency than Base16, the developer might choose Base64. This is a common choice but problematic because it has [http://en.wikipedia.org/wiki/Base64 more than a dozen variants]. It works poorly with binary data since it works on three-byte chunks, whereas most binary data is chunked to 4 or 8 bytes. Base64 implementations are therefore more complex than they might be, and not necessarily interoperable.
+
+A more logical encoding is Ascii85, which works on 4-byte chunks. However it is not string-safe, so cannot be used cleanly in source code, XML, JSON, and so on.
+
+Our ideal encoding is designed for 4-byte chunks like Ascii85, but is safe for strings, and removes all ambiguity about whether or not implementations will interoperate. Z85 is thus designed to be more compact than Base16, more reliable than Base64, and more usable than Ascii85. 
 
 The specific goals of this specification are:
 

@@ -46,17 +46,13 @@ The changes in version 3.0 of the specification are a simpler version numbering 
 
 * Allow commands to be mixed with messages at any point in the protocol.
 
-* Commands always consist of a name (printable text), a binary zero, and a payload of zero or more octets. This makes general purpose processing (tracing, logging) easier.
+* Added SUBSCRIBE and CANCEL commands instead of special messages. TODO: update libzmq.
 
-* The "READY   " command name used by the NULL mechanism is now "READY\0". Similar changes made to ZMTP-PLAIN and CurveZMQ specifications.
-
-* Subscriptions are now managed via SUBSCRIBE and CANCEL commands instead of special messages. TODO: update libzmq.
+* Added PING and PONG commands for heartbeating. TODO: update libzmq, including API for enabling these.
 
 * Added PUB and SUB socket types so that the semantics for these could be explicitly documented. (PUB sockets cannot receive messages; SUB sockets cannot send them).
 
 * Moved transport-independent socket semantics to separate RFCs (28, 29, 30, 31) since they are not specific to ZMTP.
-
-* Added PING and PONG commands for heartbeating. TODO: update libzmq.
 
 +++ Related Specifications
 
@@ -449,7 +445,7 @@ ping-context = *OCTET
 
 The ping-ttl is a 16-bit unsigned integer in network order that MAY be zero or MAY contain a time-to-live measured in tenths of seconds. The ping-ttl provides a strong hint to the other peer to disconnect if no further traffic is received after that time. The maximum TTL is 6553 seconds.
 
-When a peer receives a PING command it SHALL respond with a PONG command that echoes the ping-context, if that is not empty:
+When a peer receives a PING command it SHALL respond with a PONG command that echoes the ping-context, which may be empty:
 
 [[code]]
 pong = command-size %d4 "PONG" ping-context

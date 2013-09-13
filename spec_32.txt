@@ -30,6 +30,8 @@ The specific goals of this specification are:
 * To be safe to pass on the command line, when enclosed in single quotes.
 * To be easy to implement in any programming language.
 
+Additionally, binary zero strings should be easily visible (we achieve this by mapping zero to the ASCII character '0').
+
 ++ Formal Specification
 
 A Z85 implementation takes a binary frame and encodes it as a printable ASCII string, or takes an ASCII encoded string and decodes it into a binary frame.

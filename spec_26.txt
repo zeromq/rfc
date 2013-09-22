@@ -1,4 +1,4 @@
-This document describes CurveZMQ, a protocol for secure messaging across the Internet. CurveZMQ is closely based on Daniel J. Bernstein's **CurveCP**, adapted for use in ZeroMQ over TCP. The [http://curvecp.org curvecp.org site] acts as a primary reference for CurveCP and is foundation material for this document. A reference implementation of CurveZMQ is provided at [http://curvezmq.org curvezmq.org]. This document describes version 1.0 of CurveZMQ.
+This document describes CurveZMQ, a protocol for secure messaging across the Internet. CurveZMQ is closely based on Daniel J. Bernstein's [http://curvecp.org CurveCP], adapted for use in ZeroMQ over TCP. A reference implementation of CurveZMQ is provided at [http://curvezmq.org curvezmq.org]. This document describes version 1.0 of CurveZMQ.
 
 * Name: rfc.zeromq.org/spec:26/CURVEZMQ
 * Editor: Pieter Hintjens <ph@imatix.com>
@@ -124,15 +124,15 @@ cookie = cookie-nonce cookie-box
 cookie-nonce = 16OCTET      ; Long nonce, prefixed by "COOKIE--"
 cookie-box = 80OCTET        ; Box [C' + s'](K)
 
-;   INITIATE command, 225+ octets
+;   INITIATE command, 257+ octets
 initiate = %d8 "INITIATE" cookie initiate-nonce initiate-box
 initiate-cookie = cookie    ; Server-provided cookie
 initiate-nonce = 8OCTET     ; Short nonce, prefixed by "CurveZMQINITIATE"
-initiate-box = 112*OCTET    ; Box [C + vouch + metadata](C'->S')
+initiate-box = 144*OCTET    ; Box [C + vouch + metadata](C'->S')
 ;   This is the text sent encrypted in the box
 vouch = vouch-nonce vouch-box
 vouch-nonce = 16OCTET       ; Long nonce, prefixed by "VOUCH---"
-vouch-box = 48OCTET         ; Box [C'](C->S)
+vouch-box = 80OCTET         ; Box [C',S](C->S')
 metadata = *property
 property = name value
 name = OCTET *name-char
@@ -232,7 +232,7 @@ The vouch itself consists of two fields:
 
 * A client long nonce (16 octets). This nonce SHALL be implicitly prefixed with the 8 characters @@"VOUCH---"@@ to give a 24-octet nonce, used to encrypt and decrypt the vouch box. This nonce SHALL be unique for all INITIATE commands from this client permanent key. A valid strategy is to use 16 random octets from a sufficiently good entropy source.
 
-* The vouch box (48 octets), that encrypts the client's transient key C' (32 octets) from the client permanent key C to the server permanent key S.
+* The vouch box (80 octets), that encrypts the client's transient key C' (32 octets) and the server permanent key S (32 octets) from the client permanent key C to the server transient key S'.
 
 The metadata consists of a list of properties consisting of name and value as size-specified strings. The name SHALL be 1 to 255 characters. Zero-sized names are not valid. The case (upper or lower) of names SHALL NOT be significant. The value SHALL be 0 to 2^31-1 octets of opaque binary data. Zero-sized values are allowed. The semantics of the value depend on the property. The value size field SHALL be four octets, in network order. Note that this size field will mostly not be aligned in memory.
 
@@ -277,6 +277,8 @@ The recipient SHALL validate all fields and SHALL reject and disconnect from pee
 +++ Differences from CurveCP
 
 While CurveCP defines a security handshake and traffic control for messages sent over UDP, CurveZMQ defines just a security handshake for messages sent over a connected stream protocol such as TCP, IPC, SCTP, or similar. We have made these significant changes from CurveCP:
+
+* The INITIATE command vouch box is Box[C',S](C->S') instead of Box[C'](C->S), as recommended by [https://codesinchaos.wordpress.com/2012/09/09/curvecp-1/ Codes in Chaos] to reduce the risk of client impersonation.
 
 * We use the term "command" instead of "packet" to represent an atomic block of data sent over the network.
 

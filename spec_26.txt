@@ -218,7 +218,7 @@ The client SHALL validate all fields and SHALL reject and disconnect from server
 
 When the client receives a WELCOME command it can decrypt this to receive the server's transient key S', and the cookie, which it must send back to the server. The cookie is the only memory of the server's secret transient key s'.
 
-The client SHALL respond to a valid WELCOME with an INITIATE command. This command SHALL be at least 225 octets long and have the following fields:
+The client SHALL respond to a valid WELCOME with an INITIATE command. This command SHALL be at least 257 octets long and have the following fields:
 
 * The command ID, which is [8]"INITIATE".
 
@@ -226,7 +226,7 @@ The client SHALL respond to a valid WELCOME with an INITIATE command. This comma
 
 * A client short nonce (8 octets). The nonce SHALL be implicitly prefixed with the 16 characters "CurveZMQINITIATE" to form the 24-octet nonce used to encrypt and decrypt the vouch box.
 
-* The initiate box (112 or more octets), by which the client securely sends its permanent public key C to the server. The initiate box holds the client permanent public key C (32 octets), the vouch (64 octets), and the metadata (0 or more octets), encrypted from the client's transient key C' to the server's transient key S'.
+* The initiate box (144 or more octets), by which the client securely sends its permanent public key C to the server. The initiate box holds the client permanent public key C (32 octets), the vouch (96 octets), and the metadata (0 or more octets), encrypted from the client's transient key C' to the server's transient key S'.
 
 The vouch itself consists of two fields:
 

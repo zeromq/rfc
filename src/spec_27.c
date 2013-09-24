@@ -159,9 +159,9 @@ external_handler (void *args)
 
         // Get originating socket identity
         char *identity = zmsg_popstr (request);
+        char *mechanism = zmsg_popstr (request);
+
         if (streq (identity, "BOB")) {
-            //  Get and validate mechanism
-            char *mechanism = zmsg_popstr (request);
             if (streq (mechanism, "NULL")) {
                 status_code = "200";
                 status_text = "OK";
@@ -196,11 +196,12 @@ external_handler (void *args)
         zmsg_destroy (&request);
 
         zmsg_t *reply = zmsg_new ();
-        zmsg_addstr (reply, "1.0");       //  ZAP version 1.0
-        zmsg_addstr (reply, sequence);    //  Sequence number
+        zmsg_addstr (reply, "1.0");     //  ZAP version 1.0
+        zmsg_addstr (reply, sequence);  //  Sequence number
         zmsg_addstr (reply, status_code);
         zmsg_addstr (reply, status_text);
         zmsg_addstr (reply, streq (status_code, "200")? "joe": "");
+        zmsg_addstr (reply, "");        //  Metadata
         zmsg_send (&reply, handler);
         free (sequence);
     }

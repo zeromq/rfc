@@ -40,7 +40,7 @@ A ZAP handler can then talk to further components if the architecture needs it. 
 
 +++ ZAP is a Remote Procedure Call
 
-ZAP uses the ZeroMQ request-reply pattern. Specifically, the servers use a REQ socket, and the handler uses a REP socket. In practice the servers may use DEALER sockets in order to send multiple requests at once, and handlers may use ROUTER sockets for the same reason. Furthermore, ZAP messages contain the request-reply address envelope so that requests can be sent along multiple intermediaries, and replies will return to the right server.
+ZAP uses the ZeroMQ request-reply pattern. Specifically, the handler binds a REP socket, and the server connects a REQ socket. In practice the servers may use DEALER sockets in order to send multiple requests at once, and handlers may use ROUTER sockets for the same reason. Furthermore, ZAP messages contain the request-reply address envelope so that requests can be sent along multiple intermediaries, and replies will return to the right server.
 
 +++ Extensible Security
 

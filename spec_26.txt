@@ -66,11 +66,11 @@ This handshake provides a number of protections but mainly, //perfect forward se
 
 The CurveZMQ protocol has a synchronous handshake, followed by an asynchronous exchange of messages in either direction. Each operation in the protocol is a "command", which consists of a command name followed by a command body. Command names are 8 octets, padded with spaces, while command bodies have a binary encoding that depends on the command.
 
-CurveZMQ has these commands: HELLO, WELCOME, INITIATE, READY, and MESSAGE. A connection always starts with the client sending HELLO to the server, which responds with READY:
+CurveZMQ has these commands: HELLO, WELCOME, INITIATE, READY, and MESSAGE. A connection always starts with the client sending HELLO to the server, which responds with WELCOME:
 
 [[code]]
 C:HELLO
-S:READY
+S:WELCOME
 [[/code]]
 
 After this exchange each side has the other's public transient key. The client then sends an INITIATE command, and the server responds with READY:
@@ -86,7 +86,7 @@ After this exchange each side has authenticated the other and exchanged metadata
 C:MESSAGE | S:MESSAGE
 [[/code]]
 
-Either peer can close their side of the connection at any time. If a peer has not sent metadata, and closes its side of the connection, this is considered a hard error. If a peer closes its side of the connection after sending its metadata, this is considered a soft error (and the implementation can therefore retry later). There is no command to close the connection, and no explicit error reporting.
+Either peer can close their side of the connection at any time. If a peer has not sent metadata, and closes its side of the connection, this is considered a hard error. If one peer closes its side of the connection after sending its metadata, this is considered a soft error (and the disconnected peer can therefore retry later). There is no command to close the connection, and no explicit error reporting.
 
 CurveZMQ is designed to be implemented a black box that accepts and produces correctly-formatted commands, and outputs data messages on the side, and runs a state machine internally for each connection.
 

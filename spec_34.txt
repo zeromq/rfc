@@ -1,7 +1,6 @@
-This document describes an extension of the ZMQ security mechanism to be able to authenticate a client without the client having to have a private key generated beforehand.
-Instead, keys are generated from a pregenerated private key on the server side (which have been generated during some kind of registration process) and from a username/password combination on the client side.
+This document describes an extension of the ZMQ security mechanism to be able to authenticate a client without the client having to have a private key generated beforehand. Instead, keys are generated from a pregenerated private key on the server side (which have been generated during some kind of registration process) and from a username/password combination on the client side.
 
-* Name: rfc.zeromq.org/spec:26/SRPZMQ
+* Name: rfc.zeromq.org/spec:34/SRPZMQ
 * Editor: Diego Duclos <diego.duclos@palmstonegames.com>
 * See also: http://pythonhosted.org/srp/srp.html#srp-6a-protocol-description, http://srp.stanford.edu/.
 
@@ -15,22 +14,24 @@ This Specification is a [http://www.digistan.org/open-standard:definition free a
 
 ++ SRPZMQ Specification
 
-SRPZMQ is a protocol for secure messaging across the internet, in much the same way as CurveZMQ is.
-However, instead of being based on curveCP, it is based on SRP, as specified by Stanford University at http://srp.stanford.edu/.
+SRPZMQ is a protocol for secure messaging across the internet, in much the same way as CurveZMQ is. However, instead of being based on curveCP, it is based on SRP, as specified by Stanford University at http://srp.stanford.edu/.
 
 ++ Goals
 
 The goals are very similar to the ones for CurveZMQ, with a few additions: The client must not need know any preshared secret, a username/password combination typed in at runtime by the user should suffice.
+
 Both username and password must be able to be any arbitrary byte array, to give the user freedom to pick a combination which they can readily remember.
+
 In addition, it must be as hard as possible for an attacker that has managed to retrieve a secret key for a user to find the password for that user.
 
-++ Why SRP ?
+++ Why SRP?
 
 SRP has several favorable factors that are attractive, when choosing a reasonably fast hashing algorithm and prime number N, it is both fast and very secure, as well as meeting all of the security goals that the curveZMQ algorithm meets.
 
 ++ General Design
 
 A connection is opened from client to server, the client sends its username to the server, along with a generated public ephemereal value we'll call A.
+
 The server replies using a salt, along with a challenge, which we'll call B, which is generated from a preshared large prime/modulo combination, a random number, and the client's private key, which is known by the server.
 
 Using this information, both the client and the server must generate a session key, this is only possible if the following factors have been met:
@@ -39,18 +40,18 @@ Using this information, both the client and the server must generate a session k
 2) The client must know the password corresponding to the private key.
 
 if these 2 factors are not met, the client and server will not generate the same session key and authentication will fail.
+
 After the session key has been generated on both ends, the two parties need to prove to eachother that they indeed know the key.
 
-to this end, the client sends a packet to the server containing its proof of K
-At this point, the server knows the client knows it is who it says it is, and it can send its own proof of K to the client, which will prove to the client that the server is indeed who they pretend they are.
+To this end, the client sends a packet to the server containing its proof of K. At this point, the server knows the client knows it is who it says it is, and it can send its own proof of K to the client, which will prove to the client that the server is indeed who they pretend they are.
 
-Once this is done, the client and server can both use the session key K as a symmetric encryption key for further communication.
-As the session key K is based on random session specific information, it will be discarded at end of session and must never be reused.
+Once this is done, the client and server can both use the session key K as a symmetric encryption key for further communication. As the session key K is based on random session specific information, it will be discarded at end of session and must never be reused.
 
 A few key things to note: 
-Both the client and the server must be using the same large, safe prime N and generator g
-The larger the prime N chosen, the more expensive the algorithm will be, and the larger the values sent through the network will be, but the harder it will be to brute-force through.
-A properly sized N value must be chosen such that a denial of service attack on the server is not practical and enough security is provided.
+
+* Both the client and the server must be using the same large, safe prime N and generator g
+* The larger the prime N chosen, the more expensive the algorithm will be, and the larger the values sent through the network will be, but the harder it will be to brute-force through.
+* A properly sized N value must be chosen such that a denial of service attack on the server is not practical and enough security is provided.
 
 The SRP spec also contains a few mandatory validations, they are as follows:
 
@@ -62,30 +63,36 @@ The SRP spec also contains a few mandatory validations, they are as follows:
 
 +++ Primary variables used in SRP 6a
 
-Variables	Description
-N			A large, safe prime (N = 2q+1, where q is a Sophie Germain prime) All arithmetic is performed in the field of integers modulo N
-g			A generator modulo N
-s			Small salt for the verification key
-I			Username
-p			Cleartext password
-H()			One-way hash function
-a,b			Secret, random values
-K			Session key
+[[code]]
+Variables   Description
+
+N           A large, safe prime (N = 2q+1, where q is a Sophie Germain prime) All arithmetic is performed in the field of integers modulo N
+g           A generator modulo N
+s           Small salt for the verification key
+I           Username
+p           Cleartext password
+H()         One-way hash function
+a,b         Secret, random values
+K           Session key
+[[/code]]
 
 +++ Derived Values used in SRP 6a
-Derived Values							Description
-k = H(N,g)								Multiplier Parameter
-A = g^a	Public 							ephemeral value
-B = kv + g^b							Public ephemeral value
-x = H(s, H( I | ‘:’ | p ))				Private key (as defined by RFC 5054)
-v = g^x									Password verifier
-u = H(A,B)								Random scrambling parameter
-M = H(H(N) xor H(g), H(I), s, A, B, K)	Session key verifier
+
+[[code]]
+Derived Values                          Description
+
+k = H(N,g)                              Multiplier Parameter
+A = g^a                                 Public ephemeral value
+B = kv + g^b                            Public ephemeral value
+x = H(s, H( I | ‘:’ | p ))              Private key (as defined by RFC 5054)
+v = g^x                                 Password verifier
+u = H(A,B)                              Random scrambling parameter
+M = H(H(N) xor H(g), H(I), s, A, B, K)  Session key verifier
+[[/code]]
 
 +++ Specific algorithms chosen
 
-It is a goal to leave as little as possible up to the user configuration wise.
-However, SRP leaves a number of things open to the user, namely: the hashing algorithm to use, the large safe prime to use and the generator number.
+It is a goal to leave as little as possible up to the user configuration wise. However, SRP leaves a number of things open to the user, namely: the hashing algorithm to use, the large safe prime to use and the generator number.
 
 <TODO: Discuss which prime to pick and which hashing algorithm to pick>
 

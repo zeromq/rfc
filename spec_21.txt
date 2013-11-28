@@ -278,6 +278,7 @@ A stateful class MAY provide these methods, and SHALL use these names when provi
 
 * A duplicator method {{myp_mymod_dup ()}}
 * A set of list navigation methods {{myp_mymod_first ()}} and {{myp_mymod_next ()}}.
+* Print methods {{myp_mymod_print ()}} and {{myp_mymod_fprint ()}}.
 
 A stateless class SHALL provide this method:
 

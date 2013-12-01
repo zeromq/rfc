@@ -4,23 +4,15 @@ The ZeroMQ Realtime Exchange Protocol (ZRE) governs how a group of peers on a ne
 * Editor: Pieter Hintjens <ph@imatix.com>
 * State: stable
 
-++ License
+++ Preamble
 
 Copyright (c) 2009-2013 iMatix Corporation
 
-This Specification is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 3 of the License, or (at your option) any later version.
+This Specification is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 3 of the License, or (at your option) any later version. This Specification is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details. You should have received a copy of the GNU General Public License along with this program; if not, see <http://www.gnu.org/licenses>.
 
-This Specification is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+This Specification is a [http://www.digistan.org/open-standard:definition free and open standard] and is governed by the Digital Standards Organization's [http://www.digistan.org/spec:1/COSS Consensus-Oriented Specification System].
 
-You should have received a copy of the GNU General Public License along with this program; if not, see <http://www.gnu.org/licenses>.
-
-++ Change Process
-
-This Specification is a free and open standard[((bibcite fandos))] and is governed by the Digital Standards Organization's Consensus-Oriented Specification System (COSS)[((bibcite coss))].
-
-++ Language
-
-The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED",  "MAY", and "OPTIONAL" in this document are to be interpreted as described in RFC 2119[((bibcite rfc2119))].
+The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in [http://tools.ietf.org/html/rfc2119 RFC 2119].
 
 ++ Goals
 
@@ -33,7 +25,7 @@ The ZRE protocol provides a way for a set of nodes on a local network to discove
 * To be neutral with respect to operating system, programming language, and hardware.
 * To allow any number of nodes to run in one process, to allow large-scale simulation and testing.
 * To provide mechanisms for collecting logging information across the network.
-* To be compatible with related protocols like FILEMQ [((bibcite filemq))]
+* To be compatible with related protocols like [http://rfc.zeromq.org/spec:19 rfc.zeromq.org FILEMQ].
 
 ++ Implementation
 
@@ -43,11 +35,7 @@ A ZRE //node// represents a source or a target for messaging. Nodes usually map 
 
 +++ Node Discovery
 
-ZRE uses UDP IPv4 //beacon// broadcasts to discover nodes. This works as follows:
-
-* A ZRE node SHALL listen to the ZRE discovery service which is UDP port 5670 (ZRE-DISC port assigned by IANA).
-* Each ZRE node SHALL broadcast, at regular intervals, a UDP beacon that identifies itself to any listening nodes on the network.
-* When a ZRE node receives a beacon from a node that it does not already know about, it SHALL consider this to be a new peer.
+ZRE uses UDP IPv4 //beacon// broadcasts to discover nodes. Each ZRE node SHALL listen to the ZRE discovery service which is UDP port 5670 (ZRE-DISC port assigned by IANA). Each ZRE node SHALL broadcast, at regular intervals, on UDP port 5670 a beacon that identifies itself to any listening nodes on the network.
 
 The ZRE beacon consists of one 22-octet UDP message with this format:
 
@@ -59,13 +47,15 @@ The ZRE beacon consists of one 22-octet UDP message with this format:
        Header               Body
 [[/code]]
 
-Notes for implementors:
+The header SHALL consist of the letters 'Z', 'R', and 'E', followed by the beacon version number, which SHALL be %x01.
 
-* The header SHALL consist of the letters 'Z', 'R', and 'E', followed by the beacon version number, which SHALL be %x01.
-* The body SHALL consist of the sender's 16-octet UUID, followed by a two-byte mailbox port number in network order.
-* A valid beacon SHALL: use a recognized header; use a body of the right size; and provide a non-zero mailbox port number.
-* A node that receives an invalid beacon SHALL discard it silently. A node MAY log the sender IP address for the purposes of debugging.
-* A node SHALL discard beacons that it receives from itself.
+The body SHALL consist of the sender's 16-octet UUID, followed by a two-byte mailbox port number in network order. If the port is non-zero this signals that the peer will accept ZeroMQ TCP connections on that port number. If the port is zero, this signals that the peer is disconnecting from the network.
+
+A valid beacon SHALL use a recognized header and a body of the correct size. A node that receives an invalid beacon SHALL discard it silently. A node MAY log the sender IP address for the purposes of debugging. A node SHALL discard beacons that it receives from itself.
+
+When a ZRE node receives a beacon from a node that it does not already know about, with a non-zero port number, it SHALL consider this to be a new peer.
+
+When a ZRE node receives a beacon from a known node, with a non-zero port number, it SHALL disconnect from this peer.
 
 +++ Interconnection Model
 
@@ -108,11 +98,11 @@ traffic         = S:WHISPER
 ;   Greet a peer so it can connect back to us
 S:HELLO         = header %x01 ipaddress mailbox groups status headers
 header          = signature sequence
-signature       = %xAA %xA1     
+signature       = %xAA %xA1
 sequence        = 2OCTET        ; Incremental sequence number
 ipaddress       = string        ; Sender IP address
-string          = size *VCHAR   
-size            = OCTET         
+string          = size *VCHAR
+size            = OCTET
 mailbox         = 2OCTET        ; Sender mailbox port number
 groups          = strings       ; List of groups sender is in
 strings         = size *string
@@ -251,15 +241,4 @@ size            = OCTET
 
 ++ Security Aspects
 
-ZRE does not have any security at this stage.
-
-++ References
-
-[[bibliography]]
-: rfc2119 : "Key words for use in RFCs to Indicate Requirement Levels" - [http://tools.ietf.org/html/rfc2119 ietf.org]
-: rfc4422 : "Simple Authentication and Security Layer" - [http://tools.ietf.org/html/rfc4422 ietf.org]
-: fandos : "Definition of a Free and Open Standard" - [http://www.digistan.org/open-standard:definition digistan.org]
-: coss : "Consensus Oriented Specification System" - [http://www.digistan.org/spec:1/COSS digistan.org]
-: zmtp : "15/ZMTP - ZeroMQ Message Transport Protocol" - [http://rfc.zeromq.org/spec:15 rfc.zeromq.org]
-: filemq : "19/FILEMQ - The FileMQ Protocol" - [http://rfc.zeromq.org/spec:19 rfc.zeromq.org]
-[[/bibliography]]
+ZRE security is handled by the underlying transport. For ZMTP v2 and v1, there is no security model and all information is exchanged in clear text. For ZMTP v3, any of the defined security mechanism may be used.

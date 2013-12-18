@@ -96,8 +96,7 @@ traffic         = S:WHISPER
                 / S:PING R:PING-OK
 
 ;   Greet a peer so it can connect back to us
-S:HELLO         = header %x01 ipaddress mailbox groups status headers
-header          = signature sequence
+S:HELLO         = signature %x01 sequence ipaddress mailbox groups status headers
 signature       = %xAA %xA1
 sequence        = 2OCTET        ; Incremental sequence number
 ipaddress       = string        ; Sender IP address
@@ -112,26 +111,26 @@ dictionary      = size *key-value
 key-value       = string        ; Formatted as name=value
 
 ; Send a message to a peer
-S:WHISPER       = header %x02 content
+S:WHISPER       = signature %x02 sequence content
 content         = FRAME         ; Message content as 0MQ frame
 
 ; Send a message to a group
-S:SHOUT         = header %x03 group content
+S:SHOUT         = signature %x03 sequence group content
 group           = string        ; Name of group
 content         = FRAME         ; Message content as 0MQ frame
 
 ; Join a group
-S:JOIN          = header %x04 group status
+S:JOIN          = signature %x04 sequence group status
 status          = OCTET         ; Sender group status sequence
 
 ; Leave a group
-S:LEAVE         = header %x05 group status
+S:LEAVE         = signature %x05 sequence group status
 
 ; Ping a peer that has gone silent
-S:PING          = header %06
+S:PING          = signature %06 sequence
 
 ; Reply to a peer's ping
-R:PING-OK       = header %07
+R:PING-OK       = signature %07 sequence
 [[/code]]
 
 +++ ZRE Commands
@@ -216,7 +215,7 @@ The following ABNF grammar defines the ZRE/LOG protocol:
 zrelog-protocol = *LOG
 
 ;   Send a log message to the log service
-LOG             = header %x01 level event node peer time data
+LOG             = signature %x01 level event node peer time data
 header          = signature
 signature       = %xAA %xA2
 

@@ -37,8 +37,8 @@ The client authenticates itself to the server by sending a HELLO command. The se
 The following ABNF grammar defines the PLAIN security handshake and message flow:
 
 [[code]]
-plain = C:hello S:welcome
-        C:initiate S:ready
+plain = C:hello ( S:welcome | S:error )
+        C:initiate ( S:ready | S:error )
      *( C:message | S:message )
      
 hello = command-size %d5 "HELLO" username password
@@ -52,4 +52,4 @@ initiate = command-size %d8 "INITIATE" metadata
 ready = command-size %d5 "READY" metadata
 [[/code]]
 
-All command bodies consist of an 8-character command name, padded with spaces, followed by formatted binary fields. The ZMTP 3.0 specification defines the grammar for message, command-size, and metadata.
+All command bodies consist of an 8-character command name, padded with spaces, followed by formatted binary fields. The ZMTP 3.0 specification defines the grammar for message, command-size, metadata, and error.

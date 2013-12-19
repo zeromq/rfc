@@ -42,6 +42,10 @@ The changes in version 3.0 of the specification are a simpler version numbering 
 
 +++ Recent Change History
 
+19 December 2013:
+
+* Added ERROR command to allow explicit error response during security handshake.
+
 22 June 2013:
 
 * Allow commands to be mixed with messages at any point in the protocol.
@@ -191,15 +195,11 @@ If the mechanism that the peer received does not exactly match the mechanism it 
 
 +++ Error Handling
 
-ZMTP has no explicit error responses. The peer SHALL treat all errors as fatal and act by closing the connection. When a peer sees that the other peer has closed the connection before the security handshake was complete, it SHALL NOT reconnect. If the other peer closes the connection after the security handshake was complete, the peer SHOULD reconnect.
+ZMTP allows an explicit fatal error response during the mechanism handshake, using the ERROR command. The peer SHALL treat an ERROR command as fatal, and act by closing the connection, and not re-connecting using the same security credentials.
+
+An implementation SHOULD signal any other error, e.g. overloaded, temporarily refusing connections, etc. by closing the connection. The peer SHALL treat an unexpected connection close as a temporary error, and SHOULD reconnect.
 
 To avoid connection storms, peers should reconnect after a short and possibly randomized interval. Further, if a peer reconnects more than once, it should increase the delay between reconnects. Various strategies are possible.
-
-If a peer closes its connection before the connection was completed, this SHOULD be treated as a permanent failure, i.e. the implementation SHOULD NOT reconnect automatically.
-
-If the peer closes its side of the connection after the connection was made successfully, this SHOULD be treated as a temporary failure, and the implementation SHOULD reconnect after a suitable waiting period.
-
-In some cases there is no visible difference between an error disconnect and a normal disconnect. The peer MAY in such cases use timing as an indicator (an immediate disconnect is an error, a later disconnect is "normal").
 
 +++ Framing
 
@@ -225,7 +225,7 @@ Commands are used by the ZMTP implementation and not generally visible to the ap
 
 These are the commands that this specification defines:
 
-* READY - implements the NULL security handshake, see "The NULL Security Mechanism" below.
+* READY and ERROR - implements the NULL security handshake, see "The NULL Security Mechanism" below.
 * PING and PONG - heartbeat requests and replies, see "Connection Heartbeating" below.
 * SUBSCRIBE and CANCEL - subscription management, see "The Publish-Subscribe Pattern", below.
 
@@ -244,13 +244,15 @@ To complete a NULL security handshake, both peers SHALL send each other a READY 
 When a peer uses the NULL security mechanism, the as-server field MUST be zero. The following ABNF grammar defines the NULL security handshake:
 
 [[code]]
-null = ready *message
+null = ready *message | error
 ready = command-size %d5 "READY" metadata
 metadata = *property
 property = name value
 name = OCTET 1*255name-char
 name-char = ALPHA | DIGIT | "-" | "_" | "." | "+"
 value = 4OCTET *OCTET       ; Size in network byte order
+error = command-size %d5 "ERROR" error-reason
+error-reason = OCTET 1*255VCHAR
 [[/code]]
 
 The message and command-size are defined by the ZMTP grammar previously explained.
@@ -268,6 +270,8 @@ P:greeting          R:greeting
 P:ready             R:ready
 P:message...        R:message...
 [[/code]]
+
+The body of the ERROR command contains an error reason that can be logged. It has no defined semantic value.
 
 +++ Connection Metadata
 

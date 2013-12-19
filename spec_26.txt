@@ -105,7 +105,9 @@ Elliptic curve encryption depends on mixing a unique number into each encryption
 The following ABNF grammar defines the CurveZMQ protocol from a high level:
 
 [[code]]
-curvezmq = C:hello S:welcome C:initiate S:ready *message
+curvezmq = C:hello ( S:welcome | S:error )
+           C:initiate ( S:ready | S:error )
+           *message
 
 ;   HELLO command, 200 octets
 hello = %d5 "HELLO" version padding hello-client hello-nonce hello-box
@@ -145,6 +147,10 @@ value-data = *OCTET         ; 0 or more octets
 ready = %d5 "READY" ready-nonce ready-box
 ready-nonce = 8OCTET        ; Short nonce, prefixed by "CurveZMQREADY---"
 ready-box = 16*OCTET        ; Box [metadata](S'->C')
+
+;   ERROR command, 6+ octets
+error = %d5 "ERROR" error-reason
+error-reason = OCTET 1*255VCHAR
 
 ;   MESSAGE command, 33+ octets
 message = %d7 "MESSAGE" message_nonce message-box

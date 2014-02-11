@@ -60,7 +60,7 @@ C4 is meant to provide a reusable optimal collaboration model for open source so
 
 +++ Licensing and Ownership
 
-* The project SHALL use the GPLv3 or a variant thereof (LGPL, AGPL).
+* The project SHALL use a share-alike license, such as the GPLv3 or a variant thereof (LGPL, AGPL), or the MPLv2.
 
 * All contributions to the project source code ("patches") SHALL use the same license as the project.
 

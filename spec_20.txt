@@ -25,7 +25,6 @@ The ZRE protocol provides a way for a set of nodes on a local network to discove
 * To be neutral with respect to operating system, programming language, and hardware.
 * To allow any number of nodes to run in one process, to allow large-scale simulation and testing.
 * To provide mechanisms for collecting logging information across the network.
-* To be compatible with related protocols like [http://rfc.zeromq.org/spec:19 rfc.zeromq.org FILEMQ].
 
 ++ Implementation
 
@@ -33,7 +32,7 @@ The ZRE protocol provides a way for a set of nodes on a local network to discove
 
 A ZRE //node// represents a source or a target for messaging. Nodes usually map to applications. A ZRE node is identified by a 16-octet universally unique identifier (UUID). ZRE does not define how a node is created or destroyed but does assume that nodes have a certain durability.
 
-+++ Node Discovery
++++ Node Discovery and Presence
 
 ZRE uses UDP IPv4 //beacon// broadcasts to discover nodes. Each ZRE node SHALL listen to the ZRE discovery service which is UDP port 5670 (ZRE-DISC port assigned by IANA). Each ZRE node SHALL broadcast, at regular intervals, on UDP port 5670 a beacon that identifies itself to any listening nodes on the network.
 
@@ -198,10 +197,9 @@ To announce an extension protocol a node adds a headers field to the HELLO comma
 service-name=tcp://ipaddress:port
 [[/code]]
 
-* The ZRE log collection protocol (ZRE/LOG), which provides a subsystem for collecting log data from a distributed network. The service name is "X-ZRELOG".
-* The file message queuing protocol (FILEMQ), which provides a way to distribute content between nodes. The service name is "X-FILEMQ".
+We specify these extension protocols formally:
 
-FILEMQ is documented in its own RFC. We describe ZRE/LOG here.
+* The ZRE log collection protocol (ZRE/LOG), which provides a subsystem for collecting log data from a distributed network. The service name is "X-ZRELOG".
 
 +++ The ZRE/LOG Extension Protocol
 
@@ -237,6 +235,33 @@ data            = string        ;  Printable error text
 string          = size *VCHAR
 size            = OCTET
 [[/code]]
+
+++ Node Discovery and Presence
+
+ZRE uses UDP IPv4 //beacon// broadcasts to discover nodes and track their presence. This works as follows:
+
+* A ZRE node SHALL listen to the ZRE discovery service which is UDP port 5670 (ZRE-DISC port assigned by IANA).
+* Each ZRE node SHALL broadcast, at regular intervals, a UDP beacon that identifies itself to any listening nodes on the network.
+* When a ZRE node receives a beacon from a node that it does not already know about, it SHALL consider this to be a new peer.
+* When a ZRE node stops receiving beacons from a peer that it knows about, after a certain interval it SHALL consider this peer to be disconnected or dead.
+
+The ZRE beacon consists of one 22-octet UDP message with this format:
+
+[[code]]
++---+---+---+------+  +------+------+
+| Z | R | E | %x01 |  | UUID | port |
++---+---+---+------+  +------+------+
+
+       Header               Body
+[[/code]]
+
+Notes for implementors:
+
+* The header SHALL consist of the letters 'Z', 'R', and 'E', followed by the beacon version number, which SHALL be %x01.
+* The body SHALL consist of the sender's 16-octet UUID, followed by a two-byte mailbox port number in network order.
+* A valid beacon SHALL: use a recognized header; use a body of the right size; and provide a non-zero mailbox port number.
+* A node that receives an invalid beacon SHALL discard it silently. A node MAY log the sender IP address for the purposes of debugging.
+* A node SHALL discard beacons that it receives from itself.
 
 ++ Security Aspects
 

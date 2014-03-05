@@ -3,6 +3,8 @@ The Collective Code Construction Contract (C4) is an evolution of the github.com
 * Name: rfc.zeromq.org/spec:16/C4
 * Editor: Pieter Hintjens <ph@imatix.com>
 
+Note: this RFC is superceded by [http://rfc.zeromq.org/spec:22 rfc.zeromq.org/spec:22/C4.1].
+
 ++ Language
 
 The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED",  "MAY", and "OPTIONAL" in this document are to be interpreted as described in RFC 2119[((bibcite rfc2119))].

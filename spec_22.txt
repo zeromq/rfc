@@ -92,11 +92,11 @@ C4 is meant to provide a reusable optimal collaboration model for open source so
 
 * Change on the project SHALL be governed by the pattern of accurately identifying problems and applying minimal, accurate solutions to these problems.
 
-* To initiate changes, a user SHOULD log an issue on the project Platform issue tracker.
+* To request changes, a user SHOULD log an issue on the project Platform issue tracker.
 
-* The user SHOULD write the issue by describing the problem they face or observe.
+* The user or Contributor SHOULD write the issue by describing the problem they face or observe.
 
-* The user SHOULD seek consensus on the accuracy of their observation, and the value of solving the problem.
+* The user or Contributor SHOULD seek consensus on the accuracy of their observation, and the value of solving the problem.
 
 * Users SHALL NOT log feature requests, ideas, suggestions, or any solutions to problems that are not explicitly documented and provable.
 
@@ -108,15 +108,17 @@ C4 is meant to provide a reusable optimal collaboration model for open source so
 
 * A Contributor SHALL NOT commit changes directly to the project.
 
+* If the Platform implements pull requests as issues, a Contributor MAY directly send a pull request without logging a separate issue.
+
 * To discuss a patch, people MAY comment on the Platform pull request, on the commit, or elsewhere.
 
 * To accept or reject a patch, a Maintainer SHALL use the Platform interface.
 
-* Maintainers SHALL NOT accept their own patches.
+* Maintainers SHOULD NOT merge their own patches except in exceptional cases, such as non-responsiveness from other Maintainers for an extended period (more than 1-2 days).
 
 * Maintainers SHALL NOT make value judgments on correct patches.
 
-* Maintainers SHALL merge correct patches rapidly.
+* Maintainers SHALL merge correct patches from other Contributors rapidly.
 
 * The Contributor MAY tag an issue as "Ready" after making a pull request for the issue.
 

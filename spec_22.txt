@@ -6,7 +6,7 @@ The Collective Code Construction Contract (C4) is an evolution of the github.com
 
 ++ Language
 
-The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED",  "MAY", and "OPTIONAL" in this document are to be interpreted as described in RFC 2119[((bibcite rfc2119))].
+The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in [http://tools.ietf.org/html/rfc2119 RFC 2119].
 
 ++ Goals
 
@@ -171,11 +171,3 @@ C4 is meant to provide a reusable optimal collaboration model for open source so
 * The [http://zeromq.org ZeroMQ community] uses the C4.1 process for many projects.
 * [http://www.ossec.net/ OSSEC] [http://ossec-docs.readthedocs.org/en/latest/oRFC/orfc-1.html uses the C4.1 process].
 * The [http://zerovm.org ZeroVM] community uses [https://github.com/zerovm/zvm-community/blob/master/process/c4_1.md a C4.1 fork for their work]. 
-
-++ References
-
-[[bibliography]]
-: rfc2119 : "Key words for use in RFCs to Indicate Requirement Levels" - [http://tools.ietf.org/html/rfc2119 ietf.org]
-: fandos : "Definition of a Free and Open Standard" - [http://www.digistan.org/open-standard:definition digistan.org]
-: coss : "Consensus Oriented Specification System" - [http://www.digistan.org/spec:1/COSS digistan.org]
-[[/bibliography]]

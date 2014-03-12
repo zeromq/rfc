@@ -49,7 +49,7 @@ OHAI            = signature %x01 protocol version
 signature       = %xAA %xA3
 protocol        = string        ; Must be "FILEMQ"
 string          = size *VCHAR
-size            = OCTET
+size            = number-1
 version         = %x02
 
 ;   The server grants the client access
@@ -59,8 +59,11 @@ OHAI-OK         = signature %x04
 ICANHAZ         = signature %x05 path options cache
 path            = string        ; Full path or path prefix
 options         = dictionary
-dictionary      = size *key-value
-key-value       = string        ; Formatted as name=value
+dictionary      = count *( name value )
+count           = number-4
+name            = string
+value           = longstr
+longstr         = number-4 *VCHAR
 cache           = dictionary    ; File SHA-1 signatures
 
 ;   The server confirms the subscription
@@ -68,17 +71,17 @@ ICANHAZ-OK      = signature %x06
 
 ;   The client sends credit to the server
 NOM             = signature %x07 credit
-credit          = 8OCTET        ; 64-bit integer, network order
+credit          = number-8      ; Amount of credit in bytes
 
 ;   The server sends a chunk of file data
 CHEEZBURGER     = signature %x08 sequence operation filename
                   offset headers chunk
-sequence        = 8OCTET        ; 64-bit integer, network order
+sequence        = nunber-8      ; Chunk sequence, 0 and up
 operation       = create | delete
 create          = %x01          ; Octet
 delete          = %x02          ; Octet
 filename        = string
-offset          = 8OCTET        ; 64-bit integer, network order
+offset          = number-8      ; File offset in bytes
 headers         = dictionary
 chunk           = FRAME
 
@@ -97,6 +100,11 @@ reason          = string
 
 ;   Server error reply - client sent an invalid command
 S:RTFM          = signature %x81 reason
+
+; Numbers are unsigned integers in network byte order
+number-1        = 1OCTET
+number-4        = 4OCTET
+number-8        = 8OCTET
 [[/code]]
 
 +++ Interconnection Model

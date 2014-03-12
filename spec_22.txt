@@ -8,18 +8,6 @@ The Collective Code Construction Contract (C4) is an evolution of the github.com
 
 The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED",  "MAY", and "OPTIONAL" in this document are to be interpreted as described in RFC 2119[((bibcite rfc2119))].
 
-++ Changes over Revision Zero
-
-* Removal of requirement to use Semantic Versioning, which allows changes to APIs that are forbidden by C4.
-
-* Clarification of how far a patch has to compile and pass tests.
-
-* Clarification that we maintain stabilization projects using the same process.
-
-* Addition of rule that accepted contributors are systematically invited to become maintainers.
-
-* Addition of section on "Project Administration".
-
 ++ Goals
 
 C4 is meant to provide a reusable optimal collaboration model for open source software projects. It has these specific goals:

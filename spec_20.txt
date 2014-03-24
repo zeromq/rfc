@@ -222,11 +222,13 @@ ERROR           = %x01
 WARNING         = %x02
 INFO            = %x03
 
-event           = JOIN / LEAVE / ENTER / EXIT
-JOIN            = %x01
-LEAVE           = %x02
-ENTER           = %x03
-EXIT            = %x04
+event           = JOIN / LEAVE / ENTER / EXIT / SEND / RECV
+JOIN            = %x01          ;  We joined a group
+LEAVE           = %x02          ;  We left a group
+ENTER           = %x03          ;  Peer joined network
+EXIT            = %x04          ;  Peer left network
+SEND            = %x05          ;  Sent outgoing message
+RECV            = %x06          ;  Received message
 
 node            = 2OCTET        ;  Hash of node UUID
 peer            = 2OCTET        ;  Hash of peer UUID

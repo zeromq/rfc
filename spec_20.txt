@@ -2,7 +2,7 @@ The ZeroMQ Realtime Exchange Protocol (ZRE) governs how a group of peers on a ne
 
 * Name: rfc.zeromq.org/spec:20/ZRE
 * Editor: Pieter Hintjens <ph@imatix.com>
-* State: legacy, deprecated by rfc.zeromq.org/spec:35/FILEMQ
+* State: legacy, deprecated by rfc.zeromq.org/spec:36/ZRE
 
 ++ Preamble
 

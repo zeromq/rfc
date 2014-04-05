@@ -2,7 +2,7 @@ The File Message Queuing Protocol (FILEMQ) governs the delivery of files between
 
 * Name: rfc.zeromq.org/spec:19/FILEMQ
 * Editor: Pieter Hintjens <ph@imatix.com>
-* State: stable
+* State: legacy, deprecated by rfc.zeromq.org/spec:35/FILEMQ
 
 ++ License
 

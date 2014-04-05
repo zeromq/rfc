@@ -1,12 +1,12 @@
-The ZeroMQ Realtime Exchange Protocol (ZRE) governs how a group of peers on a network discover each other, organize into groups, and send each other events. ZRE runs over the ZeroMQ [http://rfc.zeromq.org/spec:15/ZMTP ZMTP protocol].
+The ZeroMQ Realtime Exchange Protocol (ZRE) governs how a group of peers on a network discover each other, organize into groups, and send each other events. ZRE runs over the [http://rfc.zeromq.org/spec:23/ZMTP ZeroMQ Message Transfer Protocol (ZMTP)].
 
-* Name: rfc.zeromq.org/spec:20/ZRE
+* Name: rfc.zeromq.org/spec:36/ZRE
 * Editor: Pieter Hintjens <ph@imatix.com>
-* State: legacy, deprecated by rfc.zeromq.org/spec:36/ZRE
+* State: draft
 
 ++ Preamble
 
-Copyright (c) 2009-2013 iMatix Corporation
+Copyright (c) 2009-2014 iMatix Corporation
 
 This Specification is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 3 of the License, or (at your option) any later version. This Specification is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details. You should have received a copy of the GNU General Public License along with this program; if not, see <http://www.gnu.org/licenses>.
 
@@ -25,6 +25,13 @@ The ZRE protocol provides a way for a set of nodes on a local network to discove
 * To be neutral with respect to operating system, programming language, and hardware.
 * To allow any number of nodes to run in one process, to allow large-scale simulation and testing.
 * To provide mechanisms for collecting logging information across the network.
+
+++ Changes Over Version 1
+
+This is version 2 of ZRE. The changes over version 1 are:
+
+* The 'strings' and 'dictionary' types redesigned for better expandability.
+* The version number was increased to 2.
 
 ++ Implementation
 
@@ -82,54 +89,77 @@ This mechanism is designed particularly for applications that bind to ephemeral 
 
 +++ TCP Protocol Grammar
 
-The following ABNF grammar defines the ZRE protocol, where all commands are sent by one node (the sender, "S:") to another peer (the recipient, "R:"):
+The following ABNF grammar defines the ZRE protocol, where all commands are sent by one node N: to a peer node P:
 
 [[code]]
-zre-protocol    = greeting *traffic
+ZRE             = N:greeting *traffic
+greeting        = N:hello
+traffic         = N:whisper / N:shout / N:join / N:leave
+                / N:ping P:ping-ok
 
-greeting        = S:HELLO
-traffic         = S:WHISPER
-                / S:SHOUT
-                / S:JOIN
-                / S:LEAVE
-                / S:PING R:PING-OK
+;     Greet a peer so it can connect back to us
+hello           = signature %d1 sequence ipaddress mailbox groups status headers
+signature       = %xAA %xA1             ; two octets
+sequence        = number-2              ; Incremental sequence number
+ipaddress       = string                ; Sender IP address
+mailbox         = number-2              ; Sender mailbox port numer
+groups          = strings               ; List of groups sender is in
+status          = number-1              ; Sender groups status sequence
+headers         = dictionary            ; Sender header properties
 
-;   Greet a peer so it can connect back to us
-S:HELLO         = signature %x01 sequence ipaddress mailbox groups status headers
-signature       = %xAA %xA1
-sequence        = 2OCTET        ; Incremental sequence number
-ipaddress       = string        ; Sender IP address
-string          = size *VCHAR
-size            = OCTET
-mailbox         = 2OCTET        ; Sender mailbox port number
-groups          = strings       ; List of groups sender is in
-strings         = size *string
-status          = OCTET         ; Sender group status sequence
-headers         = dictionary    ; Sender header properties
-dictionary      = size *key-value
-key-value       = string        ; Formatted as name=value
+;     Send a multi-part message to a peer
+whisper         = signature %d2 sequence content
+sequence        = number-2              ; Incremental sequence number
+content         = msg                   ; Wrapped message content
 
-; Send a message to a peer
-S:WHISPER       = signature %x02 sequence content
-content         = FRAME         ; Message content as 0MQ frame
+;     Send a multi-part message to a group
+shout           = signature %d3 sequence group content
+sequence        = number-2              ; Incremental sequence number
+group           = string                ; Group to send to
+content         = msg                   ; Wrapped message content
 
-; Send a message to a group
-S:SHOUT         = signature %x03 sequence group content
-group           = string        ; Name of group
-content         = FRAME         ; Message content as 0MQ frame
+;     Join a group
+join            = signature %d4 sequence group status
+sequence        = number-2              ; Incremental sequence number
+group           = string                ; Name of group
+status          = number-1              ; Sender groups status sequence
 
-; Join a group
-S:JOIN          = signature %x04 sequence group status
-status          = OCTET         ; Sender group status sequence
+;     Leave a group
+leave           = signature %d5 sequence group status
+sequence        = number-2              ; Incremental sequence number
+group           = string                ; Name of group
+status          = number-1              ; Sender groups status sequence
 
-; Leave a group
-S:LEAVE         = signature %x05 sequence group status
+;     Ping a peer that has gone silent
+ping            = signature %d6 sequence
+sequence        = number-2              ; Incremental sequence number
 
-; Ping a peer that has gone silent
-S:PING          = signature %06 sequence
+;     Reply to a peer's ping
+ping_ok         = signature %d7 sequence
+sequence        = number-2              ; Incremental sequence number
 
-; Reply to a peer's ping
-R:PING-OK       = signature %07 sequence
+; A list of string values
+strings         = strings-count *strings-value
+strings-count   = number-4
+strings-value   = longstr
+
+; A list of name/value pairs
+dictionary      = dict-count *( dict-name dict-value )
+dict-count      = number-4
+dict-value      = longstr
+dict-name       = string
+
+; A msg is zero or more distinct frames
+msg             = *frame
+
+; Strings are always length + text contents
+string          = number-1 *VCHAR
+longstr         = number-4 *VCHAR
+
+; Numbers are unsigned integers in network byte order
+number-1        = 1OCTET
+number-2        = 2OCTET
+number-4        = 4OCTET
 [[/code]]
 
 +++ ZRE Commands

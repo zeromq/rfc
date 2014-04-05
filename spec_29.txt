@@ -5,7 +5,7 @@ This document specifies the semantics of the ZeroMQ publish-subscribe pattern, w
 
 ++ Preamble
 
-Copyright (c) 2013 iMatix Corporation.
+Copyright (c) 2013-2014 iMatix Corporation.
 
 This Specification is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 3 of the License, or (at your option) any later version. This Specification is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details. You should have received a copy of the GNU General Public License along with this program; if not, see <http://www.gnu.org/licenses>.
 
@@ -47,7 +47,7 @@ For processing outgoing messages:
 
 For processing subscriptions:
 
-* SHALL receive SUBSCRIBE and CANCEL commands from subscribers depending on the transport protocol used.
+* SHALL receive subscribe and unsubscribe requests from subscribers depending on the transport protocol used.
 * SHALL NOT deliver these commands to its calling application.
 
 ++ The XPUB Socket Type
@@ -78,10 +78,10 @@ For processing incoming messages:
 
 For processing subscriptions:
 
-* SHALL receive SUBSCRIBE and CANCEL commands from subscribers depending on the transport protocol used.
+* SHALL receive subscribe and unsubscribe requests from subscribers depending on the transport protocol used.
 * SHALL deliver these commands to its calling application.
 * MAY, depending on configuration, normalize commands delivered to its calling application so that multiple identical subscriptions result in a single command only.
-* SHALL, if the subscriber peer disconnects prematurely, generate a suitable CANCEL command for the calling application.
+* SHALL, if the subscriber peer disconnects prematurely, generate a suitable unsubscribe request for the calling application.
 
 ++ The SUB Socket Type
 
@@ -105,7 +105,7 @@ For processing incoming messages:
 
 For processing subscriptions:
 
-* MAY send SUBSCRIBE and CANCEL commands to publishers depending on the transport protocol used.
+* MAY send subscribe and unsubscribe requests to publishers depending on the transport protocol used.
 
 ++ The XSUB Socket Type
 
@@ -137,8 +137,8 @@ For processing outgoing messages:
 For processing subscriptions:
 
 * SHALL accept subscription commands from its calling application.
-* SHALL send SUBSCRIBE and CANCEL commands to publishers depending on the transport protocol used.
-* When closing a connection to a publisher SHOULD send CANCEL commands for all subscriptions.
+* SHALL send subscribe and unsubscribe requests to publishers depending on the transport protocol used.
+* When closing a connection to a publisher SHOULD send unsubscribe requests for all subscriptions.
 
 ++ Security Aspects
 

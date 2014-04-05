@@ -48,8 +48,6 @@ error           = S:SRSLY / S:RTFM
 OHAI            = signature %x01 protocol version
 signature       = %xAA %xA3
 protocol        = string        ; Must be "FILEMQ"
-string          = size *VCHAR
-size            = number-1
 version         = %x02
 
 ;   The server grants the client access
@@ -59,11 +57,6 @@ OHAI-OK         = signature %x04
 ICANHAZ         = signature %x05 path options cache
 path            = string        ; Full path or path prefix
 options         = dictionary
-dictionary      = count *( name value )
-count           = number-4
-name            = string
-value           = longstr
-longstr         = number-4 *VCHAR
 cache           = dictionary    ; File SHA-1 signatures
 
 ;   The server confirms the subscription
@@ -71,7 +64,7 @@ ICANHAZ-OK      = signature %x06
 
 ;   The client sends credit to the server
 NOM             = signature %x07 credit
-credit          = number-8      ; Amount of credit in bytes
+credit          = number-8      ; Credit, in bytes
 
 ;   The server sends a chunk of file data
 CHEEZBURGER     = signature %x08 sequence operation filename
@@ -83,7 +76,6 @@ delete          = %x02          ; Octet
 filename        = string
 offset          = number-8      ; File offset in bytes
 headers         = dictionary
-chunk           = FRAME
 
 ;   Client or server sends a heartbeat
 HUGZ            = signature %x09
@@ -101,7 +93,19 @@ reason          = string
 ;   Server error reply - client sent an invalid command
 S:RTFM          = signature %x81 reason
 
-; Numbers are unsigned integers in network byte order
+;   A list of name/value pairs
+dictionary      = dict-count *( dict-name dict-value )
+dict-count      = number-4
+dict-value      = longstr
+dict-name       = string
+
+;   A chunk has 4-octet length + binary contents
+chunk           = number-4 *OCTET
+
+;   Strings are always length + text contents
+string          = number-1 *VCHAR
+
+;   Numbers are unsigned integers in network byte order
 number-1        = 1OCTET
 number-4        = 4OCTET
 number-8        = 8OCTET

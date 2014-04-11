@@ -105,6 +105,7 @@ chunk           = number-4 *OCTET
 
 ; Strings are always length + text contents
 string          = number-1 *VCHAR
+longstr         = number-4 *VCHAR
 
 ; Numbers are unsigned integers in network byte order
 number-1        = 1OCTET

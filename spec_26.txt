@@ -149,9 +149,9 @@ ready = %d5 "READY" ready-nonce ready-box
 ready-nonce = 8OCTET        ; Short nonce, prefixed by "CurveZMQREADY---"
 ready-box = 16*OCTET        ; Box [metadata](S'->C')
 
-;   ERROR command, 6+ octets
+;   ERROR command, 7+ octets
 error = %d5 "ERROR" error-reason
-error-reason = OCTET 1*255VCHAR
+error-reason = OCTET 0*255VCHAR
 
 ;   MESSAGE command, 33+ octets
 message = %d7 "MESSAGE" message_nonce message-box

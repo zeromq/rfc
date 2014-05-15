@@ -66,7 +66,7 @@ This handshake provides a number of protections but mainly, //perfect forward se
 
 The CurveZMQ protocol has a synchronous handshake, followed by an asynchronous exchange of messages in either direction. Each operation in the protocol is a "command", which consists of a command name followed by a command body. Command names are 8 octets, padded with spaces, while command bodies have a binary encoding that depends on the command.
 
-CurveZMQ has these commands: HELLO, WELCOME, INITIATE, READY, and MESSAGE. A connection always starts with the client sending HELLO to the server, which responds with WELCOME:
+CurveZMQ has these commands: HELLO, WELCOME, INITIATE, READY, MESSAGE, and ERROR. A connection always starts with the client sending HELLO to the server, which responds with WELCOME:
 
 [[code]]
 C:HELLO
@@ -86,7 +86,15 @@ After this exchange each side has authenticated the other and exchanged metadata
 C:MESSAGE | S:MESSAGE
 [[/code]]
 
-Either peer can close their side of the connection at any time. If a peer has not sent metadata, and closes its side of the connection, this is considered a hard error. If one peer closes its side of the connection after sending its metadata, this is considered a soft error (and the disconnected peer can therefore retry later). There is no command to close the connection, and no explicit error reporting.
+Either peer can silently close their side of the connection at any time, and this can also happen due to network behavior. This is considered a soft error, and the disconnected peer MAY retry a connection after some suitable interval.
+
+To reject a client connection explicitly, a server SHALL send an ERROR command:
+
+[[code]]
+C:ERROR | S:ERROR
+[[/code]]
+
+This is considered a hard error, and the client SHALL NOT try to reconnect using the same credentials. A client peer SHALL NOT send ERROR to the server.
 
 CurveZMQ is designed to be implemented a black box that accepts and produces correctly-formatted commands, and outputs data messages on the side, and runs a state machine internally for each connection.
 
@@ -194,7 +202,9 @@ The first command on a CurveZMQ connection is the HELLO command. The client SHAL
 
 * The signature box (80 octets). This SHALL contain 64 zero octets, encrypted from the client's transient key C' to the server's permanent key S.
 
-The server SHALL validate all fields and SHALL reject and disconnect clients who send malformed HELLO commands. When the server gets a valid HELLO command, it SHALL generate a new transient key pair, and encode both the public and secret key in a WELCOME command, as explained below. The server SHALL not keep this transient key pair and SHOULD keep minimal state for the client until the client responds with a valid INITIATE command. This protects against denial-of-service attacks where unauthenticated clients send many HELLO commands to consume server resources.
+The server SHALL validate all fields and SHALL reject and disconnect clients who send malformed HELLO commands.
+
+When the server gets a valid HELLO command, it SHALL generate a new transient key pair, and encode both the public and secret key in a WELCOME command, as explained below. The server SHALL not keep this transient key pair and SHOULD keep minimal state for the client until the client responds with a valid INITIATE command. This protects against denial-of-service attacks where unauthenticated clients send many HELLO commands to consume server resources.
 
 Note that the client uses an 8 octet "short nonce" in the HELLO, INITIATE, and MESSAGE commands. This nonce SHALL be unique in each command within a connection. The client SHALL NOT send more than 2^64-1 commands in one connection. The client MAY use any strategy to generate unique short nonces, including using an incremental counter.
 
@@ -218,7 +228,7 @@ The cookie consists of two fields:
 
 The server SHALL generate a new cookie for each WELCOME command it sends.
 
-The client SHALL validate all fields and SHALL reject and disconnect from servers which send malformed WELCOME commands.
+The client SHALL validate all fields and SHALL disconnect from servers that send malformed WELCOME commands.
 
 ++++ The INITIATE Command
 
@@ -256,7 +266,7 @@ The server SHALL respond to a valid INITIATE command with a READY command. This 
 
 * The ready box (16 or more octets). This shall contain metadata of the same format as sent in the INITIATE command, encrypted from the server's transient key S' to the client's transient key C'.
 
-The client SHALL validate all fields and SHALL reject and disconnect from servers who send malformed READY commands.
+The client SHALL validate all fields and SHALL disconnect from servers who send malformed READY commands.
 
 The client MAY validate the meta-data. If the client accepts the meta-data, it SHALL then expect MESSAGE commands from the server.
 
@@ -278,7 +288,15 @@ The message payload consists of a flags field (1 octet) followed by zero or more
 
 * Bit 0 (MORE): //More messages to follow//. A value of 1 indicates that more messages will follow. A value of 0 indicates that there are no more messages to follow.
 
-The recipient SHALL validate all fields and SHALL reject and disconnect from peers who send malformed MESSAGE commands.
+The recipient SHALL validate all fields and SHALL reject and disconnect from peers who send malformed MESSAGE commands. A server SHALL NOT send an ERROR command in response to an invalid MESSAGE command.
+
+++++ The ERROR Command
+
+A server SHALL indicate an authentication failure by sending an ERROR command back to the client. The server MAY respond with ERROR in other failure cases, or may disconnect the client silently depending on the case. This command SHALL be 7 or more octets long and have the following fields:
+
+* The command ID, which is [5]"ERROR".
+
+* The error reason, which is a length-specified string of 0 to 255 UTF8 characters.
 
 +++ Differences from CurveCP
 
@@ -303,6 +321,8 @@ While CurveCP defines a security handshake and traffic control for messages sent
 * In MESSAGE commands, the payload has a frame format that supports some requirements of ZMTP 3.0, particularly the continuation flag ("more").
 
 * In MESSAGE commands, we do not use the CurveCP traffic control fields since traffic control is handled by the underlying stream protocol.
+
+* CurveCP has no explicit ERROR response and does not inform clients of authentication failures.
 
 * While CurveCP delivers a stream (reconstituted from packets), CurveZMQ delivers atomic messages.
 

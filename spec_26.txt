@@ -91,7 +91,7 @@ Either peer can silently close their side of the connection at any time, and thi
 To reject a client connection explicitly, a server SHALL send an ERROR command:
 
 [[code]]
-C:ERROR | S:ERROR
+S:ERROR
 [[/code]]
 
 This is considered a hard error, and the client SHALL NOT try to reconnect using the same credentials. A client peer SHALL NOT send ERROR to the server.
@@ -296,7 +296,7 @@ A server SHALL indicate an authentication failure by sending an ERROR command ba
 
 * The command ID, which is [5]"ERROR".
 
-* The error reason, which is a length-specified string of 0 to 255 UTF8 characters.
+* The error reason, which is a length-specified string of 0 to 255 ASCII characters.
 
 +++ Differences from CurveCP
 

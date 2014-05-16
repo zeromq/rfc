@@ -179,7 +179,7 @@ If the mechanism that the peer received does not exactly match the mechanism it 
 
 +++ Error Handling
 
-ZMTP allows an explicit fatal error response during the mechanism handshake, using the ERROR command. The peer SHALL treat an ERROR command as fatal, and act by closing the connection, and not re-connecting using the same security credentials.
+ZMTP allows an explicit fatal error response during the mechanism handshake, using the ERROR command. The peer SHALL treat an incoming ERROR command as fatal, and act by closing the connection, and not re-connecting using the same security credentials.
 
 An implementation SHOULD signal any other error, e.g. overloaded, temporarily refusing connections, etc. by closing the connection. The peer SHALL treat an unexpected connection close as a temporary error, and SHOULD reconnect.
 
@@ -313,7 +313,7 @@ PAIR   |     |     |        |        |     |      |     |      |      |      |  
 -------+-----+-----+--------+--------+-----+------+-----+------+------+------+------+
 [[/code]]
 
-When a peer validates the socket type, it MUST handle errors by silently disconnecting the other peer and possibly logging the error for debugging purposes.
+When a peer validates the socket type, it SHOULD handle errors by returning an ERROR command, and then disconnecting the peer.
 
 ++++ The Identity Property
 

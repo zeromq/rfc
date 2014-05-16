@@ -61,7 +61,7 @@ A valid beacon SHALL use a recognized header and a body of the correct size. A n
 
 When a ZRE node receives a beacon from a node that it does not already know about, with a non-zero port number, it SHALL consider this to be a new peer.
 
-When a ZRE node receives a beacon from a known node, with a non-zero port number, it SHALL disconnect from this peer.
+When a ZRE node receives a beacon from a known node, with a zero port number, it SHALL disconnect from this peer.
 
 +++ Interconnection Model
 

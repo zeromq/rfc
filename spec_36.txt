@@ -61,7 +61,7 @@ A valid beacon SHALL use a recognized header and a body of the correct size. A n
 
 When a ZRE node receives a beacon from a node that it does not already know about, with a non-zero port number, it SHALL consider this to be a new peer.
 
-When a ZRE node receives a beacon from a known node, with a non-zero port number, it SHALL disconnect from this peer.
+When a ZRE node receives a beacon from a known node, with a zero port number, it SHALL disconnect from this peer.
 
 +++ Interconnection Model
 
@@ -69,13 +69,13 @@ Each node SHALL create a ZeroMQ ROUTER socket and //bind// this to an ephemeral 
 
 This ROUTER socket SHALL be used for all incoming ZeroMQ messages from other nodes. A node SHALL NOT send messages to peers via this socket.
 
-When a node discovers a new peer, it SHALL create a ZeroMQ DEALER socket, set its identity (binary 16-octet UUID) on that socket, and //connect// this to the peer's mailbox port. A node may immediately, after connection, start to send messages to a peer via this DEALER socket.
+When a node discovers a new peer, it SHALL create a ZeroMQ DEALER socket, set its identity (a byte containing 1, followed by 16-octet UUID) on that socket, and //connect// this to the peer's mailbox port. A node may immediately, after connection, start to send messages to a peer via this DEALER socket.
 
 A node SHALL connect each DEALER sockets to at most one peer. A node may disconnect its DEALER socket if the peer has failed to respond within some time (see Heartbeating).
 
 This DEALER socket SHALL be used for all outgoing ZeroMQ messages to a specific peer. A node SHALL not receive messages on this socket. The sender MAY set a high-water mark (HWM) of, for example, 100 messages per second (if the timeout period is 30 second, this means a HWM of 3,000 messages). The sender SHOULD set the send timeout on the socket to zero so that a full send buffer can be detected and treated as "peer not responding".
 
-Note that the ROUTER socket provides the caller with the UUID of the sender for any message received on the socket, as an identity frame that precedes other frames in the message. A peer can thus use the identity on received messages to look up the appropriate DEALER socket for messages back to that peer. The identity SHALL be a binary 16-octet UUID value.
+Note that the ROUTER socket provides the caller with the UUID of the sender for any message received on the socket, as an identity frame that precedes other frames in the message. A peer can thus use the identity on received messages to look up the appropriate DEALER socket for messages back to that peer. The identity SHALL be a binary 17-octet UUID value where the first byte is always 1.
 
 When a node receives, on its ROUTER socket, a valid message from an unknown node, it SHALL treat this as a new peer in the identical fashion as if a UDP beacon was received from an unknown node.
 

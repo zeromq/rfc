@@ -32,6 +32,7 @@ This is version 2 of ZRE. The changes over version 1 are:
 
 * The 'strings' and 'dictionary' types redesigned for better expandability.
 * The version number was increased to 2.
+* The hard-coded dependency on TCP transport has been removed (merging ipaddress and port into a single endpoint field).
 
 ++ Implementation
 
@@ -92,19 +93,18 @@ This mechanism is designed particularly for applications that bind to ephemeral 
 The following ABNF grammar defines the ZRE protocol, where all commands are sent by one node N: to a peer node P:
 
 [[code]]
-ZRE             = N:greeting *traffic
-greeting        = N:hello
-traffic         = N:whisper / N:shout / N:join / N:leave
-                / N:ping P:ping-ok
+ZRE             = greeting *traffic
+greeting        = hello
+traffic         = whisper / shout / join / leave / ping / ping-ok
 
 ;     Greet a peer so it can connect back to us
-hello           = signature %d1 sequence ipaddress mailbox groups status headers
+hello           = signature %d1 sequence endpoint groups status name headers
 signature       = %xAA %xA1             ; two octets
 sequence        = number-2              ; Incremental sequence number
-ipaddress       = string                ; Sender IP address
-mailbox         = number-2              ; Sender mailbox port numer
+endpoint        = string                ; Sender connect endpoint
 groups          = strings               ; List of groups sender is in
 status          = number-1              ; Sender groups status sequence
+name            = string                ; Sender public name
 headers         = dictionary            ; Sender header properties
 
 ;     Send a multi-part message to a peer

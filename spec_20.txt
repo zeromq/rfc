@@ -168,7 +168,7 @@ When a node joins a group it SHALL broadcast a JOIN command to all its peers. Th
 
 ++++ The LEAVE Command
 
-When a node leaves a group it SHALL broadcast a LEAVE command to all its peers. The LEAVE command has two fields: the name of the group to join, and the group status sequence number //after// leaving the group.
+When a node leaves a group it SHALL broadcast a LEAVE command to all its peers. The LEAVE command has two fields: the name of the group to leave, and the group status sequence number //after// leaving the group.
 
 ++++ The PING Command
 

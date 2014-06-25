@@ -1,4 +1,4 @@
-The ZeroMQ WebSockets Transport Protocol (ZWTP) is a transport layer protocol for exchanging text messages between two peers over a WebSockets. This document describes ZWTP/1.0.
+The ZeroMQ WebSockets Transport Protocol (ZWTP) is a transport layer protocol for exchanging UTF8 string messages between two peers over a WebSockets. This document describes ZWTP/1.0.
 
 * Name: rfc.zeromq.org/spec:39/ZWTP
 * Editor: Doron Somech <somdoron@gmail.com>
@@ -6,7 +6,7 @@ The ZeroMQ WebSockets Transport Protocol (ZWTP) is a transport layer protocol fo
 
 ++ Goals
 
-The ZeroMQ WebSockets Transport Protocol (ZWTP) is a transport layer protocol for exchanging text messages between two peers over a WebSockets. This document describes ZWTP/1.0.
+The ZeroMQ WebSockets Transport Protocol (ZWTP) is a transport layer protocol for exchanging UTF8 string messages between two peers over a WebSockets. This document describes ZWTP/1.0.
 
 ++ Implementation
 
@@ -34,3 +34,7 @@ Any other socket combinations SHOULD be handled by silently disconnecting the ot
 
 XPUB and XSUB sockets are implemented at the protocol level as PUB and SUB sockets. 
 That is, XPUB and XSUB are API constructs only. A SUB socket sends a subscription message as one UTF8 character '1' followed by the subscription body, and unsubscription messages as one UTF8 character '0' followed by the subscription body.
+
+Note: ZMTP defines one byte x00 and x01 as unsubscribe and subscribe, 
+also the Sub and Pub socket type of zeromq only recognize x00 and x01 as unsubscribe and subcriber.
+Therefore if ZWTP implemented inside ZeroMQ for interoperability before sending the unsubscribe or subscribe on the wire the implementation should replace the byte with UTF8 character and vice versa when reading from the wire.

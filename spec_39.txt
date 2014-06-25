@@ -21,7 +21,7 @@ ZWTP defines its own framing.
 
 +++ Framing
 
-
++++ Resource Sharing
 
 +++ Socket Compatibility
 

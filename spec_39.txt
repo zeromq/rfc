@@ -1,0 +1,36 @@
+The ZeroMQ WebSockets Transport Protocol (ZWTP) is a transport layer protocol for exchanging text messages between two peers over a WebSockets. This document describes ZWTP/1.0.
+
+* Name: rfc.zeromq.org/spec:39/ZWTP
+* Editor: Doron Somech <somdoron@gmail.com>
+* Contributors: 
+
+++ Goals
+
+The ZeroMQ WebSockets Transport Protocol (ZWTP) is a transport layer protocol for exchanging text messages between two peers over a WebSockets. This document describes ZWTP/1.0.
+
+++ Implementation
+
++++ Formal Grammar
+
++++ Framing
+
++++ Socket Compatibility
+
+The implementation SHOULD enforce that an incoming connection has a valid socket type, depending on the socket type of the socket receiving the connection:
+
+* PAIR accepts connections from PAIR.
+* PUB accepts connections from SUB.
+* SUB accepts connections from PUB.
+* REQ accepts connections from REP or ROUTER.
+* REP accepts connections from REQ or DEALER.
+* DEALER accepts connections from REP, DEALER, or ROUTER.
+* ROUTER accepts connections from REQ, DEALER, or ROUTER.
+* PULL accepts connections from PUSH.
+* PUSH accepts connections from PULL.
+
+Any other socket combinations SHOULD be handled by silently disconnecting the other peer and possibly logging the error for debugging purposes.
+
++++ Publish-Subscribe
+
+XPUB and XSUB sockets are implemented at the protocol level as PUB and SUB sockets. 
+That is, XPUB and XSUB are API constructs only. A SUB socket sends a subscription message as one UTF8 character '1' followed by the subscription body, and unsubscription messages as one UTF8 character '0' followed by the subscription body.

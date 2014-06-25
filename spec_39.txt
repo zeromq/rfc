@@ -10,9 +10,18 @@ The ZeroMQ WebSockets Transport Protocol (ZWTP) is a transport layer protocol fo
 
 ++ Implementation
 
-+++ Formal Grammar
+This document doesn't describe the WebSockets protocol (RFC6455) and only defines the handshake and messaging over it.
+Any impelemtation of this protocol also must implement the RFC6455.
+
+WebSockets is message oriented, so this protocol doesn't define how messages are structured on the wire.
+WebSockets also has framing concept, however the concept is different than ZeroMQ framing and the WebSockets framing is not used by ZWTP 1.0. 
+ZWTP defines its own framing.
+
++++ Handshaking
 
 +++ Framing
+
+
 
 +++ Socket Compatibility
 

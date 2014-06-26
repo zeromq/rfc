@@ -1,29 +1,87 @@
-The ZeroMQ WebSockets Transport Protocol (ZWTP) is a transport layer protocol for exchanging UTF8 string messages between two peers over a WebSockets. This document describes ZWTP/1.0.
+The ZeroMQ WebSocket (ZWS) protocol is a mapping for ZeroMQ over WebSocket.
 
 * Name: rfc.zeromq.org/spec:39/ZWTP
 * Editor: Doron Somech <somdoron@gmail.com>
-* Contributors: 
+* Contributors:
+
+++ Language
+
+The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED",  "MAY", and "OPTIONAL" in this document are to be interpreted as described in RFC 2119[((bibcite rfc2119))]. 
 
 ++ Goals
 
-The ZeroMQ WebSockets Transport Protocol (ZWTP) is a transport layer protocol for exchanging UTF8 string messages between two peers over a WebSockets. This document describes ZWTP/1.0.
+The ZeroMQ WebSocket (ZWS) protocol is a mapping for ZeroMQ over WebSocket (http://tools.ietf.org/html/rfc6455).
 
 ++ Implementation
 
-This document doesn't describe the WebSockets protocol (RFC6455) and only defines the handshake and messaging over it.
-Any impelemtation of this protocol also must implement the RFC6455.
+ZWS connection is starting after successful WebSockets handshake between the client and the server. 
 
-WebSockets is message oriented, so this protocol doesn't define how messages are structured on the wire.
-WebSockets also has framing concept, however the concept is different than ZeroMQ framing and the WebSockets framing is not used by ZWTP 1.0. 
-ZWTP defines its own framing.
++++ Handshake
 
-+++ Handshaking
+ZWS doesn't define the connection initiation and handshake between the client and the server.
+
+However client handshake request MUST include:
+* Sec-WebSocket-Protocol set to "ZWS1.0".
+* Query string parameter "type" set to valid socket type.
+
+If client failed to include the above the server should closed the connection (with BAD REQUEST, WebSocket close control message or silently drop the TCP connection).
+Following is valid handshake request:
+
+[[code]]
+GET /?type=DEALER HTTP/1.1
+Host: server.example.com
+Upgrade: websocket
+Connection: Upgrade
+Sec-WebSocket-Key: x3JJHMbDL1EzLkh9GBhXDw==
+Sec-WebSocket-Protocol: ZWS1.0
+Sec-WebSocket-Version: 13
+Origin: http://example.com
+[[/code]]
+
+Server handshake response MUST include:
+* Sec-WebSocket-Protocol set to "ZWS1.0".
+
+Following is vaid server handshake response:
+[[code]]
+HTTP/1.1 101 Switching Protocols
+Upgrade: websocket
+Connection: Upgrade
+Sec-WebSocket-Accept: HSmrc0sMlYUkAGmm5OPpG2HaGWk=
+Sec-WebSocket-Protocol: ZWS1.0
+[[/code]]
+
++++ Formal Grammar
+
+The following ABNF grammar defines the ZWS/1.0 protocol:
+
+[[code]]
+zws = *connection
+
+connection = identity *messsage
+
+identity = '0' body
+
+; utf8-char is out of scope for this document
+body = *utf8-char
+
+message     = *more-frame final-frame
+final-frame = final body
+final       = '0'
+more-frame  = more body
+more        = '1'
+
+[[/code]]
 
 +++ Framing
 
-+++ Resource Sharing
+Each ZeroMQ frame maps to one WebSockets message. A frame consists of a MORE UTF8 character (either '0' or '1') followed by frame body of UTF8 characters.
+
+MORE character indicate if more frames to follow. A value of '0' indicates that there are no more frames to follow. A value of '1' indicates that more frames to follow. 
+On messages consisting of a single frame the MORE character MUST be 0.
 
 +++ Socket Compatibility
+
+ZWS Client implemenation doesn't have to implement the all sockets type and can choose which socket type to implement.
 
 The implementation SHOULD enforce that an incoming connection has a valid socket type, depending on the socket type of the socket receiving the connection:
 
@@ -41,8 +99,46 @@ Any other socket combinations SHOULD be handled by silently disconnecting the ot
 
 +++ Publish-Subscribe
 
-XPUB and XSUB sockets are implemented at the protocol level as PUB and SUB sockets. 
-That is, XPUB and XSUB are API constructs only. A SUB socket sends a subscription message as one UTF8 character '1' followed by the subscription body, and unsubscription messages as one UTF8 character '0' followed by the subscription body.
+XPUB and XSUB sockets are implemented at the protocol level as PUB and SUB sockets. That is, XPUB and XSUB are API constructs only. 
+A SUB socket sends a subscription message as one UTF8 character '1' followed by the subscription body, and unsubscription messages as one UTF8 character '0' followed by the subscription body.
 
-Note: ZMTP defines one byte x00 and x01 as unsubscribe and subscribe, also the Sub and Pub socket type of zeromq only recognize x00 and x01 as unsubscribe and subcriber.
-Therefore if ZWTP implemented inside ZeroMQ for interoperability before sending the unsubscribe or subscribe on the wire the implementation should replace the one byte with one UTF8 character and vice versa when reading from the wire.
+Please note becuase ZWS subscription and unsubscription are different from ZMTP and ZeroMQ (one UTF8 character vs one byte), 
+implementation need to convert the byte to UTF8 character before sending on the wire and vice versa when reading from the wire.
+
++++ Port Sharing
+
+ZWS implementation might choose to implement port sharing.
+
+If port sharing implemented multiple sockets can bind to same port by specifiy the resource name.
+
+Client may specify resource in the client handshake request.
+
+Example for server binding: "ws://*:80/chat"
+
+Exampel for client handshake request with resource:
+
+[[code]]
+GET /chat?type=DEALER HTTP/1.1
+Host: server.example.com
+Upgrade: websocket
+Connection: Upgrade
+Sec-WebSocket-Key: x3JJHMbDL1EzLkh9GBhXDw==
+Sec-WebSocket-Protocol: ZWS1.0
+Sec-WebSocket-Version: 13
+Origin: http://example.com
+[[/code]]
+
+++ Security
+
+ZWS1.0 makes no attempt at security.
+
+However the protocol can be tunneled over SSL.
+
+Clients support tunner over SSL with specifying wss instead of ws, for example "wss://example.com".
+
+Load balancer might teriminate the SSL befor arriving on the server.
+
+++ References
+
+http://github.com/somdoron/NetMQ.WebSockets - Extension to NetMQ which implement ZWS1.0.
+http://github.com/somdoron/JSMQ - ZeroMQ Javascript library that implement ZWS1.0.

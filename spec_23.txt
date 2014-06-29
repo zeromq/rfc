@@ -325,8 +325,6 @@ The Identity SHALL match this grammar:
 identity = 0*255OCTET
 [[/code]]
 
-The first octet of the Identity SHALL NOT be zero: identities starting with a zero octet are reserved for implementations' internal use.
-
 ++ Socket Semantics
 
 In order to ensure interoperability, we aim to define both the socket-specific semantics of the API to calling applications, and the behavior of peers talking to each other over the network.

@@ -24,7 +24,6 @@ The ZRE protocol provides a way for a set of nodes on a local network to discove
 * To recover from transient failures in connectivity.
 * To be neutral with respect to operating system, programming language, and hardware.
 * To allow any number of nodes to run in one process, to allow large-scale simulation and testing.
-* To provide mechanisms for collecting logging information across the network.
 
 ++ Changes Over Version 1
 
@@ -32,6 +31,8 @@ This is version 2 of ZRE. The changes over version 1 are:
 
 * The 'strings' and 'dictionary' types redesigned for better expandability.
 * The version number was increased to 2.
+* The hard-coded dependency on TCP transport has been removed (merging ipaddress and port into a single endpoint field).
+* Removed the logging extension, which is better handled by a separate framework.
 
 ++ Implementation
 
@@ -92,19 +93,18 @@ This mechanism is designed particularly for applications that bind to ephemeral 
 The following ABNF grammar defines the ZRE protocol, where all commands are sent by one node N: to a peer node P:
 
 [[code]]
-ZRE             = N:greeting *traffic
-greeting        = N:hello
-traffic         = N:whisper / N:shout / N:join / N:leave
-                / N:ping P:ping-ok
+ZRE             = greeting *traffic
+greeting        = hello
+traffic         = whisper / shout / join / leave / ping / ping-ok
 
 ;     Greet a peer so it can connect back to us
-hello           = signature %d1 sequence ipaddress mailbox groups status headers
+hello           = signature %d1 sequence endpoint groups status name headers
 signature       = %xAA %xA1             ; two octets
 sequence        = number-2              ; Incremental sequence number
-ipaddress       = string                ; Sender IP address
-mailbox         = number-2              ; Sender mailbox port numer
+endpoint        = string                ; Sender connect endpoint
 groups          = strings               ; List of groups sender is in
 status          = number-1              ; Sender groups status sequence
+name            = string                ; Sender public name
 headers         = dictionary            ; Sender header properties
 
 ;     Send a multi-part message to a peer
@@ -198,7 +198,7 @@ When a node joins a group it SHALL broadcast a JOIN command to all its peers. Th
 
 ++++ The LEAVE Command
 
-When a node leaves a group it SHALL broadcast a LEAVE command to all its peers. The LEAVE command has two fields: the name of the group to join, and the group status sequence number //after// leaving the group.
+When a node leaves a group it SHALL broadcast a LEAVE command to all its peers. The LEAVE command has two fields: the name of the group to leave, and the group status sequence number //after// leaving the group.
 
 ++++ The PING Command
 
@@ -209,64 +209,6 @@ Note that PING commands SHOULD be used only in targeted cases where a peer is ot
 ++++ The PING-OK Command
 
 When a node receives a PING command it SHALL reply with a PING-OK command.
-
-++ ZRE Extension Protocols
-
-ZRE allows the addition of extension protocols that share the ZRE discovery mechanisms. These protocols have the following common properties:
-
-* They use ZeroMQ messaging over TCP;
-* They are based on a service model where each node may offer zero or more services;
-* Each service binds to an ephemeral port and announces itself to other nodes;
-* Nodes that wish to use a service may then connect to it.
-
-Each extension protocol uses a specific ZeroMQ socket pattern and message format. Currently ZRE supports two extension protocols:
-
-To announce an extension protocol a node adds a headers field to the HELLO command, in the form:
-
-[[code]]
-service-name=tcp://ipaddress:port
-[[/code]]
-
-We specify these extension protocols formally:
-
-* The ZRE log collection protocol (ZRE/LOG), which provides a subsystem for collecting log data from a distributed network. The service name is "X-ZRELOG".
-
-+++ The ZRE/LOG Extension Protocol
-
-The log service SHALL create a ZeroMQ SUB socket and //bind// this to an ephemeral TCP port (in the range %C000x - %FFFFx). The log service SHALL broadcast its connection endpoint in the HELLO command as explained above. Any node wishing to send log data SHALL create a PUB socket and connect it to this endpoint.
-
-Every ZRE/LOG message SHALL start with the protocol signature %xAA %xA2. The log service SHALL silently discard any message received that does not start with these two octets.
-
-The following ABNF grammar defines the ZRE/LOG protocol:
-
-[[code]]
-zrelog-protocol = *LOG
-
-;   Send a log message to the log service
-LOG             = signature %x01 level event node peer time data
-header          = signature
-signature       = %xAA %xA2
-
-level           = ERROR / WARNING / INFO
-ERROR           = %x01
-WARNING         = %x02
-INFO            = %x03
-
-event           = JOIN / LEAVE / ENTER / EXIT / SEND / RECV
-JOIN            = %x01          ;  We joined a group
-LEAVE           = %x02          ;  We left a group
-ENTER           = %x03          ;  Peer joined network
-EXIT            = %x04          ;  Peer left network
-SEND            = %x05          ;  Sent outgoing message
-RECV            = %x06          ;  Received message
-
-node            = 2OCTET        ;  Hash of node UUID
-peer            = 2OCTET        ;  Hash of peer UUID
-time            = 8OCTET        ;  Time in msecs
-data            = string        ;  Printable error text
-string          = size *VCHAR
-size            = OCTET
-[[/code]]
 
 ++ Node Discovery and Presence
 

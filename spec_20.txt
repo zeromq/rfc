@@ -1,4 +1,4 @@
-The ZeroMQ Realtime Exchange Protocol (ZRE) governs how a group of peers on a network discover each other, organize into groups, and send each other events. ZRE runs over the ZeroMQ [http://rfc.zeromq.org/spec:15/ZMTP ZMTP protocol].
+The ZeroMQ Realtime Exchange Protocol (ZRE) governs how a group of peers on a network discover each other, organize into groups, and send each other events. ZRE runs over the ZeroMQ [http://rfc.zeromq.org/spec:15/ZMTP ZMTP protocol]. Note that this specification has been superceded by rfc.zeromq.org/spec:36/ZRE.
 
 * Name: rfc.zeromq.org/spec:20/ZRE
 * Editor: Pieter Hintjens <ph@imatix.com>

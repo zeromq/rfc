@@ -564,11 +564,11 @@ A DEALER client connects to a ROUTER server. Both client and server are running 
  Property value ""
 [[/code]]
 
-* The server validates the socket type, accepts it, and replies with a READY command that contains only the Socket-Type property (ROUTER sockets do not send an identity):
+* The server validates the socket type, accepts it, and replies with a READY command that contains the Socket-Type property (REQ, DEALER and ROUTER sockets also send an identity property):
 
 [[code]]
 +------+----+
-| %x04 | 28 |
+| %x04 | 41 |
 +------+----+
 +------+---+---+---+---+---+
 | %x05 | R | E | A | D | Y |
@@ -579,6 +579,12 @@ A DEALER client connects to a ROUTER server. Both client and server are running 
 +------+------+------+------+---+---+---+---+---+---+
 | %x00 | %x00 | %x00 | %x06 | R | O | U | T | E | R |
 +------+------+------+------+---+---+---+---+---+---+
++----+---+---+---+---+---+---+---+---+
+| 8  | I | d | e | n | t | i | t | y |
++----+---+---+---+---+---+---+---+---+
++------+------+------+------+
+| %x00 | %x00 | %x00 | %x00 |
++------+------+------+------+
 [[/code]]
 
 As soon as the server has sent its own READY command, it may also send messages to the client. As soon as the client has received the READY command from the server, it may send messages to the server.

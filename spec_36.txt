@@ -175,6 +175,8 @@ number-4        = 4OCTET
 
 +++ ZRE Commands
 
+All commands start with a protocol signature (%xAA %xA0), then a command identifier, then the protocol version number (%d2), and then a sequence number (two octets in network byte order). The first message from a peer MUST have sequence number 1, and every message must have a strictly incrementing sequence number. When a peer detects gaps in the sequence, or an out-of-sequence message, it SHALL treat the peer as invalid, and disconnect the peer.
+
 ++++ The HELLO Command
 
 Each node SHALL start a dialog by sending HELLO as the first command on an connection to a peer.
@@ -183,8 +185,7 @@ When a node receives messages from a new peer it SHALL silently ignore any comma
 
 The HELLO command contains these fields:
 
-* {{ipaddress}} - IP address that the sender will accept connections on.
-* {{mailbox}} - port number of the sender's mailbox.
+* {{endpoint}} - ZeroMQ endpoint that the sender will accept connections on.
 * {{groups}} - the list of groups that the sender is present in, as a list of strings.
 * {{status}} - the sender's group status sequence.
 * {{headers}} - zero or more properties set by the sender.

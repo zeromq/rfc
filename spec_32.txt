@@ -76,7 +76,7 @@ SHALL encode as the following 10 characters:
 
 ++ Reference Implementation
 
-A reference implementation in C is provided in the RFC repository at https://github.com/zeromq/rfc/src/spec_32.c.
+A reference implementation in C is provided in the RFC repository at https://github.com/zeromq/rfc/blob/master/src/spec_32.c.
 
 ++ Security Considerations
 

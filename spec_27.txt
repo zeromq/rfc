@@ -79,7 +79,7 @@ The request message SHALL consist of the following message frames:
 * The //request id//, which MAY contain an opaque binary blob.
 * The //domain//, which SHALL contain a string.
 * The //address//, the origin network IP address.
-* The //identity//, the identity of the originating ZeroMQ socket.
+* The //identity//, the connection Identity, if any.
 * The //mechanism//, which SHALL contain a string.
 * The //credentials//, which SHALL be zero or more opaque frames.
 
@@ -98,7 +98,7 @@ The various fields have these meanings:
 * request id: the meaning of this is defined by the sending server only. The reply SHALL echo the request id without modifying it.
 * domain: this requests authentication within some domain. The significance of domains are an application issue and not relevant to ZAP.
 * address: this provides the IP address of the client, to allow address-based filtering. It SHALL be an IPv4 dotted string, or an IPv6 canonical string representation.
-* identity: this provides the identity of the originating socket. It SHALL be a binary string no longer than 255 bytes.
+* identity: this provides the Identity metadata property, if any, provided by by the connection. It SHALL be a binary string no longer than 255 bytes.
 * mechanism: this specifies the security mechanism to authenticate against. The mechanism SHALL NOT be empty.
 * credentials: these provide the user credentials to authenticate. The number of frames needed is defined by each mechanism.
 * status code: this shall be "200" to indicate success, "300" to indicate a temporary error, "400" to indicate authentication failure, and "500" to indicate an internal error (system failure).
@@ -122,7 +122,7 @@ The ZeroMQ REQ and REP sockets manage address envelopes automatically, while the
 
 * When using a REQ socket, the server SHALL not send nor receive an address delimiter.
 * When using a REP socket, the handler SHALL not send nor receive an address delimiter.
-* When using a ROUTER socket, the handler SHALL receive an extra frame indicating the identity of the peer that sent it the request. The handler MUST send this identity frame at the start of its reply message.
+* When using a ROUTER socket, the handler SHALL receive an extra frame indicating the routing ID of the peer that sent it the request. The handler MUST send this routing ID frame at the start of its reply message.
 
 +++ Proxy Handlers
 
@@ -131,9 +131,9 @@ A handler MAY act as a proxy for other handlers. This is how we connect external
 In a proxy architecture the handler SHOULD forward ZAP messages with no modifications except:
 
 * The handler MUST use a ROUTER socket for talking to servers.
-* The handler MUST send the whole received message (including the first identity frame) on to external handlers.
+* The handler MUST send the whole received message (including the first routing ID frame) on to external handlers.
 
-More generally, a terminal (non-proxy) handler that deals with an unknown number of intermediaries between it and the servers MUST accept an address envelope consisting of N identity frames followed by an empty address delimiter frame. It MUST save this envelope before processing the request, and MUST send the same envelope back with the reply. This is what a REP socket does, so in general terminal handlers will use REP sockets.
+More generally, a terminal (non-proxy) handler that deals with an unknown number of intermediaries between it and the servers MUST accept an address envelope consisting of N routing ID frames followed by an empty address delimiter frame. It MUST save this envelope before processing the request, and MUST send the same envelope back with the reply. This is what a REP socket does, so in general terminal handlers will use REP sockets.
 
 +++ The NULL Mechanism
 
@@ -186,7 +186,7 @@ This shows an authentication request sent by a server to a handler, for a client
 +------+-------+
 | 192.168.55.1 |    Address
 +------+-------+
-| BOB  |            Identity
+| BOB  |            Identity property
 +------+
 | NULL |            Mechanism
 +------+
@@ -214,7 +214,7 @@ This shows an example reply from the handler to the server:
 +-+
 [[/code]]
 
-If the server application uses a REP socket, it SHALL NOT receive nor send the delimiter frame. If it uses a ROUTER socket, it SHALL receive and send the delimiter frame, and shall additionally receive and send an identity frame before the delimiter frame.
+If the server application uses a REP socket, it SHALL NOT receive nor send the delimiter frame. If it uses a ROUTER socket, it SHALL receive and send the delimiter frame, and shall additionally receive and send an routing ID frame before the delimiter frame.
 
 +++ Example of PLAIN Authentication
 
@@ -232,7 +232,7 @@ This shows an authentication request sent by a server to a handler, for a client
 +------+-------+
 | 192.168.55.1 |    Address
 +-------+------+
-| BOB   |           Identity
+| BOB   |           Identity property
 +-------+
 | PLAIN |           Mechanism
 +-------+

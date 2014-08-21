@@ -134,9 +134,9 @@ ZWS1.0 makes no attempt at security.
 
 However the protocol can be tunneled over SSL.
 
-Clients support tunner over SSL with specifying wss instead of ws, for example "wss://example.com".
+Clients support tunnel over SSL with specifying wss instead of ws, for example "wss://example.com".
 
-Load balancer might teriminate the SSL befor arriving on the server.
+Load balancer might terminate the SSL before arriving on the server.
 
 ++ References
 

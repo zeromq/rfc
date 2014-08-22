@@ -15,6 +15,7 @@ The ZeroMQ WebSocket (ZWS) protocol is a mapping for ZeroMQ over WebSocket (http
 ++ Implementation
 
 ZWS connection is starting after successful WebSockets handshake between the client and the server. 
+ZWS message are binary websocket messages (the message opcode must be binary).
 
 +++ Handshake
 
@@ -59,24 +60,23 @@ zws = *connection
 
 connection = identity *messsage
 
-identity = '0' body
+identity = %x00 body
 
-; utf8-char is out of scope for this document
-body = *utf8-char
+body = *OCTEC
 
 message     = *more-frame final-frame
 final-frame = final body
-final       = '0'
+final       = %x00
 more-frame  = more body
-more        = '1'
+more        = %x01
 
 [[/code]]
 
 +++ Framing
 
-Each ZeroMQ frame maps to one WebSockets message. A frame consists of a MORE UTF8 character (either '0' or '1') followed by frame body of UTF8 characters.
+Each ZeroMQ frame maps to one WebSockets message. A frame consists of a MORE byte (either 0 or 1) followed by frame body.
 
-MORE character indicate if more frames to follow. A value of '0' indicates that there are no more frames to follow. A value of '1' indicates that more frames to follow. 
+MORE byte indicate if more frames to follow. A value of 0 indicates that there are no more frames to follow. A value of 1 indicates that more frames to follow. 
 On messages consisting of a single frame the MORE character MUST be 0.
 
 +++ Socket Compatibility
@@ -100,10 +100,7 @@ Any other socket combinations SHOULD be handled by silently disconnecting the ot
 +++ Publish-Subscribe
 
 XPUB and XSUB sockets are implemented at the protocol level as PUB and SUB sockets. That is, XPUB and XSUB are API constructs only. 
-A SUB socket sends a subscription message as one UTF8 character '1' followed by the subscription body, and unsubscription messages as one UTF8 character '0' followed by the subscription body.
-
-Please note becuase ZWS subscription and unsubscription are different from ZMTP and ZeroMQ (one UTF8 character vs one byte), 
-implementation need to convert the byte to UTF8 character before sending on the wire and vice versa when reading from the wire.
+A SUB socket sends a subscription message as 0x01 byte followed by the subscription body, and unsubscription messages as 0x00 byte '0' followed by the subscription body.
 
 +++ Port Sharing
 
@@ -134,11 +131,12 @@ ZWS1.0 makes no attempt at security.
 
 However the protocol can be tunneled over SSL.
 
-Clients support tunner over SSL with specifying wss instead of ws, for example "wss://example.com".
+Clients support tunnel over SSL with specifying wss instead of ws, for example "wss://example.com".
 
-Load balancer might teriminate the SSL befor arriving on the server.
+Load balancer might terminate the SSL before arriving on the server.
 
 ++ References
 
 http://github.com/somdoron/NetMQ.WebSockets - Extension to NetMQ which implement ZWS1.0.
-http://github.com/somdoron/JSMQ - ZeroMQ Javascript library that implement ZWS1.0.
+http://github.com/ZeroMQ/JSMQ - ZeroMQ Javascript library that implement ZWS1.0.
+http://github.com/somdoron/ZWSSock - C library that implement ZWS1.0.

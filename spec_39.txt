@@ -138,4 +138,5 @@ Load balancer might terminate the SSL before arriving on the server.
 ++ References
 
 http://github.com/somdoron/NetMQ.WebSockets - Extension to NetMQ which implement ZWS1.0.
-http://github.com/somdoron/JSMQ - ZeroMQ Javascript library that implement ZWS1.0.
+http://github.com/ZeroMQ/JSMQ - ZeroMQ Javascript library that implement ZWS1.0.
+http://github.com/somdoron/ZWSSock - C library that implement ZWS1.0.

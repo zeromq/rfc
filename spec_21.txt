@@ -422,9 +422,17 @@ The constructor SHALL take this general form:
 myp_mymod_t *
 myp_mymod_new (<arguments>)
 {
-    //  Allocate new instance on heap
-    //  Initialize all properties in instance
-    //  Return instance reference
+    myp_mymod_t *self = (myp_mymod_t *) zmalloc (sizeof (myp_mymod_t));
+    if (self) {
+        self->someprop = someprop_new ();
+        if (self->someprop)
+            self->anotherprop = anotherprop_new ();
+        if (self->anotherprop)
+            self->lastprop = lastprop_new ();
+        else
+            myp_mymod_destroy (&self);
+    }
+    return self;
 }
 [[/code]]
 
@@ -448,8 +456,9 @@ myp_mymod_destroy (myp_mymod_t **self_p)
     assert (self_p);
     if (*self_p) {
         myp_mymod_t *self = *self_p;
-        //  Free any properties allocated on heap
-        //  Destroy any child class instances
+        someprop_destroy (&self->someprop);
+        anotherprop_destroy (&self->anotherprop);
+        lastprop_destroy (&self->lastprop);
         free (self);
         *self_p = NULL;
     }

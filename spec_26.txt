@@ -206,7 +206,7 @@ The server SHALL validate all fields and SHALL reject and disconnect clients who
 
 When the server gets a valid HELLO command, it SHALL generate a new transient key pair, and encode both the public and secret key in a WELCOME command, as explained below. The server SHALL not keep this transient key pair and SHOULD keep minimal state for the client until the client responds with a valid INITIATE command. This protects against denial-of-service attacks where unauthenticated clients send many HELLO commands to consume server resources.
 
-Note that the client uses an 8 octet "short nonce" in the HELLO, INITIATE, and MESSAGE commands. This nonce SHALL be unique in each command within a connection. The client SHALL NOT send more than 2^64-1 commands in one connection. The client MAY use any strategy to generate unique short nonces, including using an incremental counter.
+Note that the client uses an 8 octet "short nonce" in the HELLO, INITIATE, and MESSAGE commands. This nonce SHALL be an incrementing integer, and unique to each command within a connection. The client SHALL NOT send more than 2^64-1 commands in one connection. The server SHALL verify that a client connection does use correctly incrementing short nonces, and SHALL disconnect clients that reuse a short nonce.
 
 ++++ The WELCOME Command
 
@@ -270,7 +270,7 @@ The client SHALL validate all fields and SHALL disconnect from servers who send 
 
 The client MAY validate the meta-data. If the client accepts the meta-data, it SHALL then expect MESSAGE commands from the server.
 
-Note that the server uses an 8 octet "short nonce" in the READY and MESSAGE commands. This nonce SHALL be unique in each of these command within a connection. The server SHALL NOT send more than 2^64-2 MESSAGE commands in one connection. The server MAY use any strategy to generate unique short nonces, including an incremental counter.
+Note that the server uses an 8 octet "short nonce" in the HELLO, INITIATE, and MESSAGE commands. This nonce SHALL be an incrementing integer, and unique to each command within a connection. The server SHALL NOT send more than 2^64-1 commands in one connection. The client SHALL verify that a server connection does use correctly incrementing short nonces, and SHALL disconnect from servers that reuse a short nonce.
 
 ++++ The MESSAGE Command
 
@@ -325,8 +325,6 @@ While CurveCP defines a security handshake and traffic control for messages sent
 * CurveCP has no explicit ERROR response and does not inform clients of authentication failures.
 
 * While CurveCP delivers a stream (reconstituted from packets), CurveZMQ delivers atomic messages.
-
-* While CurveCP uses strictly incrementing short nonces, CurveZMQ has no such requirement since commands are guaranteed to arrive in order over the stream transport.
 
 ++ CurveCP
 

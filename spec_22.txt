@@ -160,6 +160,8 @@ C4 is meant to provide a reusable optimal collaboration model for open source so
 
 * Administrators MAY remove Maintainers who are inactive for an extended period of time, or who repeatedly fail to apply this process accurately.
 
+* Administrators MAY temporarily or permanently block or ban contributors who do not respect this contract, who are argumentative or hostile, or who exhibit behavior that is generally offensive and/or distressing to others.
+
 ++ Further Reading
 
 * [http://en.wikipedia.org/wiki/Chris_Argyris Argyris' Models 1 and 2] - the goals of C4.1 are consistent with Argyris' Model 2.

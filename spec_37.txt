@@ -30,15 +30,15 @@ The ZeroMQ Message Transport Protocol (ZMTP) is a transport layer protocol for e
 
 * We need a way to carry metadata about the connection, after the security handshake. ZMTP defines a standard set of //metadata properties// (socket type, identity, etc.) that peers exchange after the security mechanism.
 
-* **NEW:** We want to allow multiple tasks to share a single external unique interface and port, to decrease system administration costs. ZMTP defines a //resource// metadata property that lets any number of tasks share a single interface and port.
+* We want to allow multiple tasks to share a single external unique interface and port, to decrease system administration costs.
 
 * We need to write down these solutions in a way that is easy for teams to implement on any platform and in any language. ZMTP is thus specified as a formal protocol (this document) and made available to teams under a free license.
 
 * We need guarantees that people will not create private forks of ZMTP, thus breaking interoperability. ZMTP is thus licensed under the GPLv3, so that any derived versions must also be made available to users of software that implements it.
 
-+++ Changes from ZMTP 3.1
++++ Changes from ZMTP 3.0
 
-- resources
+ZMTP defines a //resource// metadata property that lets any number of tasks share a single interface and port.
 
 
 +++ Related Specifications
@@ -179,7 +179,7 @@ If the mechanism that the peer received does not exactly match the mechanism it 
 
 +++ Error Handling
 
-ZMTP allows an explicit fatal error response during the mechanism handshake, using the ERROR command. The peer SHALL treat an ERROR command as fatal, and act by closing the connection, and not re-connecting using the same security credentials.
+ZMTP allows an explicit fatal error response during the mechanism handshake, using the ERROR command. The peer SHALL treat an incoming ERROR command as fatal, and act by closing the connection, and not re-connecting using the same security credentials.
 
 An implementation SHOULD signal any other error, e.g. overloaded, temporarily refusing connections, etc. by closing the connection. The peer SHALL treat an unexpected connection close as a temporary error, and SHOULD reconnect.
 
@@ -210,8 +210,8 @@ Commands are used by the ZMTP implementation and not generally visible to the ap
 These are the commands that this specification defines:
 
 * READY and ERROR - implements the NULL security handshake, see "The NULL Security Mechanism" below.
-* **NEW:** SUBSCRIBE and CANCEL - subscription management, see "The Publish-Subscribe Pattern", below.
-* **NEW:** PING and PONG - heartbeat requests and replies, see "Connection Heartbeating" below.
+* SUBSCRIBE and CANCEL - subscription management, see "The Publish-Subscribe Pattern", below.
+* PING and PONG - heartbeat requests and replies, see "Connection Heartbeating" below.
 
 ZMTP supports extensible security mechanisms and these may define their own commands. Security mechanisms MAY use any command names they need to.
 
@@ -236,7 +236,7 @@ name = OCTET 1*255name-char
 name-char = ALPHA | DIGIT | "-" | "_" | "." | "+"
 value = 4OCTET *OCTET       ; Size in network byte order
 error = command-size %d5 "ERROR" error-reason
-error-reason = OCTET 1*255VCHAR
+error-reason = OCTET 0*255VCHAR
 [[/code]]
 
 The message and command-size are defined by the ZMTP grammar previously explained.
@@ -269,7 +269,7 @@ These metadata properties are defined:
 
 * "Identity", which specifies the sender's socket identity. See the section "The Identity Property" below. The sender MAY specify an Identity.
 
-* **NEW:** "Resource", which specifies the a resource to connect to. See the section "The Resource Property" below. The sender MAY specify a Resource.
+* "Resource", which specifies the a resource to connect to. See the section "The Resource Property" below. The sender MAY specify a Resource.
 
 The implementation MAY provide other metadata properties such as implementation name, platform name, and so on. For interoperability, metadata names and semantics MAY be defined as RFCs.
 
@@ -317,7 +317,7 @@ PAIR   |     |     |        |        |     |      |     |      |      |      |  
 -------+-----+-----+--------+--------+-----+------+-----+------+------+------+------+
 [[/code]]
 
-When a peer validates the socket type, it MUST handle errors by silently disconnecting the other peer and possibly logging the error for debugging purposes.
+When a peer validates the socket type, it SHOULD handle errors by returning an ERROR command, and then disconnecting the peer.
 
 ++++ The Identity Property
 
@@ -390,7 +390,7 @@ The implementation SHOULD follow http://rfc.zeromq.org/spec:28/REQREP for the se
 
 The implementation SHOULD follow http://rfc.zeromq.org/spec:29/PUBSUB for the semantics of PUB, XPUB, SUB and XSUB sockets.
 
-**NEW:** When using ZMTP, message filtering SHALL happen at the publisher side (the PUB or XPUB socket). To create a subscription, the SUB or XSUB peer SHALL send a SUBSCRIBE command, which has this grammar:
+When using ZMTP, message filtering SHALL happen at the publisher side (the PUB or XPUB socket). To create a subscription, the SUB or XSUB peer SHALL send a SUBSCRIBE command, which has this grammar:
 
 [[code]]
 subscribe = command-size %d9 "SUBSCRIBE" subscription
@@ -415,9 +415,9 @@ The implementation SHOULD follow http://rfc.zeromq.org/spec:30/PIPELINE for the 
 
 The implementation SHOULD follow http://rfc.zeromq.org/spec:31/EXPAIR for the semantics of exclusive PAIR sockets.
 
-++ **NEW:** Connection Heartbeating
+++ Connection Heartbeating
 
-ZMTP provides connection heartbeating to address some specific problems:
+ZMTP/3.1 provides connection heartbeating to address some specific problems:
 
 * Network connections can go stale and die without reporting TCP errors. By detecting the lack of incoming traffic, a peer can deduce that the connection has gone stale.
 
@@ -618,5 +618,3 @@ This draft is open for discussion. The following topics at least are still on th
 * Do we want DEALER and PUSH sockets to requeue undeliverable messages to other peers? This can improve reliability but results in out-of-order messages, and is not robust against messages lost in transit, or already delivered to the other peer.
 
 * Credits, as a signaling mechanism for asynchronous flow control. This allows fine control over the amount of queued data. In this scenario, the receiving peer (DEALER, PULL, REP) would send credit which would be used up by messages routed to it. The minimal use-case is for PUSH/DEALER-to-PULL/DEALER round-robin routing. Credit could be octets, or messages.
-
-* Explicit rejection message in case of failed security negotiation. This would give peers more help in deciding whether to retry or return a fatal error to their application. The value in not giving explicit errors on security failures is that it makes life harder for attackers.

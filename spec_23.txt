@@ -31,8 +31,6 @@ The ZeroMQ Message Transport Protocol (ZMTP) is a transport layer protocol for e
 
 * We need a way to carry metadata about the connection, after the security handshake. ZMTP defines a standard set of //metadata properties// (socket type, identity, etc.) that peers exchange after the security mechanism.
 
-* We want to allow multiple tasks to share a single external unique interface and port, to decrease system administration costs.
-
 * We need to write down these solutions in a way that is easy for teams to implement on any platform and in any language. ZMTP is thus specified as a formal protocol (this document) and made available to teams under a free license.
 
 * We need guarantees that people will not create private forks of ZMTP, thus breaking interoperability. ZMTP is thus licensed under the GPLv3, so that any derived versions must also be made available to users of software that implements it.
@@ -47,10 +45,10 @@ The changes in version 3.0 of the specification are a simpler version numbering 
 * http://rfc.zeromq.org/spec:25/ZMTP-CURVE defines the ZMTP-CURVE security mechanism.
 * http://rfc.zeromq.org/spec:26/CURVEZMQ defines the CurveZMQ authentication and encryption protocol.
 * http://rfc.zeromq.org/spec:27/ZAP defines the ZeroMQ Authentication Protocol.
-* http://rfc.zeromq.org/spec:28/REQREP defines the semantics of REQ, REP, DEALER and ROUTER sockets. 
-* http://rfc.zeromq.org/spec:29/PUBSUB defines the semantics of PUB, XPUB, SUB and XSUB sockets. 
-* http://rfc.zeromq.org/spec:30/PIPELINE defines the semantics of PUSH and PULL sockets. 
-* http://rfc.zeromq.org/spec:31/EXPAIR defines the semantics of exclusive PAIR sockets. 
+* http://rfc.zeromq.org/spec:28/REQREP defines the semantics of REQ, REP, DEALER and ROUTER sockets.
+* http://rfc.zeromq.org/spec:29/PUBSUB defines the semantics of PUB, XPUB, SUB and XSUB sockets.
+* http://rfc.zeromq.org/spec:30/PIPELINE defines the semantics of PUSH and PULL sockets.
+* http://rfc.zeromq.org/spec:31/EXPAIR defines the semantics of exclusive PAIR sockets.
 * http://rfc.zeromq.org/spec:37/ZMTP defines version 3.1 of this specification.
 
 ++ Implementation
@@ -85,7 +83,7 @@ signature = %xFF padding %x7F
 padding = 8OCTET        ; Not significant
 
 version = version-major version-minor
-version-major = %x03            
+version-major = %x03
 version-minor = %x00
 
 ;   The mechanism is a null padded string
@@ -167,7 +165,7 @@ The security mechanism is an ASCII string, null-padded as needed to fit 20 octet
 
 A peer announces precisely one security mechanism, unlike SASL, which lets servers announce multiple security mechanisms. Security in ZMTP is //assertive// in that all peers on a given socket have the same, required level of security. This prevents downgrade attacks and simplifies implementations.
 
-Each security mechanism defines a protocol consisting of zero or more commands sent by either peer to the other until the handshaking is complete or either of the peers refuses to continue, and closes the connection. 
+Each security mechanism defines a protocol consisting of zero or more commands sent by either peer to the other until the handshaking is complete or either of the peers refuses to continue, and closes the connection.
 
 Commands are single frames consisting of a size field, and a body. If the body is 0-255 octets, the command SHOULD use a short size field (%x04 followed by 1 octet). If the body is 256 or more octets, the command SHOULD use a long size field (%x06 followed by 8 octets).
 
@@ -191,7 +189,7 @@ Following the greeting, which has a fixed size of 64 octets, all further data is
 
 A frame consists of a flags field (1 octet), followed by a size field (one octet or eight octets) and a frame body of size octets. The size does not include the flags field, nor itself, so an empty frame has a size of zero.
 
-A short frame has a body of 0 to 255 octets. A long frame has a body of 0 to 2^63-1 octets. 
+A short frame has a body of 0 to 255 octets. A long frame has a body of 0 to 2^63-1 octets.
 
 The flags field consists of a single octet containing various control flags. Bit 0 is the least significant bit (rightmost bit):
 
@@ -205,7 +203,7 @@ The flags field consists of a single octet containing various control flags. Bit
 
 ++++ Commands
 
-Commands are used by the ZMTP implementation and not generally visible to the application except in some cases. Commands always consist of one frame, containing a printable command name, a null octet separator, and data. 
+Commands are used by the ZMTP implementation and not generally visible to the application except in some cases. Commands always consist of one frame, containing a printable command name, a null octet separator, and data.
 
 These are the commands that this specification defines:
 
@@ -276,12 +274,12 @@ Metadata names starting with "X-" SHALL be reserved for application use.
 The Socket-Type announces the ZeroMQ socket type of the sending peer. The Socket-Type SHALL match this grammar:
 
 [[code]]
-socket-type = "REQ" | "REP" 
-            | "DEALER" | "ROUTER" 
-            | "PUB" | "XPUB" 
+socket-type = "REQ" | "REP"
+            | "DEALER" | "ROUTER"
+            | "PUB" | "XPUB"
             | "SUB" | "XSUB"
             | "PUSH" | "PULL"
-            | "PAIR" 
+            | "PAIR"
 [[/code]]
 
 The peer SHOULD enforce that the other peer is using a valid socket type. This table shows the legal combinations (as "*"):
@@ -343,11 +341,11 @@ These rules apply to all sockets:
 
 +++ The Request-Reply Pattern
 
-The implementation SHOULD follow http://rfc.zeromq.org/spec:28/REQREP for the semantics of REQ, REP, DEALER and ROUTER sockets. 
+The implementation SHOULD follow http://rfc.zeromq.org/spec:28/REQREP for the semantics of REQ, REP, DEALER and ROUTER sockets.
 
 +++ The Publish-Subscribe Pattern
 
-The implementation SHOULD follow http://rfc.zeromq.org/spec:29/PUBSUB for the semantics of PUB, XPUB, SUB and XSUB sockets. 
+The implementation SHOULD follow http://rfc.zeromq.org/spec:29/PUBSUB for the semantics of PUB, XPUB, SUB and XSUB sockets.
 
 When using ZMTP, message filtering SHALL happen at the publisher side (the PUB or XPUB socket). To create a subscription, the SUB or XSUB peer SHALL send a SUBSCRIBE message, which has this grammar:
 
@@ -373,7 +371,7 @@ Subscriptions SHALL be additive and SHALL NOT be idempotent. That is, subscribin
 
 +++ The Pipeline Pattern
 
-The implementation SHOULD follow http://rfc.zeromq.org/spec:30/PIPELINE for the semantics of PUSH and PULL sockets. 
+The implementation SHOULD follow http://rfc.zeromq.org/spec:30/PIPELINE for the semantics of PUSH and PULL sockets.
 
 +++ The Exclusive Pair Pattern
 
@@ -381,9 +379,9 @@ The implementation SHOULD follow http://rfc.zeromq.org/spec:31/EXPAIR for the se
 
 ++ Backwards Interoperability
 
-To detect and work with older versions of ZMTP, we define two strategies; one will detect only 2.0 peers, and the second will detect both 1.0 and 2.0 peers. 
+To detect and work with older versions of ZMTP, we define two strategies; one will detect only 2.0 peers, and the second will detect both 1.0 and 2.0 peers.
 
-When a peer does not need backwards interoperability, it SHOULD send its full greeting immediately upon establishing a new peer connection. 
+When a peer does not need backwards interoperability, it SHOULD send its full greeting immediately upon establishing a new peer connection.
 
 +++ Detecting ZMTP 2.0 Peers
 
@@ -402,7 +400,7 @@ Here is the sequence of commands showing two ZMTP 3.0 peers using this algorithm
 [[code]]
 C:signature + major-version             S:signature + major-version
 C:rest of greeting                      S:rest of greeting
-C:ready                                 S:ready 
+C:ready                                 S:ready
 C:message...                            S:message...
 [[/code]]
 
@@ -458,31 +456,31 @@ A DEALER client connects to a ROUTER server. Both client and server are running 
 +------+----+
    0     1
  flags  size
-     
+
 +------+---+---+---+---+---+
 | %x05 | R | E | A | D | Y |
 +------+---+---+---+---+---+
-   2     3   4   5   6   7 
+   2     3   4   5   6   7
  Command name "READY"
- 
+
 +----+---+---+---+---+---+---+---+---+---+---+---+
 | 11 | S | o | c | k | e | t | - | T | y | p | e |
 +----+---+---+---+---+---+---+---+---+---+---+---+
-  8    9  10  11  12  13  14  15  16  17  18  19  
+  8    9  10  11  12  13  14  15  16  17  18  19
  Property name "Socket-Type"
 
 +------+------+------+------+---+---+---+---+---+---+
 | %x00 | %x00 | %x00 | %x06 | D | E | A | L | E | R |
 +------+------+------+------+---+---+---+---+---+---+
-   20     21     22     23    24  25  26  27  28  29  
+   20     21     22     23    24  25  26  27  28  29
  Property value "DEALER"
-   
+
 +----+---+---+---+---+---+---+---+---+
 | 8  | I | d | e | n | t | i | t | y |
 +----+---+---+---+---+---+---+---+---+
-  30  31  32  33  34  35  36  37  38  
+  30  31  32  33  34  35  36  37  38
  Property name "Identity"
- 
+
 +------+------+------+------+
 | %x00 | %x00 | %x00 | %x00 |
 +------+------+------+------+

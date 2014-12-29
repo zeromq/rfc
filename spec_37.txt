@@ -494,6 +494,8 @@ C:message...                            S:message...
 
 * If the least significant bit is 1, the peer is using ZMTP 2.0 or later and has sent us the ZMTP signature. We read a further octet, which indicates the ZMTP version. If this is 1 or 2, we have a ZMTP 2.0 peer. If this is 3, we have a ZMTP 3.x peer.
 
+* If the implementation's security mechanism is anything other than NULL, and it detects a ZMTP 1.0 or 2.0 peer, it MUST immediately close the connection. A ZMTP 1.0 or 2.0 peer can only request NULL security.
+
 * When we have detected a ZMTP 1.0 peer, we have already sent 10 octets, which the other peer interprets as the start of an identity frame. We continue by sending the body of the identity frame (zero or more octets). From then, we encode and decode all frames on that connection using the ZMTP 1.0 framing syntax.
 
 * When we have detected a ZMTP 2.0 peer, we continue with version negotiation as explained above, by sending our version number and then socket type and identity as defined by the ZMTP 2.0 specification.
@@ -593,6 +595,8 @@ On all ZMTP connections, command names SHALL be visible and command frames SHALL
 
 ++ Security Considerations
 
+* An implementation MUST guard against downgrade attacks, which may take the form of crafting a ZMTP 1.0 or 2.0 protocol header, or asking for a less secure mechanism than the application has requested.
+
 * Attackers may overwhelm a peer by repeated connection attempts. Thus, a peer MAY log failed accesses, and MAY detect and block repeated failed connections from specific originating IP addresses.
 
 * Attackers may try to cause memory exhaustion in a peer by holding open connections. Thus, a peer MAY allocate memory to a connection only after the security handshake is complete, and MAY limit the number and cost of in-progress handshakes.
@@ -618,3 +622,6 @@ This draft is open for discussion. The following topics at least are still on th
 * Do we want DEALER and PUSH sockets to requeue undeliverable messages to other peers? This can improve reliability but results in out-of-order messages, and is not robust against messages lost in transit, or already delivered to the other peer.
 
 * Credits, as a signaling mechanism for asynchronous flow control. This allows fine control over the amount of queued data. In this scenario, the receiving peer (DEALER, PULL, REP) would send credit which would be used up by messages routed to it. The minimal use-case is for PUSH/DEALER-to-PULL/DEALER round-robin routing. Credit could be octets, or messages.
+
+* Commands or other strategies to allow wire analysis on unencrypted networks (without some additional information it is not possible to determine when messages start).
+

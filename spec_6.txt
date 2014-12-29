@@ -82,7 +82,7 @@ Peers should send heartbeats at regular and agreed-upon intervals. A peer can co
 
 If the worker detects that the client has disconnected, it MUST send READY again to start a new conversation.
 
-If the client detects that the worked has disconnected, it SHOULD stop sending it messages of any type.
+If the client detects that the worker has disconnected, it SHOULD stop sending it messages of any type.
 
 ++ References
 

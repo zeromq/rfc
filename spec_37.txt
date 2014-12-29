@@ -622,3 +622,6 @@ This draft is open for discussion. The following topics at least are still on th
 * Do we want DEALER and PUSH sockets to requeue undeliverable messages to other peers? This can improve reliability but results in out-of-order messages, and is not robust against messages lost in transit, or already delivered to the other peer.
 
 * Credits, as a signaling mechanism for asynchronous flow control. This allows fine control over the amount of queued data. In this scenario, the receiving peer (DEALER, PULL, REP) would send credit which would be used up by messages routed to it. The minimal use-case is for PUSH/DEALER-to-PULL/DEALER round-robin routing. Credit could be octets, or messages.
+
+* Commands or other strategies to allow wire analysis on unencrypted networks (without some additional information it is not possible to determine when messages start).
+

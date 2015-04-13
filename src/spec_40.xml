@@ -2,10 +2,9 @@
     signature = "5"
     title = "XRAP serialization over ZMTP"
     script = "zproto_codec_c"
+    package_dir = "."
     >
 This is the XRAP protocol (http://rfc.zeromq.org/spec:40/XRAP):
-
-<include filename = "license.xml" />
 
 <message name = "POST" id = "1">
     <field name = "parent" type = "string">Schema/type/name</field>

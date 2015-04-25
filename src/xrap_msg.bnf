@@ -1,0 +1,86 @@
+The following ABNF grammar defines the XRAP serialization over ZMTP:
+
+    xrap_msg        = *( POST | POST-OK | GET | GET-OK | GET-EMPTY | PUT | PUT-OK | DELETE | DELETE-OK | ERROR )
+
+    ;  Create a new, dynamically named resource in some parent.              
+
+    POST            = signature %d1 parent content_type content_body
+    signature       = %xAA %xA5             ; two octets
+    parent          = string                ; Schema/type/name
+    content_type    = string                ; Content type
+    content_body    = longstr               ; New resource specification
+
+    ;  Success response for POST.                                            
+
+    POST-OK         = signature %d2 status_code location etag date_modified content_type content_body
+    status_code     = number-2              ; Response status code 2xx
+    location        = string                ; Schema/type/name
+    etag            = string                ; Opaque hash tag
+    date_modified   = number-8              ; Date and time modified
+    content_type    = string                ; Content type
+    content_body    = longstr               ; Resource contents
+
+    ;  Retrieve a known resource.                                            
+
+    GET             = signature %d3 resource if_modified_since if_none_match content_type
+    resource        = string                ; Schema/type/name
+    if_modified_since = number-8            ; GET if more recent
+    if_none_match   = string                ; GET if changed
+    content_type    = string                ; Desired content type
+
+    ;  Success response for GET.                                             
+
+    GET-OK          = signature %d4 status_code content_type content_body
+    status_code     = number-2              ; Response status code 2xx
+    content_type    = string                ; Actual content type
+    content_body    = longstr               ; Resource specification
+
+    ;  Conditional GET returned 304 Not Modified.                            
+
+    GET-EMPTY       = signature %d5 status_code
+    status_code     = number-2              ; Response status code 3xx
+
+    ;  Update a known resource.                                              
+
+    PUT             = signature %d6 resource if_unmodified_since if_match content_type content_body
+    resource        = string                ; Schema/type/name
+    if_unmodified_since = number-8          ; Update if same date
+    if_match        = string                ; Update if same ETag
+    content_type    = string                ; Content type
+    content_body    = longstr               ; New resource specification
+
+    ;  Success response for PUT.                                             
+
+    PUT-OK          = signature %d7 status_code location etag date_modified
+    status_code     = number-2              ; Response status code 2xx
+    location        = string                ; Schema/type/name
+    etag            = string                ; Opaque hash tag
+    date_modified   = number-8              ; Date and time modified
+
+    ;  Remove a known resource.                                              
+
+    DELETE          = signature %d8 resource if_unmodified_since if_match
+    resource        = string                ; schema/type/name
+    if_unmodified_since = number-8          ; DELETE if same date
+    if_match        = string                ; DELETE if same ETag
+
+    ;  Success response for DELETE.                                          
+
+    DELETE-OK       = signature %d9 status_code
+    status_code     = number-2              ; Response status code 2xx
+
+    ;  Error response for any request.                                       
+
+    ERROR           = signature %d10 status_code status_text
+    status_code     = number-2              ; Response status code, 4xx or 5xx
+    status_text     = string                ; Response status text
+
+    ; Strings are always length + text contents
+    string          = number-1 *VCHAR
+    longstr         = number-4 *VCHAR
+
+    ; Numbers are unsigned integers in network byte order
+    number-1        = 1OCTET
+    number-2        = 2OCTET
+    number-4        = 4OCTET
+    number-8        = 8OCTET

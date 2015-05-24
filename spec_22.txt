@@ -38,7 +38,7 @@ C4 is meant to provide a reusable optimal collaboration model for open source so
 
 * A "Contributor" is a person who wishes to provide a patch, being a set of commits that solve some clearly identified problem.
 
-* A "Maintainer" is a person who merge patches to the project. Maintainers are not developers; their job is to enforce process.
+* A "Maintainer" is a person who merges patches to the project. Maintainers are not developers; their job is to enforce process.
 
 * Contributors SHALL NOT have commit access to the repository unless they are also Maintainers.
 

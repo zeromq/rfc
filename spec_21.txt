@@ -389,6 +389,14 @@ Property names SHALL follow the General Style for Naming. Property names SHOULD 
 
 Argument names SHALL be consistent with property names.
 
+++++ Return Values
+
+Success/failure SHALL be indicated by returning an int, with values zero or -1 respectively.
+
+Strings SHALL be returned as "char *" when they are passed to the caller, who must free them.
+
+Strings SHALL be returned as "const char *" when the caller may not modify or free them.
+
 +++ The Self Test Method
 
 In stateless classes, the only standard method is {{myp_mymod_test ()}}, which SHALL conduct a self test of the class, returning silently on success, and asserting on failure.
@@ -969,7 +977,7 @@ gsl -q -script:<script>.gsl <model>.xml
 
 * Code generation SHALL be treated as a form of dangerous abstraction that creates significant barriers to readers. A good rule of thumb is that for code generation to be profitable, it should reduce the lines of code written by hand by 80-90%.
 
-* Generated code SHALL contain this warning at the start: "GENERATED SOURCE CODE, DO NOT EDIT".
+* Generated code SHALL contain a warning of this form at the start: "GENERATED SOURCE CODE, DO NOT EDIT".
 
 * Generated code SHALL otherwise conform to this Specification so that it is indistinguishable from hand-written code.
 

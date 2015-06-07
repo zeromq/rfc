@@ -24,7 +24,7 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 
 ++ Goals
 
-The Titanic Service Protocol (SP) defines a set of services, requests, and replies that implement the Titanic pattern for disconnected persistent messaging across a network of arbitrarily connected clients and workers.
+The Titanic Service Protocol (TSP) defines a set of services, requests, and replies that implement the Titanic pattern for disconnected persistent messaging across a network of arbitrarily connected clients and workers.
 
 The Titanic pattern is developed in Chapter 4 of the Guide[((bibcite guide))], as a simple design for disk-based reliable messaging. Titanic allows clients and workers to work without being connected to the network at the same time, and defines handshaking for safe storage of requests, and retrieval of replies.
 

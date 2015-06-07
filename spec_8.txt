@@ -35,7 +35,7 @@ The goals of MMI are to:
 
 +++ Namespace
 
-An MMI broker implementation MUST handle all services that start with "mmi." internally. It MUST disconnect any workers that attempt to register servics in this namespace.
+An MMI broker implementation MUST handle all services that start with "mmi." internally. It MUST disconnect any workers that attempt to register services in this namespace.
 
 +++ Default services
 

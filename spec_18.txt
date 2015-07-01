@@ -29,7 +29,7 @@ The Majordomo Protocol (MDP) defines a reliable service-oriented request-reply d
 
 MDP is an evolution of [http://rfc.zeromq.org/spec:6 6/PPP], adding name-based service resolution and more structured protocol commands.
 
-MDP/0.2 is an evolution of MDP/0.1, adding support for multiple replies to a single request. MDP/0.2 is not compatible with MDP/0.1. The significant differences are (a) replacement of READY command with PARTIAL and FINAL commands, and (b) removal of empty frames at start of commands.
+MDP/0.2 is an evolution of MDP/0.1, adding support for multiple replies to a single request. MDP/0.2 is not compatible with MDP/0.1. The significant differences are (a) replacement of REPLY command with PARTIAL and FINAL commands, and (b) removal of empty frames at start of commands.
 
 The goals of MDP are to:
 

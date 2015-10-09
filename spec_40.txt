@@ -102,8 +102,11 @@ content_type    = string                ; Desired content type
 
 ;  Success response for GET.
 
-GET-OK          = signature %d4 status_code content_type content_body
+GET-OK          = signature %d4 status_code etag date_modified content_type
+                  content_body metadata
 status_code     = number-2              ; Response status code 2xx
+etag            = string                ; Opaque hash tag
+date_modified   = number-8              ; Date and time modified
 content_type    = string                ; Actual content type
 content_body    = longstr               ; Resource specification
 
@@ -860,6 +863,8 @@ Retrieve a known resource.
 
 <message name = "GET OK" id = "4">
     <field name = "status code" type = "number" size = "2">Response status code 2xx</field>
+    <field name = "etag" type = "string">Opaque hash tag</field>
+    <field name = "date modified" type = "number" size = "8">Date and time modified</field>
     <field name = "content type" type = "string">Actual content type</field>
     <field name = "content body" type = "longstr">Resource specification</field>
 Success response for GET.

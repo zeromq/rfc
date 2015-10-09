@@ -93,9 +93,10 @@ content_body    = longstr               ; Resource contents
 
 ;  Retrieve a known resource.
 
-GET             = signature %d3 resource if_modified_since if_none_match
-                  content_type
+GET             = signature %d3 resource parameters if_modified_since
+                  if_none_match content_type
 resource        = string                ; Schema/type/name
+parameters      = hash                  ; Filtering/sorting/selecting/paging
 if_modified_since = number-8            ; GET if more recent
 if_none_match   = string                ; GET if changed
 content_type    = string                ; Desired content type
@@ -151,6 +152,12 @@ ERROR           = signature %d10 status_code status_text
 status_code     = number-2              ; Response status code, 4xx or 5xx
 status_text     = string                ; Response status text
 
+; A list of name/value pairs
+hash            = hash-count *( hash-name hash-value )
+hash-count      = number-4
+hash-value      = longstr
+hash-name       = string
+
 ; Strings are always length + text contents
 string          = number-1 *VCHAR
 longstr         = number-4 *VCHAR
@@ -182,6 +189,10 @@ We use these headers, with their HTTP/1.1 meanings, implemented as individual fi
 * If-None-Match - a conditional GET using resource ETag.
 * If-Unmodified-Since - a conditional PUT or DELETE using resource date.
 * If-Match - a conditional PUT or DELETE using resource ETag.
+
+Additionally we can pass arguments to GET as we usually would do with a HTTP query.
+
+* Parameters - A map of key/value pairs for filtering, sorting, selecting and paging.
 
 All replies contain a 3-digit status code that conforms to the [http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html HTTP/1.1 specifications] for status codes.
 
@@ -855,6 +866,7 @@ Success response for POST.
 
 <message name = "GET" id = "3">
     <field name = "resource" type = "string">Schema/type/name</field>
+    <field name = "parameters" type = "hash">Filtering/sorting/selecting/paging</field>
     <field name = "if modified since" type = "number" size="8">GET if more recent</field>
     <field name = "if none match" type = "string">GET if changed</field>
     <field name = "content type" type = "string">Desired content type</field>

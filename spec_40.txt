@@ -83,13 +83,14 @@ content_body    = longstr               ; New resource specification
 ;  Success response for POST.
 
 POST-OK         = signature %d2 status_code location etag date_modified
-                  content_type content_body
+                  content_type content_body metadata
 status_code     = number-2              ; Response status code 2xx
 location        = string                ; Schema/type/name
 etag            = string                ; Opaque hash tag
 date_modified   = number-8              ; Date and time modified
 content_type    = string                ; Content type
 content_body    = longstr               ; Resource contents
+metadata        = hash                  ; Collection total size/version/hypermedia
 
 ;  Retrieve a known resource.
 
@@ -110,6 +111,7 @@ etag            = string                ; Opaque hash tag
 date_modified   = number-8              ; Date and time modified
 content_type    = string                ; Actual content type
 content_body    = longstr               ; Resource specification
+metadata        = hash                  ; Collection total size/version/hypermedia
 
 ;  Conditional GET returned 304 Not Modified.
 
@@ -128,11 +130,12 @@ content_body    = longstr               ; New resource specification
 
 ;  Success response for PUT.
 
-PUT-OK          = signature %d7 status_code location etag date_modified
+PUT-OK          = signature %d7 status_code location etag date_modified metadata
 status_code     = number-2              ; Response status code 2xx
 location        = string                ; Schema/type/name
 etag            = string                ; Opaque hash tag
 date_modified   = number-8              ; Date and time modified
+metadata        = hash                  ; Collection total size/version/hypermedia
 
 ;  Remove a known resource.
 
@@ -143,8 +146,9 @@ if_match        = string                ; DELETE if same ETag
 
 ;  Success response for DELETE.
 
-DELETE-OK       = signature %d9 status_code
+DELETE-OK       = signature %d9 status_code metadata
 status_code     = number-2              ; Response status code 2xx
+metadata        = hash                  ; Collection total size/version/hypermedia
 
 ;  Error response for any request.
 
@@ -193,6 +197,10 @@ We use these headers, with their HTTP/1.1 meanings, implemented as individual fi
 Additionally we can pass arguments to GET as we usually would do with a HTTP query.
 
 * Parameters - A map of key/value pairs for filtering, sorting, selecting and paging.
+
+Further all _OK messages take a map of key/value pairs to supply further metadata like the total size of a collection, hypermedia e.g. links for paging through a collection or the returned version of a document.
+
+* Metadata - A map of key/value pair containing custom data to further describe the response.
 
 All replies contain a 3-digit status code that conforms to the [http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html HTTP/1.1 specifications] for status codes.
 
@@ -861,6 +869,7 @@ Create a new, dynamically named resource in some parent.
     <field name = "date modified" type = "number" size = "8">Date and time modified</field>
     <field name = "content type" type = "string">Content type</field>
     <field name = "content body" type = "longstr">Resource contents</field>
+    <field name = "metadata" type = "hash">Collection total size/version/hypermedia</field>
 Success response for POST.
 </message>
 
@@ -879,6 +888,7 @@ Retrieve a known resource.
     <field name = "date modified" type = "number" size = "8">Date and time modified</field>
     <field name = "content type" type = "string">Actual content type</field>
     <field name = "content body" type = "longstr">Resource specification</field>
+    <field name = "metadata" type = "hash">Collection total size/version/hypermedia</field>
 Success response for GET.
 </message>
 
@@ -901,6 +911,7 @@ Update a known resource.
     <field name = "location" type = "string">Schema/type/name</field>
     <field name = "etag" type = "string">Opaque hash tag</field>
     <field name = "date modified" type = "number" size = "8">Date and time modified</field>
+    <field name = "metadata" type = "hash">Collection total size/version/hypermedia</field>
 Success response for PUT.
 </message>
 
@@ -913,6 +924,7 @@ Remove a known resource.
 
 <message name = "DELETE OK" id = "9">
     <field name = "status code" type = "number" size = "2">Response status code 2xx</field>
+    <field name = "metadata" type = "hash">Collection total size/version/hypermedia</field>
 Success response for DELETE.
 </message>
 

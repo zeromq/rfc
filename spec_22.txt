@@ -134,7 +134,7 @@ C4 is meant to provide a reusable optimal collaboration model for open source so
 
 +++ Evolution of Public Contracts
 
-* All Public Contracts (APIs or protocols) SHOULD be documented.
+* All Public Contracts (APIs or protocols) SHALL be documented.
 
 * All Public Contracts SHOULD have space for extensibility and experimentation.
 

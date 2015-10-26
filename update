@@ -1,0 +1,77 @@
+#! /bin/sh
+
+if [ $1 -eq "13" ]; then
+    cp spec_13.txt 13.wd
+    wdput zeromq-rfc spec 13 "ZMTP - ZeroMQ Message Transport Protocol"
+elif [ $1 -eq "18" ]; then
+    cp spec_18.txt 18.wd
+    wdput zeromq-rfc spec 18 "MPD - Majordomo Protocol 0.2"
+elif [ $1 -eq "19" ]; then
+    cp spec_19.txt 19.wd
+    wdput zeromq-rfc spec 19 "FILEMQ - File Message Queuing Protocol"
+elif [ $1 -eq "21" ]; then
+    cp spec_21.txt 21.wd
+    wdput zeromq-rfc spec 21 "CLASS - C Language Style for Scalability"
+elif [ $1 -eq "22" ]; then
+    cp spec_22.txt 22.wd
+    wdput zeromq-rfc spec 22 "C4.1 - Collective Code Construction Contract"
+elif [ $1 -eq "23" ]; then
+    cp spec_23.txt 23.wd
+    wdput zeromq-rfc spec 23 "ZMTP - ZeroMQ Message Transport Protocol"
+elif [ $1 -eq "24" ]; then
+    cp spec_24.txt 24.wd
+    wdput zeromq-rfc spec 24 "ZMTP PLAIN Security Mechanism"
+elif [ $1 -eq "25" ]; then
+    cp spec_25.txt 25.wd
+    wdput zeromq-rfc spec 25 "ZMTP CURVE Security Mechanism"
+elif [ $1 -eq "26" ]; then
+    cp spec_26.txt 26.wd
+    wdput zeromq-rfc spec 26 "CurveZMQ Authentication and Encryption Protocol"
+elif [ $1 -eq "27" ]; then
+    cp spec_27.txt 27.wd
+    wdput zeromq-rfc spec 27 "ZAP - ZeroMQ Authentication Protocol"
+elif [ $1 -eq "28" ]; then
+    cp spec_28.txt 28.wd
+    wdput zeromq-rfc spec 28 "REQREP - ZeroMQ Request-Reply Pattern"
+elif [ $1 -eq "29" ]; then
+    cp spec_29.txt 29.wd
+    wdput zeromq-rfc spec 29 "PUBSUB - ZeroMQ Publish-Subscribe Pattern"
+elif [ $1 -eq "30" ]; then
+    cp spec_30.txt 30.wd
+    wdput zeromq-rfc spec 30 "PIPELINE - ZeroMQ Pipeline Pattern"
+elif [ $1 -eq "31" ]; then
+    cp spec_31.txt 31.wd
+    wdput zeromq-rfc spec 31 "EXPAIR - ZeroMQ Exclusive Pair Pattern"
+elif [ $1 -eq "32" ]; then
+    cp spec_32.txt 32.wd
+    wdput zeromq-rfc spec 32 "Z85 - ZeroMQ Base-85 Encoding Algorithm"
+elif [ $1 -eq "33" ]; then
+    cp spec_33.txt 33.wd
+    wdput zeromq-rfc spec 33 "ZHTTP - HTTP Request-Reply over ZeroMQ"
+elif [ $1 -eq "34" ]; then
+    cp spec_34.txt 34.wd
+    wdput zeromq-rfc spec 34 "SRPZMQ Authentication and Encryption Protocol"
+elif [ $1 -eq "35" ]; then
+    cp spec_35.txt 35.wd
+    wdput zeromq-rfc spec 35 "FILEMQ - File Message Queuing Protocol"
+elif [ $1 -eq "36" ]; then
+    cp spec_36.txt 36.wd
+    wdput zeromq-rfc spec 36 "ZeroMQ Realtime Exchange Protocol"
+elif [ $1 -eq "37" ]; then
+    cp spec_37.txt 37.wd
+    wdput zeromq-rfc spec 37 "ZMTP - ZeroMQ Message Transport Protocol"
+elif [ $1 -eq "38" ]; then
+    cp spec_38.txt 38.wd
+    wdput zeromq-rfc spec 38 "ZMTP GSSAPI Security Mechanism"
+elif [ $1 -eq "39" ]; then
+    cp spec_39.txt 39.wd
+    wdput zeromq-rfc spec 39 "ZWS - ZeroMQ WebSocket Protocol"
+elif [ $1 -eq "40" ]; then
+    cp spec_40.txt 40.wd
+    wdput zeromq-rfc spec 40 "XRAP - Extensible Resource Access Protocol"
+elif [ $1 -eq "41" ]; then
+    cp spec_41.txt 41.wd
+    wdput zeromq-rfc spec 41 "CLISRV - ZeroMQ Client-Server Pattern"
+fi
+
+rm *.wd

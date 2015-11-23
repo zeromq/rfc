@@ -896,7 +896,11 @@ for (array_index = 0; array_index < array_size; array_index++) {
 * The recommended pattern for list iteration is:
 
 [[code]]
-<type> 
+myp_mymod_t *mymod = (myp_mymod_t *) myp_mymod_first (mymod);
+while (mymod) {
+    //  Do something
+    mymod = (myp_mymod_t *) myp_mymod_next (mymod);
+}
 [[/code]]
 
 ++ Portability

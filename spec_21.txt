@@ -397,6 +397,8 @@ Strings SHALL be returned as "char *" when they are passed to the caller, who mu
 
 Strings SHALL be returned as "const char *" when the caller may not modify or free them.
 
+Compound return values, e.g. a size-specified buffer, SHOULD be returned as fresh objects of a suitable class. The API SHOULD NOT return compound values via multiple routes, e.g. data via an argument and size via the return code.
+
 +++ The Self Test Method
 
 In stateless classes, the only standard method is {{myp_mymod_test ()}}, which SHALL conduct a self test of the class, returning silently on success, and asserting on failure.

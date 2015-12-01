@@ -60,7 +60,7 @@ General behavior:
 * SHALL maintain a double queue for each connected peer, allowing outgoing and incoming messages to be queued independently.
 * SHALL create a double queue when initiating an outgoing connection to a peer, and SHALL maintain the double queue whether or not the connection is established.
 * SHALL create a double queue when a peer connects to it. If this peer disconnects, the SERVER socket SHALL destroy its double queue and SHALL discard any messages it contains.
-* SHALL identify each double queue using a unique "routing id" 32-bit unsigned integer value.
+* SHALL identify each double queue using a unique "routing id", which is a non-zero 32-bit unsigned integer value.
 * SHOULD constrain incoming and outgoing queue sizes to a runtime-configurable limit.
 
 For processing incoming messages:

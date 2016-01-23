@@ -43,7 +43,7 @@ The goal of CLASS is to help programmers write high-quality C code in a consiste
 * The code is easy to reuse and remix, in whole or in fragments.
 * The code is easy to write correctly, and errors are rapidly clear.
 
-Our main tool for achieving this is to identify and apply the best patterns and styles. Tthe reader can learn these once, and then see them repeatedly across a wide body of code. Deviations from familiar patterns can then be taken as a sign of low-quality code that is more likely to contain errors and less remixable.
+Our main tool for achieving this is to identify and apply the best patterns and styles. The reader can learn these once, and then see them repeatedly across a wide body of code. Deviations from familiar patterns can then be taken as a sign of low-quality code that is more likely to contain errors and less remixable.
 
 +++ Common Problems
 
@@ -96,8 +96,7 @@ The project SHALL focus on one identifiable problem space, which SHALL be stated
 The project SHALL have these short names and abbreviations:
 
 * A //project short name// used in paths and URLs that identify the project. This would be used for instance in the GitHub project name. In this Specification we will use {{myproject}} as the example.
-* A //project abbreviation// used for project files and output libraries. This would be used for instance in the library produced for the project. The abbreviation MAY be an acronym. In this Specification we will use {{myproj}} as the example.
-* A //project prefix// used to prefix all method names, which MAY be the same as the project abbreviation. This would be used in source code and its API. The prefix SHOULD end with an underscore. In this Specification we will use {{myp_}} as the example.
+* A //project prefix// used for project files, output libraries, and method names. This would be used for instance in the library produced for the project. The prefix MAY be an acronym. In this Specification we will use {{myp}} as the example.
 
 These names SHALL be noted in the project {{README}}.
 
@@ -109,24 +108,20 @@ The project SHALL contain at least these files and directories:
 * A license file (e.g., {{COPYING}} or {{LICENSE}}) that specifies the terms of distribution for the project.
 * An {{include}} directory for all header files.
 * A {{src}} directory for all library source files.
-* The //external header file// ({{myproj.h}}).
+* The //public header file// ({{include/myproject.h}}).
 * Scripts and makefiles to build and test the project on at least one platform.
 
 The project MAY contain these files and directories which MUST have these names if present at all:
 
 * An {{AUTHORS}} file listing all contributors to the project.
 * A {{doc}} directory containing documentation.
-* A {{tests}} directory containing self-test programs, built with the project.
-* A {{tools}} directory containing command-line tools.
-* The //internal header file// ({{myproj_internal.h}}).
+* The //internal header file// ({{src/myp_classes.h}}).
 
 The project SHOULD install these files:
 
 * The project header files and all class header files that form part of the public API.
-* The project library, named with the project abbreviation ({{libmyproj.a}} on POSIX platforms, {{myproj.dll}} on Windows).
+* The project library, named with the project prefix ({{libmyp.a}} on POSIX platforms, {{myp.dll}} on Windows).
 * Command-line tools, if present.
-
-The project SHALL NOT use deeper nested subdirectories.
 
 +++ Dependencies
 
@@ -139,22 +134,22 @@ The project SHALL provide two services via header files:
 # A set of internal definitions to class source files, which a class source file can access with a single {{include}} statement.
 # A public API that calling applications can access with a single {{include}} statement.
 
-These two services MAY be combined into one project header file (({{myproj.h}}), or MAY be split into an external header file ({{myproj.h}}) and an internal header file ({{myproj_internal.h}}). The project MAY further break down these header files if necessary.
+These two services MAY be combined into one project header file (({{myproject.h}}), or MAY be split into an public header file ({{include/myproject.h}}) and an internal header file ({{src/myp_classes.h}}). The project MAY further break down these header files if necessary.
 
-The external header file SHALL define a version number for the project as follows:
+The public header file SHALL define a version number for the project as follows:
 
 [[code]]
-//  MYPROJ version macros for compile-time API detection
-#define MYPROJ_VERSION_MAJOR 1
-#define MYPROJ_VERSION_MINOR 0
-#define MYPROJ_VERSION_PATCH 0
+//  MYPROJECT version macros for compile-time API detection
+#define MYPROJECT_VERSION_MAJOR 1
+#define MYPROJECT_VERSION_MINOR 0
+#define MYPROJECT_VERSION_PATCH 0
 
-#define MYPROJ_MAKE_VERSION(major, minor, patch) \
+#define MYPROJECT_MAKE_VERSION(major, minor, patch) \
     ((major) * 10000 + (minor) * 100 + (patch))
-#define MYPROJ_VERSION \
-    MYPROJ_MAKE_VERSION(MYPROJ_VERSION_MAJOR, \
-                        MYPROJ_VERSION_MINOR, \
-                        MYPROJ_VERSION_PATCH)
+#define MYPROJECT_VERSION \
+    MYPROJECT_MAKE_VERSION(MYPROJECT_VERSION_MAJOR, \
+                           MYPROJECT_VERSION_MINOR, \
+                           MYPROJECT_VERSION_PATCH)
 [[/code]]
 
 The project header file SHALL assert the required version numbers for any dependencies immediately after including their respective header files, like this:
@@ -166,9 +161,9 @@ The project header file SHALL assert the required version numbers for any depend
 #endif
 [[/code]]
 
-Definitions in the external header file are visible to calling applications as well as class source code. The external header file SHALL include all class header files that form part of the public API for the project.
+Definitions in the public header file are visible to calling applications as well as class source code. The public header file SHALL #include all class header files that form part of the public API for the project.
 
-Definitions in the internal header file are visible only to class source code. The internal header file, if present, SHALL include the external header file, all class header files, and all system and library header files needed by the project. The primary goal here is to keep delicate system-dependent {{#include}} chains in a single place, and away from class source code.
+Definitions in the internal header file are visible only to class source code. The internal header file, if present, SHALL include the public header file, all class header files, and all system and library header files needed by the project. The primary goal here is to keep delicate system-dependent {{#include}} chains in a single place, and away from class source code.
 
 +++ Template README File
 
@@ -182,7 +177,6 @@ Definitions in the internal header file are visible only to class source code. T
 * Contribution policy is defined by C4 (http://rfc.zeromq.org/spec:21).
 * Project style guide is defined by CLASS (http://rfc.zeromq.org/spec:14).
  * short name: <shortname>
- * abbreviation: <abbreviation>
  * prefix: <prefix>
 * Licensed under <license name>, see COPYING
 * Language level: C99
@@ -196,7 +190,7 @@ NOTE: Microsoft Visual C/C++ does //not// support C99 and projects must build us
 
 +++ Use of the Preprocessor
 
-Project source code SHALL NOT include any header files except the project header file. This ensures that all class source code compiles in exactly the same environment.
+Project source code SHOULD NOT include any header files except the project header file. This ensures that all class source code compiles in exactly the same environment.
 
 Project source code SHALL NOT define "magic numbers" (numeric constants); these SHALL be defined in the external or internal header file, as appropriate.
 
@@ -216,12 +210,12 @@ Macro names SHALL be uppercase when they represent constants, and lowercase when
 
 Each class SHALL be written as two files:
 
-* A header file: {{include/myp_mymod.h}}
-* A source file: {{src/myp_mymod.c}}
+* A header file: {{include/myp_myclass.h}}
+* A source file: {{src/myp_myclass.c}}
 
 These two files SHALL be the original documentation for the class. Specifically, the class header SHALL define the API for the class, and the class source file SHALL define the implementation of each method.
 
-Class names SHALL follow the General Style for Naming. We will use {{mymod}} in examples.
+Class names SHALL follow the General Style for Naming. We will use {{myclass}} in examples.
 
 Every source and header file SHALL start with an appropriate file header that states at least:
 
@@ -230,31 +224,18 @@ Every source and header file SHALL start with an appropriate file header that st
 * The name of the project and a URL if relevant
 * The summary license statement
 
-Here is a template file header for an LGPL open source project:
+Here is a template file header for an MPLv2 open source project:
 
 [[code]]
 /*  =========================================================================
     <name> - <description>
 
-    -------------------------------------------------------------------------
-    Copyright (c) <year> - <company name> - <website>
-    Copyright other contributors as noted in the AUTHORS file.
+    Copyright (c) the Contributors as noted in the AUTHORS file.
+    This file is part of MYPROJ, see https://github.com/MYORG/MYPROJ.
 
-    This file is part of <project name>, <description>
-    <website>
-
-    This is free software; you can redistribute it and/or modify it under
-    the terms of the GNU Lesser General Public License as published by the
-    Free Software Foundation; either version 3 of the License, or (at your
-    option) any later version.
-
-    This software is distributed in the hope that it will be useful, but
-    WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANT-
-    ABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General
-    Public License for more details.
-
-    You should have received a copy of the GNU Lesser General Public
-    License along with this program. If not see http://www.gnu.org/licenses.
+    This Source Code Form is subject to the terms of the Mozilla Public
+    License, v. 2.0. If a copy of the MPL was not distributed with this
+    file, You can obtain one at http://mozilla.org/MPL/2.0/.
     =========================================================================
 */
 [[/code]]
@@ -266,23 +247,21 @@ We define two types of class:
 * //Stateful classes//, where the class provides methods working on //instances//, which are like "objects" in an object-oriented language.
 * //Stateless classes//, where the class provides methods that work purely on data provided by the caller or system.
 
-A class may be stateful or stateless but SHALL NOT mix the two approaches.
-
 A stateful class SHALL provide these methods:
 
-* A constructor method {{myp_mymod_new ()}}
-* A destructor method {{myp_mymod_destroy ()}}
-* A self-test method {{myp_mymod_test ()}}
+* A constructor method {{myp_myclass_new ()}}
+* A destructor method {{myp_myclass_destroy ()}}
+* A self-test method {{myp_myclass_test ()}}
 
 A stateful class MAY provide these methods, and SHALL use these names when providing such functionality:
 
-* A duplicator method {{myp_mymod_dup ()}}
-* A set of list navigation methods {{myp_mymod_first ()}} and {{myp_mymod_next ()}}.
-* Print methods {{myp_mymod_print ()}} and {{myp_mymod_fprint ()}}.
+* A duplicator method {{myp_myclass_dup ()}}
+* A set of list navigation methods {{myp_myclass_first ()}} and {{myp_myclass_next ()}}.
+* Print methods {{myp_myclass_print ()}} and {{myp_myclass_fprint ()}}.
 
-A stateless class SHALL provide this method:
+A stateless class SHALL provide at least this method:
 
-* A self-test method {{myp_mymod_test ()}}
+* A self-test method {{myp_myclass_test ()}}
 
 +++ Method Names
 
@@ -309,19 +288,19 @@ extern "C" {
 #endif
 
 //  Opaque class structure
-typedef struct _myp_mymod_t myp_mymod_t;
+typedef struct _myp_myclass_t myp_myclass_t;
 
 //  Create a new <class name> instance
-CZMQ_EXPORT myp_mymod_t *
-    myp_mymod_new (void);
+CZMQ_EXPORT myp_myclass_t *
+    myp_myclass_new (void);
 
 //  Destroy a <class name> instance 
 CZMQ_EXPORT void
-    myp_mymod_destroy (myp_mymod_t **self_p);
+    myp_myclass_destroy (myp_myclass_t **self_p);
 
 //  Self test of this class
 void
-    myp_mymod_test (bool verbose);
+    myp_myclass_test (bool verbose);
 
 #ifdef __cplusplus
 }
@@ -342,7 +321,7 @@ extern "C" {
 
 //  Self test of this class
 int
-    myp_mymod_test (bool verbose);
+    myp_myclass_test (bool verbose);
 
 #ifdef __cplusplus
 }
@@ -374,7 +353,7 @@ This SHOULD be defined as follows:
 [[code]]
 //  Structure of our class
 
-struct _mymod_t {
+struct _myclass_t {
     <type> <name>;              //  <description>
 };
 [[/code]]
@@ -401,7 +380,7 @@ Compound return values, e.g. a size-specified buffer, SHOULD be returned as fres
 
 +++ The Self Test Method
 
-In stateless classes, the only standard method is {{myp_mymod_test ()}}, which SHALL conduct a self test of the class, returning silently on success, and asserting on failure.
+In stateless classes, the only standard method is {{myp_myclass_test ()}}, which SHALL conduct a self test of the class, returning silently on success, and asserting on failure.
 
 The self test method shall take this general form:
 
@@ -410,9 +389,9 @@ The self test method shall take this general form:
 //  Runs selftest of class
 
 void
-myp_mymod_test (int verbose)
+myp_myclass_test (int verbose)
 {
-    printf (" * myp_mymod: ");
+    printf (" * myp_myclass: ");
     //  Conduct tests of every method
     printf ("OK\n");
 }
@@ -428,20 +407,14 @@ myp_mymod_test (int verbose)
 The constructor SHALL take this general form:
 
 [[code]]
-//  Create a new myp_mymod instance
-myp_mymod_t *
-myp_mymod_new (<arguments>)
+//  Create a new myp_myclass instance
+myp_myclass_t *
+myp_myclass_new (<arguments>)
 {
-    myp_mymod_t *self = (myp_mymod_t *) zmalloc (sizeof (myp_mymod_t));
-    if (self) {
-        self->someprop = someprop_new ();
-        if (self->someprop)
-            self->anotherprop = anotherprop_new ();
-        if (self->anotherprop)
-            self->lastprop = lastprop_new ();
-        else
-            myp_mymod_destroy (&self);
-    }
+    myp_myclass_t *self = (myp_myclass_t *) zmalloc (sizeof (myp_myclass_t));
+    assert (self);
+    self->someprop = someprop_new ();
+    assert (self->someprop);
     return self;
 }
 [[/code]]
@@ -452,20 +425,20 @@ myp_mymod_new (<arguments>)
 
 * The constructor MAY take one or more arguments, which SHALL correspond to properties to be initialized.
 
-* The constructor SHALL return either a new instance reference, or null, if construction failed, in which case all memory allocated during construction SHALL be released.
+* The constructor SHALL return either a new instance reference, or null, if construction failed.
 
 ++++ The Destructor Method
 
 The destructor SHALL take this general form:
 
 [[code]]
-//  Destroy a myp_mymod instance
+//  Destroy a myp_myclass instance
 void
-myp_mymod_destroy (myp_mymod_t **self_p)
+myp_myclass_destroy (myp_myclass_t **self_p)
 {
     assert (self_p);
     if (*self_p) {
-        myp_mymod_t *self = *self_p;
+        myp_myclass_t *self = *self_p;
         someprop_destroy (&self->someprop);
         anotherprop_destroy (&self->anotherprop);
         lastprop_destroy (&self->lastprop);
@@ -481,17 +454,17 @@ myp_mymod_destroy (myp_mymod_t **self_p)
 
 ++++ The Duplicator Method
 
-The class MAY offer a duplicator method which creates a full copy of an instance; if it offers such semantics, the method MUST be called {{myp_mymod_dup ()}} and take this general form:
+The class MAY offer a duplicator method which creates a full copy of an instance; if it offers such semantics, the method MUST be called {{myp_myclass_dup ()}} and take this general form:
 
 [[code]]
-//  Create a copy of a myp_mymod instance
+//  Create a copy of a myp_myclass instance
 
-myp_mymod_t *
-myp_mymod_dup (myp_mymod_t *self)
+myp_myclass_t *
+myp_myclass_dup (myp_myclass_t *self)
 {
     if (self) {
         assert (self);
-        myp_mymod_t *copy = myp_mymod_new (...);
+        myp_myclass_t *copy = myp_myclass_new (...);
         if (copy) {
             //  Initialize copy
         }
@@ -518,7 +491,7 @@ Such a container class SHALL keep the list cursor position in the instance, and 
 //  Return first item in the list or null if the list is empty
 
 item_t *
-myp_mymod_first (myp_mymod_t *self)
+myp_myclass_first (myp_myclass_t *self)
 {
     assert (self);
     //  Reset cursor to first item in list
@@ -528,7 +501,7 @@ myp_mymod_first (myp_mymod_t *self)
 //  Return next item in the list or null if there are no more items
 
 item_t *
-myp_mymod_next (myp_mymod_t *self)
+myp_myclass_next (myp_myclass_t *self)
 {
     assert (self);
     //  Move cursor to next item in list
@@ -538,17 +511,17 @@ myp_mymod_next (myp_mymod_t *self)
 
 * The navigation methods SHALL return null to indicate "no more items".
 
-* The navigation methods SHALL be idempotent, and specifically, calling {{myp_mymod_next ()}} when at the end of the list SHALL return null each time.
+* The navigation methods SHALL be idempotent, and specifically, calling {{myp_myclass_next ()}} when at the end of the list SHALL return null each time.
 
-* The class MAY offer {{myp_mymod_last ()}} and {{myp_mymod_prev ()}} methods.
+* The class MAY offer {{myp_myclass_last ()}} and {{myp_myclass_prev ()}} methods.
 
-* The class MAY offer {{myp_mymod_size ()}} which returns the list size.
+* The class MAY offer {{myp_myclass_size ()}} which returns the list size.
 
-* If the class offers methods to create list items, these SHALL be called {{myp_mymod_append ()}} (to add to the end of the list) and {{myp_mymod_insert ()}} (to add to the start of the list).
+* If the class offers methods to create list items, these SHALL be called {{myp_myclass_append ()}} (to add to the end of the list) and {{myp_myclass_insert ()}} (to add to the start of the list).
 
-* If the class offers a method to remove a list item, this SHALL be called {{myp_mymod_delete ()}}; it SHALL take the item reference as argument, and it SHALL delete the first matching item in the list, if any.
+* If the class offers a method to remove a list item, this SHALL be called {{myp_myclass_delete ()}}; it SHALL take the item reference as argument, and it SHALL delete the first matching item in the list, if any.
 
-* If the class maintains multiple lists, it SHALL create unique method names for each list by adding a list name, e.g., {{myp_momod_myitem_first ()}}.
+* If the class maintains multiple lists, it SHALL create unique method names for each list by adding a list name, e.g., {{myp_myclass_myitem_first ()}}.
 
 ++++ Accessor Methods
 
@@ -559,7 +532,7 @@ To return the value of a property the class SHALL define an accessor method like
 [[code]]
 //  Return the value of myprop
 <type>
-myp_mymod_myprop (myp_mymod_t *self)
+myp_myclass_myprop (myp_myclass_t *self)
 {
     assert (self);
     return self->myprop;
@@ -571,7 +544,7 @@ To write the value of a property, if this is permitted, the class SHALL define a
 [[code]]
 //  Set the value of myprop
 void
-myp_mymod_set_myprop (myp_mymod_t *self, <type> myprop)
+myp_myclass_set_myprop (myp_myclass_t *self, <type> myprop)
 {
     assert (self);
     self->myprop = myprop;
@@ -636,7 +609,7 @@ Particularly for representing any temporary state inside a class body, stack var
 
 +++ Static Functions
 
-Functions that are not exported by a class are defined as {{static}} and named {{s_functionname ()}} with no use of the project abbreviation or class name.
+Functions that are not exported by a class are defined as {{static}} and named {{s_functionname ()}} with no use of the project prefix or class name.
 
 Static functions MAY be defined before first use, or MAY be prototyped and defined immediately after first use.
 
@@ -670,7 +643,7 @@ Functions SHALL be defined as follows:
 When the project uses C99, stack variables SHALL be defined in-line, as close as possible to their first use, and initialized. For example:
 
 [[code]]
-myp_mymod_t *mymod = myp_mymod_new ();
+myp_myclass_t *myclass = myp_myclass_new ();
 char *comma = strchr (surname, '.');
 [[/code]]
 
@@ -769,8 +742,8 @@ This is the general template for a method comment header:
 //  --------------------------------------------------------------------------
 //  Finds the first item in the list, returns null if the list is empty.
 
-myp_mymod_t *
-myp_mymod_first (myp_mymod_t *self)
+myp_myclass_t *
+myp_myclass_first (myp_myclass_t *self)
 {
     ...
 [[/code]]
@@ -898,10 +871,10 @@ for (array_index = 0; array_index < array_size; array_index++) {
 * The recommended pattern for list iteration is:
 
 [[code]]
-myp_mymod_t *mymod = (myp_mymod_t *) myp_mymod_first (mymod);
-while (mymod) {
+myp_myclass_t *myclass = (myp_myclass_t *) myp_myclass_first (myclass);
+while (myclass) {
     //  Do something
-    mymod = (myp_mymod_t *) myp_mymod_next (mymod);
+    myclass = (myp_myclass_t *) myp_myclass_next (myclass);
 }
 [[/code]]
 
@@ -954,7 +927,7 @@ The following types and macros are defined by CZMQ and may be used safely in all
 
 Compiler warnings SHOULD always be treated as fatal. The following is a list of constructs known to cause warnings on some but not all compilers:
 
-* Assigning a void pointed to a typed pointer without a cast. Always cast a void * before assigning it to a typed pointer.
+* Assigning a void pointer to a typed pointer without a cast. Always cast a void * before assigning it to a typed pointer.
 
 * Failing to return a value in a non-void function. Always end a non-void function with a {{return}} statement.
 
@@ -964,20 +937,13 @@ Code generation MAY be used to produce classes mechanically when there is compel
 
 * The code generator SHOULD be GSL, from https://github.com/imatix/gsl.
 
-* All code generation scripts SHALL be in the project {{scripts}} subdirectory.
+* All code generation scripts SHALL be in the project {{src}} subdirectory.
 
-* All model data (XML files) SHALL be in the project {{model}} directory.
+* All model data (XML files) SHALL be in the project {{src}} directory.
 
-* The {{model}} directory SHALL contain a shell script {{generate}} that performs the code generation. The general model for this script is:
+* If only parts of a class are generated, these parts SHALL have the extension {{.inc}} and SHALL be generated into the project {{src}} directory, and SHALL be included in the class source file using an #include statement.
 
-[[code]]
-export PATH=../scripts:$PATH
-gsl -q -script:<script>.gsl <model>.xml
-[[/code]]
-
-* If only parts of a class are generated, these parts SHALL have the extension {{.inc}} and SHALL ge generated into the project {{src}} directory, and SHALL be included in the class source file using an #include statement.
-
-* Code generation SHALL be done manually, and all generated code SHALL be committed into the project as for hand-written files.
+* Code generation SHALL be done as a manual step. For example, "make code." All generated code SHALL be committed into the project as for hand-written files.
 
 * Code generation SHALL be fully idempotent, that is, generated code SHALL NOT contain any date or time stamps.
 

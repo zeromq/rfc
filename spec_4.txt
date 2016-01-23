@@ -30,7 +30,7 @@ ZPL is designed to represent a property set, where each property has a name and 
 * Be minimalistic in terms of syntax.
 * Be trivial to parse in any programming language.
 * Be usable as a continuous stream of name/value updates.
-* Be able represent hierarchical data structures.
+* Be able to represent hierarchical data structures.
 * Be neutral with respect to data typing.
 * Reduce the risk of human error to as close to zero as possible.
 

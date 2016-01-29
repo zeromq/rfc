@@ -93,7 +93,7 @@ mechanism = 20mechanism-char
 mechanism-char = "A"-"Z" | DIGIT
     | "-" | "_" | "." | "+" | %x0
 
-;   Is the peer acting as server?
+;   Is the peer acting as server for security handshake?
 as-server = %x00 | %x01
 
 ;   The filler extends the greeting to 64 octets
@@ -149,9 +149,9 @@ ZMTP is by default a peer-to-peer protocol that makes no distinction between the
 
 However, the security mechanisms (which are extension protocols, and explained below) MAY define distinct roles for client peers and server peers. This difference reflects the general model of concentrating authentication on servers.
 
-Traditionally in TCP topologies, the "server" is the peer which binds, and the "client" is the peer that connects. ZMTP allows this but also the opposite topology in which the client binds, and the server connects. The actual server role is therefore not defined by bind/connect direction, but specified in the greeting {{as-server}} field, which is set to 1 for server peers, and 0 for client peers.
+Traditionally in TCP topologies, the "server" is the peer which binds, and the "client" is the peer that connects. ZMTP allows this but also the opposite topology in which the client binds, and the server connects.
 
-If the chosen security mechanism does not specify a client and server topology, the as-server field SHALL have no significance, and SHOULD be zero for all peers.
+If the chosen security mechanism does not specify client and server roles, the as-server field SHALL have no significance, and SHOULD be zero for all peers.
 
 +++ Authentication and Confidentiality
 

@@ -93,7 +93,7 @@ mechanism = 20mechanism-char
 mechanism-char = "A"-"Z" | DIGIT
     | "-" | "_" | "." | "+" | %x0
 
-;   Is the peer acting as server?
+;   Is the peer acting as server for security handshake?
 as-server = %x00 | %x01
 
 ;   The filler extends the greeting to 64 octets
@@ -149,9 +149,9 @@ ZMTP is by default a peer-to-peer protocol that makes no distinction between the
 
 However, the security mechanisms (which are extension protocols, and explained below) MAY define distinct roles for client peers and server peers. This difference reflects the general model of concentrating authentication on servers.
 
-Traditionally in TCP topologies, the "server" is the peer which binds, and the "client" is the peer that connects. ZMTP allows this but also the opposite topology in which the client binds, and the server connects. The actual server role is therefore not defined by bind/connect direction, but specified in the greeting {{as-server}} field, which is set to 1 for server peers, and 0 for client peers.
+Traditionally in TCP topologies, the "server" is the peer which binds, and the "client" is the peer that connects. ZMTP allows this but also the opposite topology in which the client binds, and the server connects.
 
-If the chosen security mechanism does not specify a client and server topology, the as-server field SHALL have no significance, and SHOULD be zero for all peers.
+If the chosen security mechanism does not specify client and server roles, the as-server field SHALL have no significance, and SHOULD be zero for all peers.
 
 +++ Authentication and Confidentiality
 
@@ -169,9 +169,9 @@ A peer announces precisely one security mechanism, unlike SASL, which lets serve
 
 Each security mechanism defines a protocol consisting of zero or more commands sent by either peer to the other until the handshaking is complete or either of the peers refuses to continue, and closes the connection.
 
-Commands are single frames consisting of a size field, and a body. If the body is 0-255 octets, the command SHOULD use a short size field (%x04 followed by 1 octet). If the body is 256 or more octets, the command SHOULD use a long size field (%x06 followed by 8 octets).
+Commands are single frames consisting of a flags octet, a size field, and a body. If the body is 0-255 octets, the command SHOULD use a short size field (%x04 followed by 1 octet). If the body is 256 or more octets, the command SHOULD use a long size field (%x06 followed by 8 octets).
 
-The size field is always in clear text. The body may be partially or fully encrypted. ZMTP does not define the syntax nor semantics of commands. These are fully defined by the security mechanism protocol.
+The flags octet and the size field is always in clear text. The body may be partially or fully encrypted. ZMTP does not define the syntax nor semantics of commands. These are fully defined by the security mechanism protocol.
 
 The supported mechanism is not considered sensitive information. A peer that reads a full greeting, including mechanism, MUST also send a full greeting including mechanism. This avoids deadlocks in which two peers each wait for the other to divulge the remainder of their greeting.
 
@@ -187,7 +187,7 @@ To avoid connection storms, peers should reconnect after a short and possibly ra
 
 +++ Framing
 
-Following the greeting, which has a fixed size of 64 octets, all further data is sent as //frames//, which carry commands or messages. Frames consist of a size field, a flags fields, and a body. The frame design is meant to be efficient for small frames but capable of handling extremely large data as well.
+Following the greeting, which has a fixed size of 64 octets, all further data is sent as //frames//, which carry commands or messages. The frame design is meant to be efficient for small frames but capable of handling extremely large data as well.
 
 A frame consists of a flags field (1 octet), followed by a size field (one octet or eight octets) and a frame body of size octets. The size does not include the flags field, nor itself, so an empty frame has a size of zero.
 

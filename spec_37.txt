@@ -112,7 +112,7 @@ command-size = %x04 short-size | %x06 long-size
 short-size = OCTET          ; Body is 0 to 255 octets
 long-size = 8OCTET          ; Body is 0 to 2^63-1 octets
 command-body = command-name command-data
-command-name = OCTET 1*255command-name-char
+command-name = short-size 1*255command-name-char
 command-name-char = ALPHA
 command-data = *OCTET
 

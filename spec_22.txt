@@ -181,5 +181,5 @@ C4 is meant to provide a reusable optimal collaboration model for open source so
 ++ Implementations
 
 * The [http://zeromq.org ZeroMQ community] uses the C4.1 process for many projects.
-* [http://www.ossec.net/ OSSEC] [http://ossec-docs.readthedocs.org/en/latest/oRFC/orfc-1.html uses the C4.1 process].
+* [http://www.ossec.net/ OSSEC] [https://ossec-docs.readthedocs.org/en/latest/development/oRFC/orfc-1.html uses the C4.1 process].
 * The [http://www.machinekit.io/ Machinekit] community [http://www.machinekit.io/about/ uses the C4.1 process].

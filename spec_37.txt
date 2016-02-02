@@ -40,7 +40,6 @@ The ZeroMQ Message Transport Protocol (ZMTP) is a transport layer protocol for e
 
 ZMTP defines a //resource// metadata property that lets any number of tasks share a single interface and port.
 
-
 +++ Related Specifications
 
 * http://rfc.zeromq.org/spec:23/ZMTP defines ZMTP v3.0.
@@ -219,7 +218,7 @@ ZMTP supports extensible security mechanisms and these may define their own comm
 
 Messages carry application data and are not generally created, modified, or filtered by the ZMTP implementation except in some cases. Messages consist of one or more frames and an implementation SHALL always send and deliver messages atomically, that is, all the frames of a message, or none of them.
 
-++ The NULL Security Mechanism
++++ The NULL Security Mechanism
 
 The NULL mechanism implements no authentication and no confidentiality. The NULL mechanism SHOULD NOT be used on public infrastructure without transport-level security (e.g. over a VPN).
 
@@ -521,7 +520,7 @@ A DEALER client connects to a ROUTER server. Both client and server are running 
 [[code]]
  minor   mechanism  as-server  filler
 +------+-----------+---------+-------------+
-| %x00 |  "NULL"   |  %x00   | %x00...%x00 |
+| %x01 |  "NULL"   |  %x00   | %x00...%x00 |
 +------+-----------+---------+-------------+
    11     12 - 31      32        33 - 63
 [[/code]]

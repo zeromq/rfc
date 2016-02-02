@@ -196,11 +196,11 @@ We use these headers, with their HTTP/1.1 meanings, implemented as individual fi
 
 Additionally we can pass arguments to GET as we usually would do with a HTTP query.
 
-* Parameters - A map of key/value pairs for filtering, sorting, selecting and paging.
+* Parameters - A map of key/value pairs for filtering, sorting, selecting and paging. Parameter key names are case-insensitive.
 
 Further all _OK messages take a map of key/value pairs to supply further metadata like the total size of a collection, hypermedia e.g. links for paging through a collection or the returned version of a document.
 
-* Metadata - A map of key/value pair containing custom data to further describe the response.
+* Metadata - A map of key/value pair containing custom data to further describe the response. Metadata key names are case-insensitive.
 
 All replies contain a 3-digit status code that conforms to the [http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html HTTP/1.1 specifications] for status codes.
 

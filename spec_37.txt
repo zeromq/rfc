@@ -112,7 +112,7 @@ command-size = %x04 short-size | %x06 long-size
 short-size = OCTET          ; Body is 0 to 255 octets
 long-size = 8OCTET          ; Body is 0 to 2^63-1 octets
 command-body = command-name command-data
-command-name = OCTET 1*255command-name-char
+command-name = short-size 1*255command-name-char
 command-name-char = ALPHA
 command-data = *OCTET
 
@@ -232,11 +232,11 @@ null = ready *message | error
 ready = command-size %d5 "READY" metadata
 metadata = *property
 property = name value
-name = OCTET 1*255name-char
+name = short-size 1*255name-char
 name-char = ALPHA | DIGIT | "-" | "_" | "." | "+"
 value = 4OCTET *OCTET       ; Size in network byte order
 error = command-size %d5 "ERROR" error-reason
-error-reason = OCTET 0*255VCHAR
+error-reason = short-size 0*255VCHAR
 [[/code]]
 
 The message and command-size are defined by the ZMTP grammar previously explained.

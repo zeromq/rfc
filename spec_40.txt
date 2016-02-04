@@ -74,16 +74,16 @@ xrap_msg        = *( POST | POST-OK
 
 ;  Create a new, dynamically named resource in some parent.
 
-POST            = signature %d1 sequence_no parent content_type content_body
+POST            = signature %d1 tracker parent content_type content_body
 signature       = %xAA %xA5             ; two octets
-sequence_no     = number-4              ; Sequence number of request
+tracker         = number-4              ; request tracker
 parent          = string                ; Schema/type/name
 content_type    = string                ; Content type
 content_body    = longstr               ; New resource specification
 
 ;  Success response for POST.
 
-POST-OK         = signature %d2 sequence_no status_code location etag date_modified
+POST-OK         = signature %d2 tracker status_code location etag date_modified
                   content_type content_body metadata
 status_code     = number-2              ; Response status code 2xx
 location        = string                ; Schema/type/name
@@ -95,7 +95,7 @@ metadata        = hash                  ; Collection total size/version/hypermed
 
 ;  Retrieve a known resource.
 
-GET             = signature %d3 sequence_no resource parameters if_modified_since
+GET             = signature %d3 tracker resource parameters if_modified_since
                   if_none_match content_type
 resource        = string                ; Schema/type/name
 parameters      = hash                  ; Filtering/sorting/selecting/paging
@@ -105,7 +105,7 @@ content_type    = string                ; Desired content type
 
 ;  Success response for GET.
 
-GET-OK          = signature %d4 sequence_no status_code etag date_modified content_type
+GET-OK          = signature %d4 tracker status_code etag date_modified content_type
                   content_body metadata
 status_code     = number-2              ; Response status code 2xx
 etag            = string                ; Opaque hash tag
@@ -116,12 +116,12 @@ metadata        = hash                  ; Collection total size/version/hypermed
 
 ;  Conditional GET returned 304 Not Modified.
 
-GET-EMPTY       = signature %d5 sequence_no status_code
+GET-EMPTY       = signature %d5 tracker status_code
 status_code     = number-2              ; Response status code 3xx
 
 ;  Update a known resource.
 
-PUT             = signature %d6 sequence_no resource if_unmodified_since if_match
+PUT             = signature %d6 tracker resource if_unmodified_since if_match
                   content_type content_body
 resource        = string                ; Schema/type/name
 if_unmodified_since = number-8          ; Update if same date
@@ -131,7 +131,7 @@ content_body    = longstr               ; New resource specification
 
 ;  Success response for PUT.
 
-PUT-OK          = signature %d7 sequence_no status_code location etag date_modified metadata
+PUT-OK          = signature %d7 tracker status_code location etag date_modified metadata
 status_code     = number-2              ; Response status code 2xx
 location        = string                ; Schema/type/name
 etag            = string                ; Opaque hash tag
@@ -140,20 +140,20 @@ metadata        = hash                  ; Collection total size/version/hypermed
 
 ;  Remove a known resource.
 
-DELETE          = signature %d8 sequence_no resource if_unmodified_since if_match
+DELETE          = signature %d8 tracker resource if_unmodified_since if_match
 resource        = string                ; schema/type/name
 if_unmodified_since = number-8          ; DELETE if same date
 if_match        = string                ; DELETE if same ETag
 
 ;  Success response for DELETE.
 
-DELETE-OK       = signature %d9 sequence_no status_code metadata
+DELETE-OK       = signature %d9 tracker status_code metadata
 status_code     = number-2              ; Response status code 2xx
 metadata        = hash                  ; Collection total size/version/hypermedia
 
 ;  Error response for any request.
 
-ERROR           = signature %d10 sequence_no status_code status_text
+ERROR           = signature %d10 tracker status_code status_text
 status_code     = number-2              ; Response status code, 4xx or 5xx
 status_text     = string                ; Response status text
 
@@ -195,7 +195,7 @@ We use these headers, with their HTTP/1.1 meanings, implemented as individual fi
 * If-Unmodified-Since - a conditional PUT or DELETE using resource date.
 * If-Match - a conditional PUT or DELETE using resource ETag.
 
-Requests carry a sequence number. The server MUST include the sequence number from the request in the reply that it sends. The client SHOULD use a strictly increasing sequence number to enable it to detect missing replies, out of order replies, or replies to requests that had timed out due, for example, to a slow starting server, or heavily loaded server.
+Requests MAY carry a tracker, which is a non-zero integer. If the client request has a tracker, the server MUST include this in the corresponding reply.
 
 Additionally we can pass arguments to GET as we usually would do with a HTTP query.
 
@@ -609,13 +609,13 @@ The GET method does not modify the state of any resource on the server.
 
 +++ Pipelining Requests for Performance
 
-The client may send requests without waiting for responses. This can improve performance by reducing network round-tripping. The HTTP term for this is "pipelining", and we use HTTP semantics for pipelining. RFC 2616 section 8.1.2.2 says,
+The client MAY send requests without waiting for responses. This can improve performance by reducing network round-tripping. The HTTP term for this is "pipelining", and we use HTTP semantics for pipelining. RFC 2616 section 8.1.2.2 says,
 
 > Clients SHOULD NOT pipeline requests using non-idempotent methods or non-idempotent sequences of methods (see section 9.1.2). Otherwise, a premature termination of the transport connection could lead to indeterminate results. A client wishing to send a non-idempotent request SHOULD wait to send that request until it has received the response status for the previous request.
 
-XRAP clients MAY pipeline GET, PUT, DELETE and POST-public methods, but SHOULD NOT pipeline POST-private methods.
+The client MAY pipeline GET, PUT, DELETE and POST-public methods, but SHOULD NOT pipeline POST-private methods. When pipelining requests, the client SHOULD set a non-zero tracker.
 
-The server is permitted to return responses in a different order to that in which they are received. For a multithreaded server it is impractical to maintain the order, and can lead to head-of-line blocking.
+The server is permitted to return responses in a different order to that in which they are received.
 
 +++ Error Responses
 
@@ -843,7 +843,6 @@ Resource documents may contain elements, and unknown attributes on known element
 
 Clients and servers should tolerate and ignore unknown elements. Neither the client nor the server should maintain unknown elements.
 
-
 ++ Transport over ZeroMQ
 
 +++ Protocol Model
@@ -861,7 +860,7 @@ This is the XRAP protocol (http://rfc.zeromq.org/spec:40/XRAP):
 <include filename = "license.xml" />
 
 <message name = "POST" id = "1">
-    <field name = "sequence_no" type = "number" size="4">Request sequence number</field>
+    <field name = "tracker" type = "number" size="4">Request tracker</field>
     <field name = "parent" type = "string">Schema/type/name</field>
     <field name = "content type" type = "string">Content type</field>
     <field name = "content body" type = "longstr">New resource specification</field>
@@ -869,7 +868,7 @@ Create a new, dynamically named resource in some parent.
 </message>
 
 <message name = "POST OK" id = "2">
-    <field name = "sequence_no" type = "number" size="4">Request sequence number</field>
+    <field name = "tracker" type = "number" size="4">Request tracker</field>
     <field name = "status code" type = "number" size = "2">Response status code 2xx</field>
     <field name = "location" type = "string">Schema/type/name</field>
     <field name = "etag" type = "string">Opaque hash tag</field>
@@ -881,7 +880,7 @@ Success response for POST.
 </message>
 
 <message name = "GET" id = "3">
-    <field name = "sequence_no" type = "number" size="4">Request sequence number</field>
+    <field name = "tracker" type = "number" size="4">Request tracker</field>
     <field name = "resource" type = "string">Schema/type/name</field>
     <field name = "parameters" type = "hash">Filtering/sorting/selecting/paging</field>
     <field name = "if modified since" type = "number" size="8">GET if more recent</field>
@@ -891,7 +890,7 @@ Retrieve a known resource.
 </message>
 
 <message name = "GET OK" id = "4">
-    <field name = "sequence_no" type = "number" size="4">Request sequence number</field>
+    <field name = "tracker" type = "number" size="4">Request tracker</field>
     <field name = "status code" type = "number" size = "2">Response status code 2xx</field>
     <field name = "etag" type = "string">Opaque hash tag</field>
     <field name = "date modified" type = "number" size = "8">Date and time modified</field>
@@ -902,13 +901,13 @@ Success response for GET.
 </message>
 
 <message name = "GET EMPTY" id = "5">
-    <field name = "sequence_no" type = "number" size="4">Request sequence number</field>
+    <field name = "tracker" type = "number" size="4">Request tracker</field>
     <field name = "status code" type = "number" size = "2">Response status code 3xx</field>
 Conditional GET returned 304 Not Modified.
 </message>
 
 <message name = "PUT" id = "6">
-    <field name = "sequence_no" type = "number" size="4">Request sequence number</field>
+    <field name = "tracker" type = "number" size="4">Request tracker</field>
     <field name = "resource" type = "string">Schema/type/name</field>
     <field name = "if unmodified since" type = "number" size="8">Update if same date</field>
     <field name = "if match" type = "string">Update if same ETag</field>
@@ -918,7 +917,7 @@ Update a known resource.
 </message>
 
 <message name = "PUT OK" id = "7">
-    <field name = "sequence_no" type = "number" size="4">Request sequence number</field>
+    <field name = "tracker" type = "number" size="4">Request tracker</field>
     <field name = "status code" type = "number" size = "2">Response status code 2xx</field>
     <field name = "location" type = "string">Schema/type/name</field>
     <field name = "etag" type = "string">Opaque hash tag</field>
@@ -928,7 +927,7 @@ Success response for PUT.
 </message>
 
 <message name = "DELETE" id = "8">
-    <field name = "sequence_no" type = "number" size="4">Request sequence number</field>
+    <field name = "tracker" type = "number" size="4">Request tracker</field>
     <field name = "resource" type = "string">schema/type/name</field>
     <field name = "if unmodified since" type = "number" size="8">DELETE if same date</field>
     <field name = "if match" type = "string">DELETE if same ETag</field>
@@ -936,14 +935,14 @@ Remove a known resource.
 </message>
 
 <message name = "DELETE OK" id = "9">
-    <field name = "sequence_no" type = "number" size="4">Request sequence number</field>
+    <field name = "tracker" type = "number" size="4">Request tracker</field>
     <field name = "status code" type = "number" size = "2">Response status code 2xx</field>
     <field name = "metadata" type = "hash">Collection total size/version/hypermedia</field>
 Success response for DELETE.
 </message>
 
 <message name = "ERROR" id = "10">
-    <field name = "sequence_no" type = "number" size="4">Request sequence number</field>
+    <field name = "tracker" type = "number" size="4">Request tracker</field>
     <field name = "status code" type = "number" size = "2">Response status code, 4xx or 5xx</field>
     <field name = "status text" type = "string">Response status text</field>
 Error response for any request.

@@ -73,8 +73,8 @@ For processing outgoing messages:
 
 * SHALL provide the application with an API to set the message routing-id.
 * SHALL route the message to the outgoing queue if that queue exists, and is not full.
-* SHALL return an error if the queue does not exist, or is full.
-* SHALL NOT block on sending.
+* SHALL return an error if the queue does not exist.
+* SHALL block on sending, if the queue is full, unless otherwise configured.
 * SHALL NOT discard messages that it cannot queue.
 
 ++ Security Aspects

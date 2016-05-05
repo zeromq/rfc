@@ -118,29 +118,23 @@ C4 is meant to provide a reusable optimal collaboration model for open source so
 
 * Maintainers SHALL merge correct patches from other Contributors rapidly.
 
-* The Contributor MAY tag an issue as "Ready" after making a pull request for the issue.
+* Maintainers MAY merge incorrect patches from other Contributors with the goals of (a) ending fruitless discussions, (b) capturing toxic patches in the historical record, (c) engaging with the Contributor on improving their patch quality.
+
+* The Contributor MAY tag a user's issue as "Ready" after making a pull request for the issue.
 
 * The user who created an issue SHOULD close the issue after checking the patch is successful.
 
-* Maintainers SHOULD ask for improvements to incorrect patches and SHOULD reject incorrect patches if the Contributor does not respond constructively.
-
-* Any Contributor who has value judgments on a correct patch SHOULD express these via their own patches.
+* Any Contributor who has value judgments on a patch SHOULD express these via their own patches.
 
 * Maintainers MAY commit changes to non-source documentation directly to the project.
 
-+++ Creating Stable Releases
++++ Branches and Releases
 
 * The project SHALL have one branch ("master") that always holds the latest in-progress version and SHOULD always build.
 
 * The project SHALL NOT use topic branches for any reason. Personal forks MAY use topic branches.
 
-* To make a stable release someone SHALL fork the repository by copying it and thus become maintainer of this repository.
-
-* Forking a project for stabilization MAY be done unilaterally and without agreement of project maintainers.
-
-* A stabilization project SHOULD be maintained by the same process as the main project.
-
-* A patch to a stabilization project declared "stable" SHALL be accompanied by a reproducible test case.
+* To make a stable release a Maintainer shall tag the repository. Stable releases SHALL always be released from the repository master.
 
 +++ Evolution of Public Contracts
 
@@ -150,15 +144,15 @@ C4 is meant to provide a reusable optimal collaboration model for open source so
 
 * A patch that modifies a stable Public Contract SHOULD not break existing applications unless there is overriding consensus on the value of doing this.
 
-* A patch that introduces new features to a Public Contract SHOULD do so using new names.
+* A patch that introduces new features SHOULD do so using new names (a new contract).
 
-* Old names SHOULD be deprecated in a systematic fashion by marking new names as "experimental" until they are stable, then marking the old names as "deprecated".
+* New contracts SHOULD be marked as "draft" until they are stable and used by real users.
 
-* When sufficient time has passed, old deprecated names SHOULD be marked "legacy" and eventually removed.
+* Old contracts SHOULD be deprecated in a systematic fashion by marking them as "deprecated" and replacing them with new contracts as needed.
 
-* Old names SHALL NOT be reused by new features.
+* When sufficient time has passed, old deprecated contracts SHOULD be removed.
 
-* When old names are removed, their implementations MUST provoke an exception (assertion) if used by applications.
+* Old names SHALL NOT be reused by new contracts.
 
 +++ Project Administration
 
@@ -166,9 +160,9 @@ C4 is meant to provide a reusable optimal collaboration model for open source so
 
 * The Administrators SHALL ensure their own succession over time by promoting the most effective Maintainers.
 
-* A new Contributor who makes a correct patch SHALL be invited to become a Maintainer.
+* A new Contributor who makes correct patches, who clearly understands the project goals, and the process SHOULD be invited to become a Maintainer.
 
-* Administrators MAY remove Maintainers who are inactive for an extended period of time, or who repeatedly fail to apply this process accurately.
+* Administrators SHOULD remove Maintainers who are inactive for an extended period of time, or who repeatedly fail to apply this process accurately.
 
 * Administrators SHOULD block or ban "bad actors" who cause stress and pain to others in the project. This should be done after public discussion, with a chance for all parties to speak. A bad actor is someone who repeatedly ignores the rules and culture of the project, who is needlessly argumentative or hostile, or who is offensive, and who is unable to self-correct their behavior when asked to do so by others.
 

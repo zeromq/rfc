@@ -72,6 +72,9 @@ elif [ $1 -eq "40" ]; then
 elif [ $1 -eq "41" ]; then
     cp spec_41.txt 41.wd
     wdput zeromq-rfc spec 41 "CLISRV - ZeroMQ Client-Server Pattern"
+elif [ $1 -eq "42" ]; then
+    cp spec_42.txt 42.wd
+    wdput zeromq-rfc spec 42 "C4 - Collective Code Construction Contract"
 fi
 
 rm *.wd

@@ -14,7 +14,7 @@ elif [ $1 -eq "21" ]; then
     wdput zeromq-rfc spec 21 "CLASS - C Language Style for Scalability"
 elif [ $1 -eq "22" ]; then
     cp spec_22.txt 22.wd
-    wdput zeromq-rfc spec 22 "C4.1 - Collective Code Construction Contract"
+    wdput zeromq-rfc spec 22 "C4 - Collective Code Construction Contract"
 elif [ $1 -eq "23" ]; then
     cp spec_23.txt 23.wd
     wdput zeromq-rfc spec 23 "ZMTP - ZeroMQ Message Transport Protocol"

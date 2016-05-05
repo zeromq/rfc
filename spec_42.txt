@@ -58,13 +58,11 @@ C4 is meant to provide a reusable optimal collaboration model for open source so
 
 +++ Licensing and Ownership
 
-* The project SHALL use a share-alike license, such as the GPLv3 or a variant thereof (LGPL, AGPL), or the MPLv2.
+* The project SHALL use a share-alike license such as the MPLv2, or a GPLv3 variant thereof (GPL, LGPL, AGPL).
 
 * All contributions to the project source code ("patches") SHALL use the same license as the project.
 
 * All patches are owned by their authors. There SHALL NOT be any copyright assignment process.
-
-* The copyrights in the project SHALL be owned collectively by all its Contributors.
 
 * Each Contributor SHALL be responsible for identifying themselves in the project Contributor list.
 
@@ -82,7 +80,7 @@ C4 is meant to provide a reusable optimal collaboration model for open source so
 
 * A patch MUST compile cleanly and pass project self-tests on at least the principle target platform.
 
-* A patch commit message SHOULD consist of a single short (less than 50 character) line summarizing the change, optionally followed by a blank line and then a more thorough description.
+* A patch commit message MUST consist of a single short (less than 50 characters) line stating the problem ("Problem: ...") being solved, followed by a blank line and then the proposed solution ("Solution: ...").
 
 * A "Correct Patch" is one that satisfies the above requirements.
 
@@ -120,13 +118,11 @@ C4 is meant to provide a reusable optimal collaboration model for open source so
 
 * Maintainers MAY merge incorrect patches from other Contributors with the goals of (a) ending fruitless discussions, (b) capturing toxic patches in the historical record, (c) engaging with the Contributor on improving their patch quality.
 
-* The Contributor MAY tag a user's issue as "Ready" after making a pull request for the issue.
-
 * The user who created an issue SHOULD close the issue after checking the patch is successful.
 
 * Any Contributor who has value judgments on a patch SHOULD express these via their own patches.
 
-* Maintainers MAY commit changes to non-source documentation directly to the project.
+* Maintainers SHOULD close user issues that are left open without action for an uncomfortable period of time.
 
 +++ Branches and Releases
 

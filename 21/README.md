@@ -857,7 +857,7 @@ A void function SHALL NOT end in an empty <tt>return</tt> statement.
 
 ### Recommended Patterns
 
-* The recommended pattern for an open-ended loop is {{while (true) {}}, with <tt>break</tt> statements as needed to exit the loop.
+* The recommended pattern for an open-ended loop is `while (true) {}`, with <tt>break</tt> statements as needed to exit the loop.
 
 * The recommended pattern for array iteration is:
 

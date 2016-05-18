@@ -1,22 +1,21 @@
 This document describes the Extensible Resource Access Protocol (XRAP), a RESTful protocol built over ZeroMQ. XRAP provides a single, extensible answer to the problem of how to work with remote resources. We designed XRAP to avert the development of fragile domain-specific RPC protocols.
 
-* Name: rfc.zeromq.org/spec:40/XRAP
+* Name: http://rfc.zeromq.org/spec:40/XRAP
 * Contributors: Pieter Hintjens <ph@imatix.com>
-* State: draft.
 
-++ Preamble
+## Preamble
 
 Copyright (c) 2015 the Contributors.
 
 This Specification is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 3 of the License, or (at your option) any later version. This Specification is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details. You should have received a copy of the GNU General Public License along with this program; if not, see <http://www.gnu.org/licenses>.
 
-This Specification is a [http://www.digistan.org/open-standard:definition free and open standard] and is governed by the Digital Standards Organization's [http://www.digistan.org/spec:1/COSS Consensus-Oriented Specification System].
+This Specification is a [free and open standard](http://www.digistan.org/open-standard:definition) and is governed by the Digital Standards Organization's [Consensus-Oriented Specification System](http://www.digistan.org/spec:1/COSS).
 
-The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED",  "MAY", and "OPTIONAL" in this document are to be interpreted as described in [http://tools.ietf.org/html/rfc2119 RFC 2119], "Key words for use in RFCs to Indicate Requirement Levels".
+The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED",  "MAY", and "OPTIONAL" in this document are to be interpreted as described in [RFC 2119](http://tools.ietf.org/html/rfc2119), "Key words for use in RFCs to Indicate Requirement Levels".
 
-++ Overview
+## Overview
 
-+++ Use Case
+### Use Case
 
 Our generic use case is a server that holds a set of resources belonging to, and managed by, a set of remote clients. We wish to build APIs, based on network protocols that allow clients and servers to be distributed across both local and wide area networks. We hold that such protocols are essential for the clean separation of components of a distributed architecture.
 
@@ -32,7 +31,7 @@ The main goal of XRAP is to make it extremely cheap to develop, test, improve, a
 
 * In specification terms, it allows the formal specification of schemas as small independent RFCs.
 
-+++ XRAP vs. RPC
+### XRAP vs. RPC
 
 A primary use of network serialization tools like protobufs and zproto is to build domain-specific RPC protocols. These are easy to make and use, yet create significant upstream costs:
 
@@ -45,27 +44,27 @@ In effect, an RPC protocol attempts to fit all semantics into a single contract,
 
 XRAP (like REST, which it is based on) provides only four methods (POST, GET, PUT, DELETE) and moves all extensibility into resources, as defined by schemas. This is a proven and simple way to get future extensibility. Each peer can choose to implement the document semantics it chooses. Each document type can evolve independently, as its own contract.
 
-+++ Design of the Protocol
+### Design of the Protocol
 
-XRAP defines a consistent protocol for creating, retrieving, updating, and deleting remote resources. To reduce the learning curve and element of surprise, we have used [http://www.ics.uci.edu/~fielding/pubs/dissertation/rest_arch_style.htm RESTful design principles], and we have kept HTTP/1.1 compatibility.
+XRAP defines a consistent protocol for creating, retrieving, updating, and deleting remote resources. To reduce the learning curve and element of surprise, we have used [RESTful design principles](http://www.ics.uci.edu/~fielding/pubs/dissertation/rest_arch_style.htm), and we have kept HTTP/1.1 compatibility.
 
 REST is a design pattern rather than a formal specification. It is not formal about e.g. one updates a resource using PUT, or POST, nor does it explain how to represent resources. It is also incomplete in areas such as asynchronous event delivery. XRAP formalizes these missing areas. It is a reusable specification. However, it does not claim to be universal or complete. It provides sufficient abstractions to implement some basic schemas, and no more.
 
-+++ Network Transports
+### Network Transports
 
 In this document we use ZMTP as the reference transport. However XRAP may use other transports, such as HTTP. The mapping of XRAP over other transports SHALL be defined by separate RFCs.
 
-+++ Performance Tradeoffs
+### Performance Tradeoffs
 
 XRAP is mostly a verbose, request-reply protocol that uses self-describing documents (JSON or XML) for content encoding. This is the easiest form of encoding to work with and extend. It is trivial for implementors to add new properties, for experimentation or specialization. It is trivial to ignore unknown properties.
 
-++ Technical Specifications
+## Technical Specifications
 
-+++ Formal Grammar
+### Formal Grammar
 
 The following ABNF grammar defines the XRAP serialization over ZMTP:
 
-[[code]]
+```
 xrap_msg        = *( POST | POST-OK
                    | GET | GET-OK | GET-EMPTY
                    | PUT | PUT-OK
@@ -172,9 +171,9 @@ number-1        = 1OCTET
 number-2        = 2OCTET
 number-4        = 4OCTET
 number-8        = 8OCTET
-[[/code]]
+```
 
-+++ XRAP Methods and Arguments
+### XRAP Methods and Arguments
 
 A basic XRAP interaction consists of one request and one reply. The request consists of a method, a set of headers, and a content body. An XRAP client uses these methods to work with server-side resources:
 
@@ -205,9 +204,9 @@ Further all _OK messages take a map of key/value pairs to supply further metadat
 
 * Metadata - A map of key/value pair containing custom data to further describe the response. Metadata key names are case-insensitive.
 
-All replies contain a 3-digit status code that conforms to the [http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html HTTP/1.1 specifications] for status codes.
+All replies contain a 3-digit status code that conforms to the [HTTP/1.1 specifications](http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html) for status codes.
 
-+++ XRAP Resources
+### XRAP Resources
 
 Server-side resources are either **public** (shared by many clients) or **private** (to a single client). Public resources are named by formal or informal agreement, while the server alone is responsible for naming private resources. The URN of a resource is based on the resource name, so clients can know the URNs of public resources in advance, while the server provides the URNs of private resources at runtime.
 
@@ -223,15 +222,15 @@ Resources can be created by various parties at different times: by the server at
 
 The URN for a public resource is derived from the resource type and name as follows:
 
-[[code]]
+```
 /{schema}/{resource type}/{resource name}
-[[/code]]
+```
 
 The corresponding URI is prefixed by a protocol and endpoint (e.g. the hostname and port):
 
-[[code]]
+```
 {transport}://{endpoint}/{schema}/{resource type}/{resource name}
-[[/code]]
+```
 
 The fields have this meaning:
 
@@ -243,13 +242,13 @@ The fields have this meaning:
 
 The URN for a private resource follows an identical format, where resource type is "resource" and resource name is a hash generated by the server:
 
-[[code]]
+```
 {transport}://{endpoint}/{schema}/resource/{resource hash}
-[[/code]]
+```
 
 Note that "resource" is a reserved word and SHALL NOT be used as a resource type name.
 
-+++ Creating a Resource
+### Creating a Resource
 
 Clients create new resources as follows:
 
@@ -261,7 +260,7 @@ Clients create new resources as follows:
 
 Here is the walkthrough from client to server:
 
-[[code]]
+```
 Client                                     Server
 |                                           |
 |  1.) POST to parent URN                   |
@@ -272,13 +271,13 @@ Client                                     Server
 |      Location: Resource URN               |
 |<------------------------------------------|
 |                                           |
-[[/code]]
+```
 
 The content body of the created resource may be different than the content body provided by the client. While the client provides specifications for the resource, the server returns the actual resulting resource, which may have additional properties and/or children.
 
 This is the general form of a client request to create a dynamic resource, with the server response. We assume we're using XML rather than JSON:
 
-[[code]]
+```
 Client:
 -------------------------------------------------
 POST /{parent urn}
@@ -305,7 +304,7 @@ Location: {resource URN}
     {resource contents}
 </{resource type}>
 </{schema}>
-[[/code]]
+```
 
 The server may return these response codes specifically for a POST request:
 
@@ -318,7 +317,7 @@ In case of a 4xx or 5xx error response the server will return a textual error me
 
 Creating public resources is **idempotent**, i.e. repeated requests to create the same public resource are allowed, and safe. Clients should treat "200 OK" and "201 Created" as equally successful.
 
-+++ Retrieving a Resource
+### Retrieving a Resource
 
 Clients retrieve resources as follows:
 
@@ -329,7 +328,7 @@ Clients retrieve resources as follows:
 
 Here is the walkthrough from client to server:
 
-[[code]]
+```
 Client                                     Server
 |                                           |
 |  1.) GET to Resource URN                  |
@@ -339,11 +338,11 @@ Client                                     Server
 |      Resource representation              |
 |<------------------------------------------|
 |                                           |
-[[/code]]
+```
 
 This is the general form of an unconditional client request to retrieve a resource, with the server response. We assume we're using XML rather than JSON:
 
-[[code]]
+```
 Client:
 -------------------------------------------------
 GET /{resource urn}
@@ -361,7 +360,7 @@ ETag: {resource entity tag}
     {resource contents}
 </{resource type}>
 </{schema}>
-[[/code]]
+```
 
 The server may return these response codes specifically for a GET request:
 
@@ -379,19 +378,19 @@ In case of a 4xx or 5xx error response the server will return a textual error me
 
 This is the general form of a client request to conditionally retrieve a resource:
 
-[[code]]
+```
 Client:
 -------------------------------------------------
 GET /{resource urn}
 If-None-Match: {resource entity tag}
 If-Modified-Since: {resource date and time}
-[[/code]]
+```
 
 A conditional get only takes effect if there were no other errors, i.e. if the result would otherwise be "200 OK". It is valid to send either of the If-None-Match: or If-Modified-Since: headers but for best results, use both.
 
 Retrieving a resource has **no side effects**, i.e. repeated requests to retrieve the same resource will provoke the same responses, unless a third party deletes or modifies the resource.
 
-+++ Updating a Resource
+### Updating a Resource
 
 Clients update resources as follows:
 
@@ -403,7 +402,7 @@ Clients update resources as follows:
 
 Here is the walkthrough from client to server:
 
-[[code]]
+```
 Client                                     Server
 |                                           |
 |  1.) GET to Resource URN                  |
@@ -419,11 +418,11 @@ Client                                     Server
 |                                           |
 |  4.) 200 OK                               |
 |<------------------------------------------|
-[[/code]]
+```
 
 This is the general form of a client request to unconditionally modify a resource, with the server response. We ignore standard headers and we assume we're using XML rather than JSON:
 
-[[code]]
+```
 Client:
 -------------------------------------------------
 PUT /{resource urn}
@@ -441,7 +440,7 @@ Server:
 200 OK
 Date-Modified: {resource date and time}
 ETag: {resource entity tag}
-[[/code]]
+```
 
 The server may return these response codes specifically for a PUT request:
 
@@ -451,7 +450,7 @@ The server may return these response codes specifically for a PUT request:
 * 403 Forbidden - the PUT method is not allowed on the resource.
 * 412 Precondition Failed - the client does not have the latest copy of the resource.
 
-In case of a 4xx or 5xx error response the server will return a textual error message in the content body of the response. 
+In case of a 4xx or 5xx error response the server will return a textual error message in the content body of the response.
 
 **Conditional update** is used to detect and prevent update conflicts (when multiple clients try to update the same resource at the same time). Clients conditionally update resources conditionally as follows:
 
@@ -462,19 +461,19 @@ In case of a 4xx or 5xx error response the server will return a textual error me
 
 This is the general form of a client request to conditionally update a resource:
 
-[[code]]
+```
 Client:
 -------------------------------------------------
 PUT /{resource urn}
 If-Match: {resource entity tag}
 If-Unmodified-Since: {resource date and time}
-[[/code]]
+```
 
 A conditional PUT only takes effect if there were no other errors, i.e. if the result would otherwise be "200 OK". It is valid to send either of the If-Match: or If-Unmodified-Since: headers but for best results, use both.
 
 Modifying resources is **idempotent**, i.e. repeated requests to modify the same resource are allowed, and safe, unless a third party modifies or deletes the resource.
 
-+++ Deleting a Resource
+### Deleting a Resource
 
 Clients delete resources as follows:
 
@@ -486,7 +485,7 @@ Clients delete resources as follows:
 
 Here is the walkthrough from client to server:
 
-[[code]]
+```
 Client                                     Server
 |                                           |
 |  1.) GET to Resource URN                  |
@@ -502,11 +501,11 @@ Client                                     Server
 |  4.) 200 OK                               |
 |<------------------------------------------|
 |                                           |
-[[/code]]
+```
 
 This is the general form of a client request to unconditionally delete a resource, with the server response. We ignore standard headers:
 
-[[code]]
+```
 Client:
 -------------------------------------------------
 DELETE /{resource urn}
@@ -514,7 +513,7 @@ DELETE /{resource urn}
 Server:
 -------------------------------------------------
 200 OK
-[[/code]]
+```
 
 The server may return these response codes specifically for a DELETE request:
 
@@ -522,7 +521,7 @@ The server may return these response codes specifically for a DELETE request:
 * 403 Forbidden - the DELETE method is not allowed on the resource.
 * 412 Precondition Failed - the client does not have the latest copy of the resource.
 
-In case of a 4xx or 5xx error response the server will return a textual error message in the content body of the response. 
+In case of a 4xx or 5xx error response the server will return a textual error message in the content body of the response.
 
 **Conditional delete** is used to detect and prevent delete conflicts (when multiple clients try to delete the same resource at the same time). Clients conditionally delete resources conditionally as follows:
 
@@ -533,13 +532,13 @@ In case of a 4xx or 5xx error response the server will return a textual error me
 
 This is the general form of a client request to conditionally delete a resource:
 
-[[code]]
+```
 Client:
 -------------------------------------------------
 DELETE /{resource urn}
 If-Match: {resource entity tag}
 If-Unmodified-Since: {resource date and time}
-[[/code]]
+```
 
 A conditional DELETE only takes effect if there were no other errors, i.e. if the result would otherwise be "200 OK". It is valid to send either of the If-Match: or If-Unmodified-Since: headers but for best results, use both.
 
@@ -547,7 +546,7 @@ Deleting resources is **idempotent**, i.e. repeated requests to delete the same 
 
 If the resource to be deleted contains other resources, these are implicitly and silently deleted along with the resource.
 
-+++ MIME Type Selection
+### MIME Type Selection
 
 When the client retrieves a resource it MAY specify which MIME type it desires using the content-type field. XRAP allows these content types:
 
@@ -565,41 +564,41 @@ When a client creates a new resource or modifies an existing resource, it SHOULD
 
 If a server does not support the content type requested or provided by the client, it SHOULD return "501 Not Implemented."
 
-+++ Asynchronous Operation
+### Asynchronous Operation
 
 XRAP emulates REST, which is a synchronous request-reply model. This is simple and robust. However it is excessively expensive for asynchronous event delivery (mainly from server to client), as each event requires a full round trip.
 
-XRAP has one mechanism for asynchronous non-polled resource delivery, namely //asynclets//. An asynclet is a resource that is given a URN identifier before it exists. When the client retrieves the asynclet, the server will respond only when the resource has come into existence.
+XRAP has one mechanism for asynchronous non-polled resource delivery, namely *asynclets*. An asynclet is a resource that is given a URN identifier before it exists. When the client retrieves the asynclet, the server will respond only when the resource has come into existence.
 
 Asynclets are used in a specific case: when resources sit in some kind of a queue that is retrieved and emptied by the client (using GET and DELETE in a loop). The queue would be the parent resource (the "container"). The queue then contains zero or more existing resources plus a single asynclet.
 
 A normal resource is identified in a container resource by a href attribute, and other attributes:
 
-[[code]]
+```
 <some-type href="some-URN" ... />
-[[/code]]
+```
 
 An asynclet has the href attribute and a second attribute 'async="1"', telling the client that this resource, though it has a URN, does not in fact yet exist:
 
-[[code]]
+```
 <some-type href="some-URN" async="1" />
-[[/code]]
+```
 
 When the client retrieves an asynclet, the server waits until the resource is created, within that container, and it then responds to the client with the contents of that new resource.
 
 When the client retrieves the asynclet container, the container resource holds all existing resources plus a single asynclet:
 
-[[code]]
+```
 <some-type href="some-URN-1" ... />
 <some-type href="some-URN-2" ... />
 <some-type href="some-URN-3" ... />
 <some-type href="some-URN-4" ... />
 <some-type href="some-URN-5" async="1" />
-[[/code]]
+```
 
 At any time a new resource may 'arrive' and the URN held by a client for an asynclet will then refer to a real existing resource. This is transparent to the client except that there will be no wait when the client issues a GET on that URN.
 
-+++ Idempotency and Side-effects
+### Idempotency and Side-effects
 
 The GET, PUT, and DELETE methods are idempotent: the client can safely issue these more than once. POST is idempotent when creating public resources. POST to create private resources is not idempotent and will create one resource per successful execution.
 
@@ -607,7 +606,7 @@ Idempotency allows the client to safely recover from failures where it did not g
 
 The GET method does not modify the state of any resource on the server.
 
-+++ Pipelining Requests for Performance
+### Pipelining Requests for Performance
 
 The client MAY send requests without waiting for responses. This can improve performance by reducing network round-tripping. The HTTP term for this is "pipelining", and we use HTTP semantics for pipelining. RFC 2616 section 8.1.2.2 says,
 
@@ -617,11 +616,11 @@ The client MAY pipeline GET, PUT, DELETE and POST-public methods, but SHOULD NOT
 
 The server is permitted to return responses in a different order to that in which they are received.
 
-+++ Error Responses
+### Error Responses
 
 When the server returns an error response (4xx or 5xx), the content body MUST be in plain text, and the MIME type MUST be "text/plain". The client can print and log the content body as a text with no parsing or decoding.
 
-++ Resource Document Grammar
+## Resource Document Grammar
 
 Most, though not all, resources managed through a XRAP API are represented as structured resource documents.
 
@@ -646,7 +645,7 @@ Our goals with this design are:
 * To keep things as simple as possible for XRAP application developers.
 * To allow for future evolution in structured data representation.
 
-+++ Basic syntax rules
+### Basic syntax rules
 
 XRAP resource documents obey these basic rules:
 
@@ -671,7 +670,7 @@ And for JSON documents:
 
 Here is an example of a XRAP document in XML, for a schema called "music":
 
-[[code]]
+```
 <?xml version="1.0"?>
 <music xmlns="http://digistan.org/schema/music">
 <playlist name = "default">
@@ -693,21 +692,21 @@ Here is an example of a XRAP document in XML, for a schema called "music":
     </album>
 </playlist>
 </music>
-[[/code]]
+```
 
 The resource tree for the music schema is:
 
-[[code]]
+```
 playlist
     |
     o- album
         |
         o- track
-[[/code]]
+```
 
 Here is the same document in JSON:
 
-[[code]]
+```
 {
 "music": {
 "playlist": [ { "name":"default",
@@ -730,11 +729,11 @@ Here is the same document in JSON:
     ] }
 ] }
 }
-[[/code]]
+```
 
 Note that it is possible to map between JSON and XML without loss. The key rule for XML documents is that properties are represented as element attributes, not as child elements.
 
-+++ Navigation and discovery
+### Navigation and discovery
 
 XRAP documents use the following rule to allow navigation and discovery:
 
@@ -745,7 +744,7 @@ XRAP documents use the following rule to allow navigation and discovery:
 
 Here is an example of a client retrieving a public playlist resource using a GET method, with the server's response. The server is at host.com:
 
-[[code]]
+```
 Client:
 -------------------------------------------------
 GET /music/playlist/default
@@ -769,11 +768,11 @@ Content-Type: application/music+xml
         href="/music/resource/A0023" />
 </playlist>
 </music>
-[[/code]]
+```
 
 To retrieve a specific album, the client uses the URN provided by the server, for example:
 
-[[code]]
+```
 Client:
 -------------------------------------------------
 GET /music/resource/A1023
@@ -798,11 +797,11 @@ Content-Type: application/music+xml
         href="/music/resource/A1023/12" />
     </album>
 </music>
-[[/code]]
+```
 
 To retrieve a specific track, the client once again uses the URN provided by the server. Note that in this case the server delivers a content of type "audio/mpeg-3", which the client should process accordingly (and not as XRAP XML or JSON):
 
-[[code]]
+```
 Client:
 -------------------------------------------------
 GET http://host.com/music/resource/A1023/5
@@ -814,9 +813,9 @@ Content-Length: 2870112
 Content-Type: audio/mpeg-3
 
 ...opaque binary content...
-[[/code]]
+```
 
-++ Response Status Codes
+## Response Status Codes
 
 In this specification, these server reply codes have specific significance:
 
@@ -837,19 +836,19 @@ Clients should be capable of handling all errors defined by HTTP/1.1 (even over 
 * 501 Not Implemented - the requested functionality is not implemented.
 * 503 Overloaded - the server was overloaded.
 
-+++ Handling Unknown Elements and Attributes
+### Handling Unknown Elements and Attributes
 
 Resource documents may contain elements, and unknown attributes on known elements. This is especially likely when the client and server implement different versions of the API, or if the API is extended by a particular client or server implementation.
 
 Clients and servers should tolerate and ignore unknown elements. Neither the client nor the server should maintain unknown elements.
 
-++ Transport over ZeroMQ
+## Transport over ZeroMQ
 
-+++ Protocol Model
+### Protocol Model
 
 This is the zproto model for the above grammar:
 
-[[code]]
+```
 <class name = "xrap_msg"
     signature = "5"
     title = "XRAP serialization over ZMTP"
@@ -949,24 +948,24 @@ Error response for any request.
 </message>
 
 </class>
-[[/code]]
+```
 
-+++ ZeroMQ Socket Types
+### ZeroMQ Socket Types
 
 The server SHALL create a ROUTER socket and SHOULD bind it to port <to be specified>, which is the registered Internet Assigned Numbers Authority (IANA) port for XRAP. The server MAY bind its ROUTER socket to other ports in the ephemeral port range (%C000x - %FFFFx). The client SHALL create a DEALER socket and connect it to the server ROUTER host and port.
 
 Note that the ROUTER socket provides the caller with the connection identity of the sender for any message received on the socket, as an identity frame that precedes other frames in the message.
 
-+++ Protocol Signature
+### Protocol Signature
 
 Every ZeroMQ message SHALL start with the XRAP/ZMTP protocol signature, %xAA %xA5. The server and client SHALL silently discard any message received that does not start with these two octets.
 
 This mechanism is designed particularly for servers that bind to ephemeral ports which may have been previously used by other protocols, and to which there are still peers attempting to connect. It is also a general fail-fast mechanism to detect ill-formed messages.
 
-+++ Security Aspects
+### Security Aspects
 
 XRAP/ZMTP uses the ZMTP transport layer security mechanisms (NULL, PLAIN, CURVE, etc.) There are no specific security aspects in this protocol.
 
-++ Further Reading
+## Further Reading
 
-XRAP was originally developed by Pieter Hintjens in 2014 for the EU UNIFY project. The design is heavily influenced by and derived from the [http://www.restms.org/spec:1 RESTful Transport Layer] (RestTL), part of [http://www.restms.org the RestMS protocol stack]. RestTL is itself inspired by the design of [http://www.ietf.org/rfc/rfc4287.txt AtomPub] (IETF RFC 4287).
+XRAP was originally developed by Pieter Hintjens in 2014 for the EU UNIFY project. The design is heavily influenced by and derived from the [RESTful Transport Layer](http://www.restms.org/spec:1) (RestTL), part of [the RestMS protocol stack](http://www.restms.org). RestTL is itself inspired by the design of [AtomPub](http://www.ietf.org/rfc/rfc4287.txt) (IETF RFC 4287).

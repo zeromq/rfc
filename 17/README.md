@@ -1,11 +1,10 @@
 The ZeroMQ Device Configuration File (ZDCF) specifies a standard language for configuring 0MQ devices. It provides information to configure a 0MQ context, and a set of 0MQ sockets. This specification aims to make it easier to build, share, and reuse 0MQ devices and build systems for device administration.
 
-* Name: rfc.zeromq.org/spec:17/ZDCF
+* Name: http://rfc.zeromq.org/spec:17/ZDCF
 * Editor: Pieter Hintjens <ph@imatix.com>
 * Contributors: Steffen Mueller <smueller@cpan.org>
-* State: stable
 
-++ License
+## License
 
 Copyright (c) 2010-2012 iMatix Corporation and contributors
 
@@ -15,15 +14,15 @@ This Specification is distributed in the hope that it will be useful, but WITHOU
 
 You should have received a copy of the GNU General Public License along with this program; if not, see <http://www.gnu.org/licenses>.
 
-++ Change Process
+## Change Process
 
-This Specification is a free and open standard[((bibcite fandos))] and is governed by the Digital Standards Organization's Consensus-Oriented Specification System (COSS)[((bibcite coss))].
+This Specification is a free and open standard (see "[Definition of a Free and Open Standard](http://www.digistan.org/open-standard:definition)") and is governed by the Digital Standards Organization's Consensus-Oriented Specification System (COSS) (see "[Consensus Oriented Specification System](http://www.digistan.org/spec:1/COSS)").
 
-++ Language
+## Language
 
-The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED",  "MAY", and "OPTIONAL" in this document are to be interpreted as described in RFC 2119[((bibcite rfc2119))].
+The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED",  "MAY", and "OPTIONAL" in this document are to be interpreted as described in RFC 2119 (see "[Key words for use in RFCs to Indicate Requirement Levels](http://tools.ietf.org/html/rfc2119)").
 
-++ Goals
+## Goals
 
 ZDCF aims to:
 
@@ -32,20 +31,20 @@ ZDCF aims to:
 * Be as widely accessible as possible for different programming languages.
 * Cover all 0MQ context and socket configuration options.
 
-++ Architecture
+## Architecture
 
-ZDCF uses tree-structured semantics that can be implemented using arbitrary syntaxes such as ZPL[((bibcite zpl))], JSON[((bibcite json))], XML, or others. Despite the fact that this document and the name "ZDCF" refer to files, there is no technical reason against ZDCF implementations that accept in-memory data structures such as nested dictionaries or hashmaps.
+ZDCF uses tree-structured semantics that can be implemented using arbitrary syntaxes such as ZPL (see "[ZFL Property Language](http://rfc.zeromq.org/spec:4)"), JSON (see "[Introducing JSON](http://json.org/)"), XML, or others. Despite the fact that this document and the name "ZDCF" refer to files, there is no technical reason against ZDCF implementations that accept in-memory data structures such as nested dictionaries or hashmaps.
 
 In the following specification, any reference to a dictionary is to be understood as any data structure that maps a string key to another data structure.
 
-+++ Global properties
+### Global properties
 
 At the top level, a ZDCF structure is a dictionary. An empty dictionary is special cased to represent an empty ZDCF; this is a valid JSON-specified file:
 
-[[code]]
-{ 
+```
+{
 }
-[[/code]]
+```
 
 Any other ZDCF file is required to include the version of the ZDCF specification that it was written against as a floating point number in the "version" attribute of the top level dictionary. See below for a description on how implementations are to handle version information.
 
@@ -53,7 +52,7 @@ In addition to the specification version, the top level dictionary of a ZDCF fil
 
 Here is a typical example of a ZDCF file expressed in JSON:
 
-[[code]]
+```
 {
     "version": 1.0,
     "apps": {
@@ -83,11 +82,11 @@ Here is a typical example of a ZDCF file expressed in JSON:
         }
     }
 }
-[[/code]]
+```
 
-Here is the same property tree expressed in ZPL[((bibcite zpl))]:
+Here is the same property tree expressed in ZPL (see "[ZFL Property Language](http://rfc.zeromq.org/spec:4)"):
 
-[[code]]
+```
 version = 1.0
 apps
     listener
@@ -106,11 +105,11 @@ apps
                         bind = tcp://eth0:5555
                     backend
                         bind = tcp://eth0:5556
-[[/code]]
+```
 
 And in simple XML:
 
-[[code]]
+```
 <zdcf>
     <version>1.0</version>
     <apps>
@@ -128,9 +127,9 @@ And in simple XML:
         </main>
     </apps>
 </zdcf>
-[[/code]]
+```
 
-+++ The Application Object
+### The Application Object
 
 As stated above, each application object represents one process that may contain multiple 0MQ devices running in threads. An application may have a context object as the "context" entry of the dictionary. It may have a dictionary "devices" mapping device names to device objects. In summary an application can have these properties:
 
@@ -138,7 +137,7 @@ As stated above, each application object represents one process that may contain
 * "context" - An optional context object
 * "devices" - A dictionary of zero or more device names mapped to device objects
 
-+++ The Context Object
+### The Context Object
 
 The context object is optional in each application and has these properties:
 
@@ -146,7 +145,7 @@ The context object is optional in each application and has these properties:
 * "iothreads" - (integer) - specifies the number of I/O threads for the context. Defaults to 1 if not specified or if there is no explicit context object in the application.
 * "verbose" - (boolean) - if "true", the program parsing the JSON should output tracing information. Defaults to "false" if not specified.
 
-+++ The Device Object
+### The Device Object
 
 Device objects can occur zero or more times in the "devices" section of an application and have these properties:
 
@@ -160,9 +159,9 @@ The built-in device types that exist at time of writing are:
 * "zmq_forwarder" - ZMQ_FORWARDER
 * "zmq_streamer" - ZMQ_STREAMER
 
-See [http://api.zeromq.org/zmq_device.html zmq_device(3)] for details on the built-in device types.
+See [zmq_device(3)](http://api.zeromq.org/zmq_device.html) for details on the built-in device types.
 
-+++ The Socket Object
+### The Socket Object
 
 Socket objects can occur zero or more times in the "sockets" section of a device object, and have these properties:
 
@@ -184,9 +183,9 @@ The socket types that exist at time of writing are:
 * "pull" - ZMQ_PULL
 * "pair" - ZMQ_PAIR
 
-See [http://api.zeromq.org/zmq_socket.html zmq_socket(3)] for details.
+See [zmq_socket(3)](http://api.zeromq.org/zmq_socket.html) for details.
 
-+++ The Socket Option Object
+### The Socket Option Object
 
 A socket option object is optional inside a socket object. It has these properties:
 
@@ -202,9 +201,9 @@ A socket option object is optional inside a socket object. It has these properti
 * "sndbuf" - (integer) - specifies the ZMQ_SNDBUF option.
 * "rcvbuf" - (integer) - specifies the ZMQ_RCVBUF option.
 
-See [http://api.zeromq.org/zmq_setsockopt.html zmq_setsockopt(3)] for details.
+See [zmq_setsockopt(3)](http://api.zeromq.org/zmq_setsockopt.html) for details.
 
-+++ Value Arrays
+### Value Arrays
 
 Properties may be specified as value arrays where it makes sense and at least for:
 
@@ -214,16 +213,16 @@ Properties may be specified as value arrays where it makes sense and at least fo
 
 For example:
 
-[[code]]
+```
     "frontend": {
         "option": {
             "subscribe": [ "10001", "10002" ]
         },
         "bind": [ "tcp://eth0:5555", "inproc://device" ]
     }
-[[/code]]
+```
 
-++ Handling Specification Versions
+## Handling Specification Versions
 
 As an author of a ZDCF file, you must include the version of the specification that you wrote the ZDCF file against. The version of the specification is a floating point number and must be compared as such. Any change in the fractional part is considered a backwards-compatible change. Any change in the integer part of the specification version is understood to be backwards-incompatible.
 
@@ -234,12 +233,3 @@ A software that consumes ZDCF content must adhere to the following rules:
 
 In other words, you are free to implement backwards-compatibility with older versions of the specification, but please don't silently try to accept content that was written against a specification that you did not implement. Your users will thank you for it. If at the time of implementation, the specification version that you had access to is 5.3, then you may accept content written against 5.4 assuming it's a specification change that is backwards compatible. ZDCF 6.0, however, you should reject until you've updated your implementation to handle it.
 
-++ References
-
-[[bibliography]]
-: rfc2119 : "Key words for use in RFCs to Indicate Requirement Levels" - [http://tools.ietf.org/html/rfc2119 ietf.org]
-: zpl : "ZFL Property Language" - [http://rfc.zeromq.org/spec:4 rfc.zeromq.org]
-: json : "Introducing JSON" - [http://json.org/ json.org]
-: fandos : "Definition of a Free and Open Standard" - [http://www.digistan.org/open-standard:definition digistan.org]
-: coss : "Consensus Oriented Specification System" - [http://www.digistan.org/spec:1/COSS digistan.org]
-[[/bibliography]]

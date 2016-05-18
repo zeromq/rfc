@@ -1,5 +1,5 @@
-rfc
-===
+ZeroMQ RFC
+==========
 
 This is the ZeroMQ RFC project.
 

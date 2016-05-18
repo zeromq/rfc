@@ -363,11 +363,11 @@ Property names SHALL follow the General Style for Naming. Property names SHOULD 
 
 ### General Rules
 
-++++ Argument Names
+#### Argument Names
 
 Argument names SHALL be consistent with property names.
 
-++++ Return Values
+#### Return Values
 
 Success/failure SHALL be indicated by returning an int, with values zero or -1 respectively.
 
@@ -401,7 +401,7 @@ myp_myclass_test (int verbose)
 
 ### Stateful Classes
 
-++++ The Constructor Method
+#### The Constructor Method
 
 The constructor SHALL take this general form:
 
@@ -426,7 +426,7 @@ myp_myclass_new (<arguments>)
 
 * The constructor SHALL return either a new instance reference, or null, if construction failed.
 
-++++ The Destructor Method
+#### The Destructor Method
 
 The destructor SHALL take this general form:
 
@@ -451,7 +451,7 @@ myp_myclass_destroy (myp_myclass_t **self_p)
 * The destructor SHALL be idempotent, i.e., can be called safely on the same instance reference more than once.
 * The destructor SHALL safely free properties and child class instances that are not null.
 
-++++ The Duplicator Method
+#### The Duplicator Method
 
 The class MAY offer a duplicator method which creates a full copy of an instance; if it offers such semantics, the method MUST be called <tt>myp_myclass_dup ()</tt> and take this general form:
 
@@ -480,7 +480,7 @@ myp_myclass_dup (myp_myclass_t *self)
 
 * A duplicated instance SHALL be entirely independent of the original instance (i.e. all properties SHALL also be duplicated).
 
-++++ List Navigation Methods
+#### List Navigation Methods
 
 A class MAY act as a list container for other items, which may be child class instances, strings, memory blocks, or other structures.
 
@@ -522,7 +522,7 @@ myp_myclass_next (myp_myclass_t *self)
 
 * If the class maintains multiple lists, it SHALL create unique method names for each list by adding a list name, e.g., <tt>myp_myclass_myitem_first ()</tt>.
 
-++++ Accessor Methods
+#### Accessor Methods
 
 The class MAY expose instance properties via its API, in which case this SHALL be done through accessor methods.
 
@@ -552,11 +552,11 @@ myp_myclass_set_myprop (myp_myclass_t *self, <type> myprop)
 
 * Properties exposed by accessor methods MAY not actually exist as such in the instance; they may be calculated rather than simply copied to/from the instance structure.
 
-++++ Formatted String Arguments
+#### Formatted String Arguments
 
 When a method (such as an accessor method) accepts a string argument as primary argument, it SHOULD use a variable argument list and perform vsnprintf formatting on that string argument.
 
-++++ General Methods
+#### General Methods
 
 The class MAY offer any number of other methods that operate on the instance. These methods shall take this general form:
 
@@ -565,7 +565,7 @@ The class MAY offer any number of other methods that operate on the instance. Th
 
 A method may take ownership of an object instance and then act as a destructor of the object instance at some later stage. In that case the method SHALL use the same style as the destructor.
 
-++++ Return Values
+#### Return Values
 
 Methods SHOULD use one of the following patterns for returning values to the caller:
 
@@ -981,4 +981,3 @@ The use of opaque data structures that are accessed via references is thread saf
 * The heavy reliance on heap memory makes CLASS unsuitable for embedded systems where all memory use must be static.
 
 * In most CLASS applications it is difficult to handle an "out of memory" error in any way except to abort.
-

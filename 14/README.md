@@ -40,7 +40,7 @@ Peers exchange messages. Each message has a command, extensible supplementary in
 
 Managers don't know their workers, they start by binding a socket and waiting for incoming messages.  Workers know their managers (endpoints, etc.), they start by connecting to each manager and initiating message exchange.
 
-++++ Scheme
+#### Scheme
 
 ```
  W               M
@@ -53,7 +53,7 @@ Managers don't know their workers, they start by binding a socket and waiting fo
    --- DONE  -->   Job is done
 ```
 
-++++ Description
+#### Description
 1. To get a job, worker sends a READY command to all his managers.
 2. Manager receives READY, and remembers an available worker (routing path to worker) until a job is available. If another READY message is received with routing path that is already remembered, the message is ignored.
 3. When a job is available, manager sends WAKE to all corresponding workers (correspondance is defined by custom load-balancing solutions, or it may be "any worker" in the simplest case).

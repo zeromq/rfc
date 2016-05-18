@@ -174,7 +174,7 @@ A **DISCONNECT** command consists of a multipart message of 2 frames, formatted 
 * Frame 0: "MDPW02" (six bytes, representing MDP/Worker v0.2)
 * Frame 1: 0x06 (one byte, representing DISCONNECT)
 
-++++ Opening and Closing a Connection
+#### Opening and Closing a Connection
 
 * The worker is responsible for opening and closing a logical connection. One worker MUST connect to exactly one broker using a single ØMQ DEALER socket.
 
@@ -192,7 +192,7 @@ A **DISCONNECT** command consists of a multipart message of 2 frames, formatted 
 
 * When the worker receives DISCONNECT it must send no further commands to the broker; it MUST close its socket, and reconnect to the broker on a new socket. This mechanism allows workers to re-register after a broker failure and recovery.
 
-++++ Request and Reply Processing
+#### Request and Reply Processing
 
 * The worker SHALL send zero or more PARTIAL commands for a single REQUEST, followed by exactly one FINAL command.
 
@@ -200,7 +200,7 @@ A **DISCONNECT** command consists of a multipart message of 2 frames, formatted 
 
 * The address of each directly connected client is prepended by the ROUTER socket to all request messages coming from clients. That ROUTER socket also expects a client address to be prepended to each reply message sent to a client.
 
-++++ Heartbeating
+#### Heartbeating
 
 * HEARTBEAT commands are valid at any time, after a READY command.
 

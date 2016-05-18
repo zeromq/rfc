@@ -39,7 +39,7 @@ ZMTP consists of these layers:
 
 ### The Framing Layer
 
-++++ Preamble
+#### Preamble
 
 The framing layer underlies everything in ZMTP. The basic transport layer (e.g. provided by TCP) is a stream. ZMTP's framing layer turns that into a series of frames, in either direction. Frames are length-specified, so that peers can safely reject frames that are oversized. ZMTP's framing design is optimized for bandwidth and performance.
 
@@ -47,7 +47,7 @@ Framing is used to create structured messages, rather than to break large messag
 
 The framing layer is consistent no matter what work is happening on the connection. That is, it can be fully interpreted from the information sent on the wire.
 
-++++ Specification
+#### Specification
 
 A ZMTP **message** consists of 1 or more frames.
 
@@ -103,11 +103,11 @@ The following diagram shows the layout of a frame with length of 255 or more oct
 
 ### The Connection Layer
 
-++++ Preamble
+#### Preamble
 
 The connection layer provides a way for peers to identify each other at TCP connection time. A ZMTP connection is equivalent to a TCP connection. If peers disconnect and reconnect, this acts as two separate ZMTP connections.
 
-++++ Specification
+#### Specification
 
 A ZMTP connection is bidirectional and asynchronous. That is, either peer MAY send a message to the other peer at any time.
 
@@ -131,7 +131,7 @@ The flags octet (idflags) of an identity frame SHALL not be validated and SHOULD
 
 ### The Content Layer
 
-++++ Preamble
+#### Preamble
 
 The format and semantics of the ZMTP content messages sent across a connection depend on the **content type** of that connection direction, which is not specified in the protocol but must be assumed by both peers.
 
@@ -141,7 +141,7 @@ The following ABNF grammar defines ZMTP content:
 content     = *broadcast / *addressed / *neutral
 ```
 
-++++ Broadcast Content
+#### Broadcast Content
 
 **Broadcast content** is used between publishers and subscribers. A publisher SHALL send broadcast content. A subscriber SHALL NOT send any content.
 
@@ -153,7 +153,7 @@ broadcast   = message
 
 The recipient MAY filter messages. Any matching mechanism may be used (prefix, wildcard, regexp). ZMTP does not standardize this, though the current ZeroMQ implementation uses a prefix match.
 
-++++ Addressed Content
+#### Addressed Content
 
 **Addressed content** is used between peers in a request-reply chain. Any peer MAY send addressed content to any other peer in a request-reply chain.
 
@@ -173,7 +173,7 @@ The envelope SHOULD be used by peers in the following fashion:
 
 In this way, a chain of peers can push addresses onto the envelope as they forward requests, and pop addresses off the envelope to route replies back.
 
-++++ Neutral Content
+#### Neutral Content
 
 **Neutral content** is used between peers that do not require routing. Either peer MAY send neutral content to the other peer though specific peer implementations MAY ignore content coming from their peers.
 

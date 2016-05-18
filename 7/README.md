@@ -162,7 +162,7 @@ A **DISCONNECT** command consists of a multipart message of 3 frames, formatted 
 
 MD/Worker commands all start with an empty frame to allow consistent processing of client and worker frames in a broker, over a single socket. The empty frame has no other significance.
 
-++++ Opening and Closing a Connection
+#### Opening and Closing a Connection
 
 * The worker is responsible for opening and closing a logical connection. One worker MUST connect to exactly one broker using a single ØMQ DEALER (XREQ) socket.
 
@@ -180,13 +180,13 @@ MD/Worker commands all start with an empty frame to allow consistent processing 
 
 * When the worker receives DISCONNECT it must send no further commands to the broker; it MUST close its socket, and reconnect to the broker on a new socket. This mechanism allows workers to re-register after a broker failure and recovery.
 
-++++ Request and Reply Processing
+#### Request and Reply Processing
 
 * The REQUEST and the REPLY commands MUST contain precisely one client address frame. This frame MUST be followed by an empty (zero sized) frame.
 
 * The address of each directly connected client is prepended by the ROUTER socket to all request messages coming from clients. That ROUTER socket also expects a client address to be prepended to each reply message sent to a client.
 
-++++ Heartbeating
+#### Heartbeating
 
 * HEARTBEAT commands are valid at any time, after a READY command.
 

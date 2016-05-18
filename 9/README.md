@@ -47,7 +47,7 @@ A Titanic implementation (the "server") MUST implement these services:
 * **titanic.reply** - whereby a client queries the server for a reply, if available.
 * **titanic.close** - whereby a client tells the server that it has finished processing a reply.
 
-++++ The titanic.request Service
+#### The titanic.request Service
 
 The titanic.request service accepts a request, stores it persistently, and returns a UUID (universally unique identifier) for the request. It a multipart request message with 2 or more frames, as follows:
 
@@ -61,7 +61,7 @@ Note that this request message is carried *over MDP*. The service name is the ta
 
 The status code MUST be one of the codes listed below in the section "Status Frames". The UUID MUST be formatted as 32 hexadecimal characters ('0' to '9' and 'A' to 'Z' or 'a' to 'z').
 
-++++ The titanic.reply Service
+#### The titanic.reply Service
 
 The titanic.reply service accepts a UUID and if a reply exists for that UUID, returns the reply message. It accepts a request message with 1 frame, as follows:
 
@@ -76,7 +76,7 @@ The status code MUST be one of the codes listed below in the section "Status Fra
 
 The titanic.reply service is idempotent and MUST NOT delete a reply when successfully delivered to the client. Multiple requests to titanic.reply with the same UUID should result in the same response back to the client, until and unless the request is executed. See "Request Execution" below.
 
-++++ The titanic.close Service
+#### The titanic.close Service
 
 The titanic.close service accepts a UUID and deletes any request and reply for that UUID. It accepts a request message with 1 frame, as follows:
 

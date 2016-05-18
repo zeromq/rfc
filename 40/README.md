@@ -216,7 +216,7 @@ The resource types form a static **schema** attached to a root type. The set of 
 
 We can hold structured resources as interchangeable XML or JSON **resource documents**, at the choice of the client. XRAP specifies the grammar for representing resources and their properties.
 
-++++ Resource Names (URNs)
+#### Resource Names (URNs)
 
 Resources can be created by various parties at different times: by the server at startup, by clients at runtime, or by the server as the consequence of other events, at runtime. Only the party that created a resource can delete it, and it may place restrictions on other parties' right to work with the resource.
 

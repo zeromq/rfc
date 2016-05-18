@@ -118,25 +118,25 @@ S:RTFM          = signature %x81 reason
 
 ### Interconnection Model
 
-++++ ZeroMQ Socket Types
+#### ZeroMQ Socket Types
 
 The server SHALL create a ROUTER socket and SHOULD bind it to port 5670, which is the registered Internet Assigned Numbers Authority (IANA) port for FILEMQ. The server MAY bind its ROUTER socket to other ports in the ephemeral port range (%C000x - %FFFFx). The client SHALL create a DEALER socket and connect it to the server ROUTER host and port.
 
 Note that the ROUTER socket provides the caller with the connection identity of the sender for any message received on the socket, as an identity frame that precedes other frames in the message.
 
-++++ Protocol Signature
+#### Protocol Signature
 
 Every ZeroMQ message SHALL start with the FILEMQ protocol signature, %xAA %xA3. The server and client SHALL silently discard any message received that does not start with these two octets.
 
 This mechanism is designed particularly for servers that bind to ephemeral ports which may have been previously used by other protocols, and to which there are still peers attempting to connect. It is also a general fail-fast mechanism to detect ill-formed messages.
 
-++++ Connection State
+#### Connection State
 
 The server SHALL reply to an unexpected command with a RTFM command. The client SHALL respond to an RTFM command by closing its DEALER connection and starting a new connection.
 
 ### FILEMQ Commands
 
-++++ The OHAI Command
+#### The OHAI Command
 
 The client SHALL start a new connection by sending the OHAI command to the server. This command identifies the protocol and version. This is designed to allow version detection.
 
@@ -144,21 +144,21 @@ If the server does not support the request protocol version it SHALL reply with 
 
 If the server accepts the OHAI command it SHALL reply with either a OHAI-OK command or, if authentication is required, an ORLY command.
 
-++++ The ORLY Command
+#### The ORLY Command
 
 When a client requests access, the server MAY reply with an ORLY command to initiate a Simple Authentication and Security Layer (SASL) challenge and response exchange. The server SHALL provide a list of mechanisms that it accepts, and a frame of binary data containing a challenge.
 
-++++ The YARLY Command
+#### The YARLY Command
 
 The client SHOULD respond to an ORLY command with a YARLY command that has calculated response data. Note that the SASL challenge/response model uses external SASL libraries that process the challenge data and return suitable response data.
 
 The client or server MUST at least support the SASL "PLAIN" mechanism.
 
-++++ The OHAI-OK Command
+#### The OHAI-OK Command
 
 When the server grants the client access after an OHAI or YARL command, it SHALL reply with an OHAI-OK command. If the server does not grant access it SHALL reply with a SRSLY command.
 
-++++ The ICANHAZ Command
+#### The ICANHAZ Command
 
 The client MAY subscribe to any number of virtual paths by sending ICANHAZ commands to the server. The client MAY specify a full path, or it MAY specify a partial path, which is used as a prefix match. Paths MUST start with "/", thus the path "/" subscribes to *everything*.
 
@@ -170,23 +170,23 @@ The 'options' field provides additional information to the server. The server SH
 
 When the client specifies the RESYNC option, the 'cache' dictionary field tells the server which files the client already has. Each entry in the 'cache' dictionary is a "filename=digest" key/value pair where the digest SHALL be a SHA-1 digest in printable hexadecimal format. If the filename starts with '/' then it SHOULD start with the path, otherwise the server MUST ignore it. If the filename does not start with '/' then the server SHALL treat it as relative to the path.
 
-++++ The ICANHAZ-OK Command
+#### The ICANHAZ-OK Command
 
 When a server accepts a subscription it MUST reply with an ICANHAZ-OK command. If the server refuses a subscription it SHALL reply with a SRSLY command, and discard any further commands from this client.
 
-++++ The NOM Command
+#### The NOM Command
 
 The client MUST initiate the transfer of data by sending credit to the server. The server SHALL only send as much data to the client as it has credit for. The credit is an amount in bytes that corresponds to actual file content (but not bytes used by commands themselves).
 
 The client MAY sent NOM commands at any point after it has received an OHAI-OK from the server. The server SHALL not respond directly to NOM commands.
 
-++++ The CHEEZBURGER Command
+#### The CHEEZBURGER Command
 
 The server SHALL send file content to the client using CHEEZBURGER commands. Each CHEEZBURGER command shall deliver a chunk of file data starting at a specific offset. The server MUST send the content of a single file as consecutive chunks and clients MAY depend on this behavior.
 
 The headers field is reserved for future use.
 
-++++ The HUGZ Command
+#### The HUGZ Command
 
 The server or client MAY sent heartbeat commands at any point after the server has sent OHAI-OK to the client, which has received it.
 
@@ -194,19 +194,19 @@ The HUGZ command acts as a heartbeat, indicating that the peer is alive. The ser
 
 A peer may thus choose to only send HUGZ to another peer when it is not sending any other traffic to that peer.
 
-++++ The HUGZ-OK Command
+#### The HUGZ-OK Command
 
 A peer SHALL respond to a HUGZ command with a HUGZ-OK command. This allows one peer to be responsible for all heartbeating.
 
-++++ The KTHXBAI Command
+#### The KTHXBAI Command
 
 The client MAY end a connection by sending the KTHXBAI command to the server. The server SHALL not respond to this command.
 
-++++ The SRSLY Command
+#### The SRSLY Command
 
 The server SHALL respond to any failed attempt to access a resource on the server with a SRSLY command. This includes failed authentication and failed subscriptions. When a client receives a SRSLY command it SHOULD close the connection and if needed, reconnect with new authentication credentials.
 
-++++ The RTFM Command
+#### The RTFM Command
 
 The server SHALL respond to an invalid command by sending RTFM. Note that the server SHALL not send RTFM to clients which send an invalid protocol signature. When a client receives a RTFM command it SHOULD close the connection and not reconnect.
 

@@ -133,7 +133,7 @@ R:PING-OK       = signature %07 sequence
 
 ### ZRE Commands
 
-++++ The HELLO Command
+#### The HELLO Command
 
 Each node SHALL start a dialog by sending HELLO as the first command on an connection to a peer.
 
@@ -151,31 +151,31 @@ If the recipient has not already connected to this peer it SHALL create a ZeroMQ
 
 The "group status sequence" is a one-octet number that is incremented each time the peer joins or leaves a group. Each peer MAY use this to assert the accuracy of its own group management information.
 
-++++ The WHISPER Command
+#### The WHISPER Command
 
 When a node wishes to send a message to a single peer it SHALL use the WHISPER command. The WHISPER command contains a single field, which is the message content defined as one 0MQ frame. ZRE does not support multi-frame message contents.
 
-++++ The SHOUT Command
+#### The SHOUT Command
 
 When a node wishes to send a message to a set of nodes participating in a group it SHALL use the SHOUT command. The SHOUT command contains two fields: the name of the group, and the the message content defined as one 0MQ frame.
 
 Note that messages are sent via ZeroMQ over TCP, so the SHOUT command is unicast to each peer that should receive it. ZRE does not provide any UDP multicast functionality.
 
-++++ The JOIN Command
+#### The JOIN Command
 
 When a node joins a group it SHALL broadcast a JOIN command to all its peers. The JOIN command has two fields: the name of the group to join, and the group status sequence number *after* joining the group. Group names are case sensitive.
 
-++++ The LEAVE Command
+#### The LEAVE Command
 
 When a node leaves a group it SHALL broadcast a LEAVE command to all its peers. The LEAVE command has two fields: the name of the group to leave, and the group status sequence number *after* leaving the group.
 
-++++ The PING Command
+#### The PING Command
 
 A node SHOULD send a PING command to any peer that it has not received a UDP beacon from within a certain time (typically five seconds). Note that UDP traffic may be dropped on a network that is heavily saturated. If a node receives no reply to a PING command, and no other traffic from a peer within a somewhat longer time (typically 30 seconds), it SHOULD treat that peer as dead.
 
 Note that PING commands SHOULD be used only in targeted cases where a peer is otherwise silent. Otherwise, the cost of PING commands will rise exponentially with the number of peers connected, and can degrade network performance.
 
-++++ The PING-OK Command
+#### The PING-OK Command
 
 When a node receives a PING command it SHALL reply with a PING-OK command.
 

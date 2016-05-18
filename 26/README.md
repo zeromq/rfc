@@ -186,7 +186,7 @@ We use the CurveCP notation "Box [X](C->S)" to mean a cryptographic box that enc
 
 CurveZMQ uses the same cryptography as CurveCP, so keys are 32 octets (256 bits) and nonces are 24 octets. An encrypted box is always 16 octets larger than the clear-text data it holds. These sizes are not configurable; they are enforced by the underlying cryptography library and act as universal constants for CurveZMQ implementations. This may change in future versions.
 
-++++ The HELLO Command
+#### The HELLO Command
 
 The first command on a CurveZMQ connection is the HELLO command. The client SHALL send a HELLO command after opening the stream connection. This command SHALL be 200 octets long and have the following fields:
 
@@ -208,7 +208,7 @@ When the server gets a valid HELLO command, it SHALL generate a new transient ke
 
 Note that the client uses an 8 octet "short nonce" in the HELLO, INITIATE, and MESSAGE commands. This nonce SHALL be an incrementing integer, and unique to each command within a connection. The client SHALL NOT send more than 2^64-1 commands in one connection. The server SHALL verify that a client connection does use correctly incrementing short nonces, and SHALL disconnect clients that reuse a short nonce.
 
-++++ The WELCOME Command
+#### The WELCOME Command
 
 The server SHALL respond to a valid HELLO command with a WELCOME command. This command SHALL be 168 octets long and have the following fields:
 
@@ -230,7 +230,7 @@ The server SHALL generate a new cookie for each WELCOME command it sends.
 
 The client SHALL validate all fields and SHALL disconnect from servers that send malformed WELCOME commands.
 
-++++ The INITIATE Command
+#### The INITIATE Command
 
 When the client receives a WELCOME command it can decrypt this to receive the server's transient key S', and the cookie, which it must send back to the server. The cookie is the only memory of the server's secret transient key s'.
 
@@ -256,7 +256,7 @@ The server SHALL validate all fields and SHALL reject and disconnect clients who
 
 After decrypting the INITIATE command, the server MAY authenticate the client based on its permanent public key C. If the client does not pass authentication, the server SHALL not respond except by closing the connection. If the client passes authentication the server SHALL send a READY command and MAY then immediately send MESSAGE commands.
 
-++++ The READY Command
+#### The READY Command
 
 The server SHALL respond to a valid INITIATE command with a READY command. This command SHALL be at least 30 octets long and have the following fields:
 
@@ -272,7 +272,7 @@ The client MAY validate the meta-data. If the client accepts the meta-data, it S
 
 Note that the server uses an 8 octet "short nonce" in the HELLO, INITIATE, and MESSAGE commands. This nonce SHALL be an incrementing integer, and unique to each command within a connection. The server SHALL NOT send more than 2^64-1 commands in one connection. The client SHALL verify that a server connection does use correctly incrementing short nonces, and SHALL disconnect from servers that reuse a short nonce.
 
-++++ The MESSAGE Command
+#### The MESSAGE Command
 
 The client MAY send MESSAGE commands when it has received a valid READY command. The server MAY send MESSAGE commands when it has sent a READY command. This command SHALL be at least 33 octets long and have the following fields:
 
@@ -290,7 +290,7 @@ The message payload consists of a flags field (1 octet) followed by zero or more
 
 The recipient SHALL validate all fields and SHALL reject and disconnect from peers who send malformed MESSAGE commands. A server SHALL NOT send an ERROR command in response to an invalid MESSAGE command.
 
-++++ The ERROR Command
+#### The ERROR Command
 
 A server SHALL indicate an authentication failure by sending an ERROR command back to the client. The server MAY respond with ERROR in other failure cases, or may disconnect the client silently depending on the case. This command SHALL be 7 or more octets long and have the following fields:
 

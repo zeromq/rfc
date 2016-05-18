@@ -201,7 +201,7 @@ The flags field consists of a single octet containing various control flags. Bit
 
 * Bit 0 (MORE): *More frames to follow*. A value of 0 indicates that there are no more frames to follow. A value of 1 indicates that more frames will follow. This bit SHALL be zero on command frames.
 
-++++ Commands
+#### Commands
 
 Commands are used by the ZMTP implementation and not generally visible to the application except in some cases. Commands always consist of one frame, containing a printable command name, a null octet separator, and data.
 
@@ -213,7 +213,7 @@ These are the commands that this specification defines:
 
 ZMTP supports extensible security mechanisms and these may define their own commands. Security mechanisms MAY use any command names they need to.
 
-++++ Messages
+#### Messages
 
 Messages carry application data and are not generally created, modified, or filtered by the ZMTP implementation except in some cases. Messages consist of one or more frames and an implementation SHALL always send and deliver messages atomically, that is, all the frames of a message, or none of them.
 
@@ -273,7 +273,7 @@ The implementation MAY provide other metadata properties such as implementation 
 
 Metadata names starting with "X-" SHALL be reserved for application use.
 
-++++ The Socket-Type Property
+#### The Socket-Type Property
 
 The Socket-Type announces the ZeroMQ socket type of the sending peer. The Socket-Type SHALL match this grammar:
 
@@ -317,7 +317,7 @@ PAIR   |     |     |        |        |     |      |     |      |      |      |  
 
 When a peer validates the socket type, it SHOULD handle errors by returning an ERROR command, and then disconnecting the peer.
 
-++++ The Identity Property
+#### The Identity Property
 
 A REQ, DEALER, or ROUTER peer connecting to a ROUTER MAY announce its identity, which is used as an addressing mechanism by the ROUTER socket. For all other socket types, the Identity property shall be ignored.
 
@@ -329,7 +329,7 @@ identity = 0*255OCTET
 
 The first octet of the Identity SHALL NOT be zero: identities starting with a zero octet are reserved for implementations' internal use.
 
-++++ **NEW:** The Resource Property
+#### **NEW:** The Resource Property
 
 The Resource Property addresses the common problem of running multiple services (within a single process) on a single network endpoint. This is particularly desirable when using public-facing ports, which can be expensive to manage due to firewall issues. Without any protocol support, one service requires one port number to bind to. With protocol support, multiple services can share a single port.
 

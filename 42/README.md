@@ -1,10 +1,7 @@
-# RFC 42/C4
-
 The Collective Code Construction Contract (C4) is an evolution of the github.com [Fork + Pull Model](http://help.github.com/send-pull-requests/), aimed at providing an optimal collaboration model for free software projects. This is revision 2 of the C4 specification and deprecates RFC 22.
 
-* Name: http://rfc.zeromq.org/spec:42 (42/C4)
+* Name: http://rfc.zeromq.org/spec:42/C4
 * Editor: Pieter Hintjens <ph@imatix.com>
-* State: stable
 
 ## License
 
@@ -14,7 +11,7 @@ This Specification is free software; you can redistribute it and/or modify it un
 
 This Specification is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along with this program; if not, see http://www.gnu.org/licenses.
+You should have received a copy of the GNU General Public License along with this program; if not, see <http://www.gnu.org/licenses>.
 
 ## Language
 
@@ -29,8 +26,7 @@ C4 is meant to provide a reusable optimal collaboration model for open source so
 1. To allow the project to develop faster and more accurately, by increasing the diversity of the decision making process;
 1. To support the natural life cycle of project versions from experimental through to stable, by allowing safe experimentation, rapid failure, and isolation of stable code;
 1. To reduce the internal complexity of project repositories, thus making it easier for Contributors to participate and reducing the scope for error;
-
-* To enforce collective ownership of the project, which increases economic incentive to Contributors and reduces the risk of hijack by hostile entities.
+1. To enforce collective ownership of the project, which increases economic incentive to Contributors and reduces the risk of hijack by hostile entities.
 
 ## 2. Design
 
@@ -114,10 +110,11 @@ C4 is meant to provide a reusable optimal collaboration model for open source so
 ## Further Reading
 
 * [Argyris' Models 1 and 2](http://en.wikipedia.org/wiki/Chris_Argyris) - the goals of C4 are consistent with Argyris' Model 2.
+
 * [Toyota Kata](http://en.wikipedia.org/wiki/Toyota_Kata) - covering the Improvement Kata (fixing problems one at a time) and the Coaching Kata (helping others to learn the Improvement Kata).
 
 ## Implementations
 
 * The [ZeroMQ community](http://zeromq.org) uses the C4 process for many projects.
-* [OSSEC](http://www.ossec.net/) [uses](https://ossec-docs.readthedocs.org/en/latest/development/oRFC/orfc-1.html) the C4 process.
+* [OSSEC](http://www.ossec.net/) [uses the C4 process](https://ossec-docs.readthedocs.org/en/latest/development/oRFC/orfc-1.html).
 * The [Machinekit](http://www.machinekit.io/) community [uses the C4 process](http://www.machinekit.io/about/).

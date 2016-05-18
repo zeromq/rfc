@@ -1,10 +1,9 @@
 The ZeroMQ Property Language (ZPL) defines a minimalistic framing language for specifying property sets, expressed as a hierarchy of name-value property pairs.
 
-* Name: rfc.zeromq.org/spec:4/ZPL
+* Name: http://rfc.zeromq.org/spec:4/ZPL
 * Editor: Pieter Hintjens <ph@imatix.com>
-* State: stable
 
-++ License
+## License
 
 Copyright (c) 2010 iMatix Corporation and contributors
 
@@ -14,15 +13,15 @@ This Specification is distributed in the hope that it will be useful, but WITHOU
 
 You should have received a copy of the GNU General Public License along with this program; if not, see <http://www.gnu.org/licenses>.
 
-++ Change Process
+## Change Process
 
-This Specification is a free and open standard[((bibcite fandos))] and is governed by the Digital Standards Organization's Consensus-Oriented Specification System (COSS)[((bibcite coss))].
+This Specification is a free and open standard (see "[Definition of a Free and Open Standard](http://www.digistan.org/open-standard:definition)") and is governed by the Digital Standards Organization's Consensus-Oriented Specification System (COSS) (see "[Consensus Oriented Specification System](http://www.digistan.org/spec:1/COSS)").
 
-++ Language
+## Language
 
-The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED",  "MAY", and "OPTIONAL" in this document are to be interpreted as described in RFC 2119[((bibcite rfc2119))].
+The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED",  "MAY", and "OPTIONAL" in this document are to be interpreted as described in RFC 2119 (see "[Key words for use in RFCs to Indicate Requirement Levels](http://tools.ietf.org/html/rfc2119)").
 
-++ Goals
+## Goals
 
 ZPL is designed to represent a property set, where each property has a name and a value. Properties are hierarchical, i.e. properties can contain other properties. It aims to:
 
@@ -40,7 +39,7 @@ The use cases for ZPL include:
 * Streamed data exchange.
 * Streamed logging.
 
-++ Specification
+## Specification
 
 ZPL is an ASCII text format that uses whitespace - line endings and indentation - for framing and hierarchy. ZPL data consists of a series of properties encoded as name/value pairs, one per line, where the name may be structured, and where the value is an untyped string.
 
@@ -48,9 +47,9 @@ Implementations should treat any of the following sequences as a line-ending: ne
 
 Here is a typical example of a ZPL file:
 
-[[code]]
-#   ZPL configuration file example
-#   This format is designed to be trivial to write and parse
+```
+1. ZPL configuration file example
+1. This format is designed to be trivial to write and parse
 #
 context
     iothreads = 1
@@ -66,7 +65,7 @@ main
         bind = tcp://eth0:5555
     backend
         bind = tcp://eth0:5556
-[[/code]]
+```
 
 Notes:
 
@@ -85,12 +84,12 @@ Notes:
 
 Names SHALL match this grammar:
 
-[[code]]
+```
 name = *name-char
 name-char = ALPHA | DIGIT | "$" | "-" | "_" | "@" | "." | "&" | "+" | "/"
-[[/code]]
+```
 
-++ Justification and Design
+## Justification and Design
 
 ZPL exists because alternatives were inadequate:
 
@@ -103,11 +102,3 @@ The use of significant whitespace may be controversial. It is meant to be easier
 
 The lack of type awareness and other semantic validation is deliberate. ZPL is not meant to be a formal grammar but a simple-to-parse framing for name/value pairs. It emulates 0MQ insofar as it frames data but does not attempt to inspect or validate that data.
 
-++ References
-
-[[bibliography]]
-: rfc2119 : "Key words for use in RFCs to Indicate Requirement Levels" - [http://tools.ietf.org/html/rfc2119 ietf.org]
-: json : "Introducing JSON" - [http://json.org/ json.org]
-: fandos : "Definition of a Free and Open Standard" - [http://www.digistan.org/open-standard:definition digistan.org]
-: coss : "Consensus Oriented Specification System" - [http://www.digistan.org/spec:1/COSS digistan.org]
-[[/bibliography]]

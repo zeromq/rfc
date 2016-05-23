@@ -221,7 +221,7 @@ Messages carry application data and are not generally created, modified, or filt
 
 The NULL mechanism implements no authentication and no confidentiality. The NULL mechanism SHOULD NOT be used on public infrastructure without transport-level security (e.g. over a VPN).
 
-To complete a NULL security handshake, both peers SHALL send each other a READY command. Both peers SHOULD then parse, and MAY validate the READY command. Either or both peer MAY then choose to close the connection if validation failed. A peer MAY start to send messages immediately after sending its metadata.
+To complete a NULL security handshake, the client SHALL send a READY command and then wait for a READY command in reply. The server SHOULD parse, and MAY validate the READY command. If there is no error, it MUST send a READY command in reply. Either or both peer MAY choose to close the connection if validation failed. A peer MAY start to send messages immediately after completing its handshake, that is, having both sent and received a READY command.
 
 When a peer uses the NULL security mechanism, the as-server field MUST be zero. The following ABNF grammar defines the NULL security handshake:
 
@@ -244,14 +244,6 @@ The body of the READY command consists of a list of properties consisting of nam
 The name SHALL be 1 to 255 characters. Zero-sized names are not valid. The case (upper or lower) of names SHALL NOT be significant.
 
 The value SHALL be 0 to 2,147,483,647 (2^31-1 or INT32_MAX in C/C++) octets of opaque binary data. Zero-sized values are allowed. The semantics of the value depend on the property. The value size field SHALL be four octets, in network byte order. Note that this size field will mostly not be aligned in memory.
-
-Note that to avoid deadlocks, each peer MUST send its READY command before attempting to receive a READY from the other peer. In the NULL mechanism, peers are symmetric. Here is the command flow for two peers, P and R:
-
-```
-P:greeting          R:greeting
-P:ready             R:ready
-P:message...        R:message...
-```
 
 The body of the ERROR command contains an error reason that can be logged. It has no defined semantic value.
 

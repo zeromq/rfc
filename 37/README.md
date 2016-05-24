@@ -221,9 +221,11 @@ Messages carry application data and are not generally created, modified, or filt
 
 The NULL mechanism implements no authentication and no confidentiality. The NULL mechanism SHOULD NOT be used on public infrastructure without transport-level security (e.g. over a VPN).
 
+When a peer uses the NULL security mechanism, the as-server field MUST be zero. The peer that binds SHALL be the server, and connecting peer SHALL be the client.
+
 To complete a NULL security handshake, the client SHALL send a READY command and then wait for a READY command in reply. The server SHOULD parse, and MAY validate the READY command. If there is no error, it MUST send a READY command in reply. Either or both peer MAY choose to close the connection if validation failed. A peer MAY start to send messages immediately after completing its handshake, that is, having both sent and received a READY command.
 
-When a peer uses the NULL security mechanism, the as-server field MUST be zero. The following ABNF grammar defines the NULL security handshake:
+The following ABNF grammar defines the NULL security handshake:
 
 ```
 null = ready *message | error

@@ -1,6 +1,6 @@
 This document describes a protocol for performing HTTP requests and responses over ZeroMQ. It is partly modeled after the protocols of Mongrel2 and ZeroGW, but with the addition of streaming capability and credits-based flow control.
 
-* Name: http://rfc.zeromq.org/spec:8/ZHTTP
+* Name: http://rfc.zeromq.org/spec:33/ZHTTP
 * Editor: Justin Karneges <justin@fanout.io>
 
 ## License

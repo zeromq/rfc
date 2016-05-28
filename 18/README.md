@@ -39,7 +39,7 @@ The goals of MDP are to:
 
 ## Architecture
 
-[![Figure](1.png)]
+![Figure](1.png)
 
 ### Overall Topology
 

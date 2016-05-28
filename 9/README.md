@@ -37,7 +37,7 @@ Titanic is a layer built on top of the Majordomo Protocol ([/spec:7/MDP 7/MDP]).
 
 The Titanic pattern places the persistence outside the broker, as a proxy service that looks like a worker to clients, and a client to workers:
 
-[[=image figure9-1.png]]
+[![Figure](1.png)]
 
 ### Services
 
@@ -106,4 +106,3 @@ Every reply from a TSP service contains a status frame followed by zero or more 
 ### Reference Implementations
 
 The C99 Titanic examples from Chapter 4 of the Guide (see "[ØMQ - The Guide](http://zguide.zeromq.org)") act as the prime reference implementation for TSP. Translations of the examples into other languages may be available.
-

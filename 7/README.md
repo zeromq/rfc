@@ -37,7 +37,7 @@ The goals of MDP are to:
 
 ## Architecture
 
-[[=image figure7-1.png]]
+[![Figure](1.png)]
 
 ### Overall Topology
 
@@ -231,4 +231,3 @@ The C99 Majordomo examples from Chapter 4 of the Guide (see "[ØMQ - The Guide](
 
 * The heartbeat rate must be set to similar values in broker and worker, or false disconnections will occur. A better heartbeat design will be developed later.
 * The use of multiple frames for command formatting has a performance impact. Future versions of MDP may place commands into single frames.
-

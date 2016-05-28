@@ -37,7 +37,7 @@ Titanic is a layer built on top of the Majordomo Protocol ([/spec:7/MDP 7/MDP]).
 
 The Titanic pattern places the persistence outside the broker, as a proxy service that looks like a worker to clients, and a client to workers:
 
-[![Figure](1.png)]
+![Figure](1.png)
 
 ### Services
 

@@ -3,6 +3,8 @@ The Collective Code Construction Contract (C4) is an evolution of the github.com
 * Name: http://rfc.zeromq.org/spec:22/C4
 * Editor: Pieter Hintjens <ph@imatix.com>
 
+Note: this RFC is superceded by http://rfc.zeromq.org/spec:42/C4
+
 ## License
 
 Copyright (c) 2009-2015 Pieter Hintjens.

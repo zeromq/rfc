@@ -1,5 +1,5 @@
 module.exports = {
     title: 'ZeroMQ RFCs',
     gitbook: '>=3.0.0',
-    plugins: ['coss']
+    plugins: ['coss@1.0.4']
 };

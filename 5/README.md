@@ -1,7 +1,12 @@
-The ZeroMQ Device Configuration File (ZDCF) specifies a standard language for configuring 0MQ devices. It provides information to configure a 0MQ context, and a set of 0MQ sockets. This specification aims to make it easier to build, share, and reuse 0MQ devices and build systems for device administration.
+---
+domain: rfc.zeromq.org
+shortname: 5/ZDCF
+name: ZeroMQ Device Configuration File
+status: retired
+editor: Pieter Hintjens <ph@imatix.com>
+---
 
-* Name: http://rfc.zeromq.org/spec:5/ZDCF
-* Editor: Pieter Hintjens <ph@imatix.com>
+The ZeroMQ Device Configuration File (ZDCF) specifies a standard language for configuring 0MQ devices. It provides information to configure a 0MQ context, and a set of 0MQ sockets. This specification aims to make it easier to build, share, and reuse 0MQ devices and build systems for device administration.
 
 ## License
 
@@ -186,4 +191,3 @@ For example:
         "bind": [ "tcp://eth0:5555", "inproc://device" ]
     }
 ```
-

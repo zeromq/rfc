@@ -1,7 +1,12 @@
-The C Language Style for Scalability (CLASS) defines a consistent style and organization for scalable C library and application code built on modern C compilers and operating systems. CLASS aims to collect industry best practice into one reusable standard.
+---
+domain: rfc.zeromq.org
+shortname: 21/CLASS
+name: C Language Style for Scalability
+status: stable
+editor: Pieter Hintjens <ph@imatix.com>
+---
 
-* Name: http://rfc.zeromq.org/spec:21/CLASS
-* Editor: Pieter Hintjens <ph@imatix.com>
+The C Language Style for Scalability (CLASS) defines a consistent style and organization for scalable C library and application code built on modern C compilers and operating systems. CLASS aims to collect industry best practice into one reusable standard.
 
 ## License
 

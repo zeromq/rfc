@@ -1,7 +1,12 @@
-The File Message Queuing Protocol (FILEMQ) governs the delivery of files between a 'client' and a 'server'. FILEMQ runs over the ZeroMQ [ZMTP v3 protocol](http://rfc.zeromq.org/spec:23/ZMTP). This is version 2 of the FILEMQ protocol.
+---
+domain: rfc.zeromq.org
+shortname: 35/FILEMQ
+name: File Message Queuing Protocol
+status: draft
+editor: Pieter Hintjens <ph@imatix.com>
+---
 
-* Name: http://rfc.zeromq.org/spec:35/FILEMQ
-* Editor: Pieter Hintjens <ph@imatix.com>
+The File Message Queuing Protocol (FILEMQ) governs the delivery of files between a 'client' and a 'server'. FILEMQ runs over the ZeroMQ [ZMTP v3 protocol](http://rfc.zeromq.org/spec:23/ZMTP). This is version 2 of the FILEMQ protocol.
 
 ## Preamble
 

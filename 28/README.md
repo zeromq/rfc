@@ -1,7 +1,12 @@
-This document specifies the semantics of the ZeroMQ request-reply pattern, which covers the REQ, REP, DEALER, and ROUTER socket types. This specification is intended to guide implementations of these socket types so that users can depend on reliable semantics.
+---
+domain: rfc.zeromq.org
+shortname: 28/REQREP
+name: ZeroMQ Request-Reply
+status: stable
+editor: Pieter Hintjens <ph@imatix.com>
+---
 
-* Name: http://rfc.zeromq.org/spec:28/REQREP
-* Editor: Pieter Hintjens <ph@imatix.com>
+This document specifies the semantics of the ZeroMQ request-reply pattern, which covers the REQ, REP, DEALER, and ROUTER socket types. This specification is intended to guide implementations of these socket types so that users can depend on reliable semantics.
 
 ## Preamble
 

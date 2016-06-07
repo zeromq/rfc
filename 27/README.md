@@ -1,8 +1,14 @@
+---
+domain: rfc.zeromq.org
+shortname: 27/ZAP
+name: ZeroMQ Authentication Protocol
+status: stable
+editor: Pieter Hintjens <ph@imatix.com>
+---
+
 This document specifies ZAP, the ZeroMQ Authentication Protocol. The use case for ZAP is a set of *servers* that need authentication of remote clients, and which talk to an *handler* that checks client credentials. ZAP defines how the servers connect to the handler, and the messages they exchange.
 
-* Name: http://rfc.zeromq.org/spec:27/ZAP
-* Editor: Pieter Hintjens <ph@imatix.com>
-* See also: http://rfc.zeromq.org/spec:23/ZMTP, http://rfc.zeromq.org/spec:24/ZMTP-NULL, http://rfc.zeromq.org/spec:24/ZMTP-PLAIN, http://rfc.zeromq.org/spec:25/ZMTP-CURVE, http://rfc.zeromq.org/spec:26/CURVEZMQ.
+See also: http://rfc.zeromq.org/spec:23/ZMTP, http://rfc.zeromq.org/spec:24/ZMTP-NULL, http://rfc.zeromq.org/spec:24/ZMTP-PLAIN, http://rfc.zeromq.org/spec:25/ZMTP-CURVE, http://rfc.zeromq.org/spec:26/CURVEZMQ.
 
 ## Preamble
 

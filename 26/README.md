@@ -1,8 +1,14 @@
+---
+domain: rfc.zeromq.org
+shortname: 26/CURVEZMQ
+name: CurveZMQ
+status: stable
+editor: Pieter Hintjens <ph@imatix.com>
+---
+
 This document describes CurveZMQ, a protocol for secure messaging across the Internet. CurveZMQ is closely based on Daniel J. Bernstein's [CurveCP](http://curvecp.org), adapted for use in ZeroMQ over TCP. A reference implementation of CurveZMQ is provided at [curvezmq.org](http://curvezmq.org). This document describes version 1.0 of CurveZMQ.
 
-* Name: http://rfc.zeromq.org/spec:26/CURVEZMQ
-* Editor: Pieter Hintjens <ph@imatix.com>
-* See also: http://rfc.zeromq.org/spec:23/ZMTP, http://rfc.zeromq.org/spec:25/ZMTP-CURVE.
+See also: http://rfc.zeromq.org/spec:23/ZMTP, http://rfc.zeromq.org/spec:25/ZMTP-CURVE.
 
 ## Preamble
 

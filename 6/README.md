@@ -1,7 +1,12 @@
-The Paranoid Pirate Protocol (PPP) defines a reliable request-reply dialog between a client (or client) and a worker peer. PPP covers presence, heartbeating, and request-reply processing. It originated in Chapter 4 of the Guide.
+---
+domain: rfc.zeromq.org
+shortname: 6/PPP
+name: Paranoid Pirate Protocol
+status: stable
+editor: Pieter Hintjens <ph@imatix.com>
+---
 
-* Name: http://rfc.zeromq.org/spec:6/PPP
-* Editor: Pieter Hintjens <ph@imatix.com>
+The Paranoid Pirate Protocol (PPP) defines a reliable request-reply dialog between a client (or client) and a worker peer. PPP covers presence, heartbeating, and request-reply processing. It originated in Chapter 4 of the Guide.
 
 ## License
 
@@ -82,4 +87,3 @@ Peers should send heartbeats at regular and agreed-upon intervals. A peer can co
 If the worker detects that the client has disconnected, it MUST send READY again to start a new conversation.
 
 If the client detects that the worker has disconnected, it SHOULD stop sending it messages of any type.
-

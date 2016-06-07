@@ -34,10 +34,10 @@
   * [32/Z85](32/README.md)
   * [33/ZHTTP](33/README.md)
   * [34/SRPZMQ](34/README.md)
-  * [39/ZWTP](39/README.md)
+  * [39/ZWS](39/README.md)
   * [40/XRAP](40/README.md)
   * [42/C4](42/README.md)
-* Legacy
+* Deprecated
   * [1/SPB](1/README.md)
   * [2/SPB](2/README.md)
   * [7/MDP](7/README.md)
@@ -50,8 +50,3 @@
   * [16/C4](16/README.md)
   * [19/FILEMQ](19/README.md)
   * [20/ZRE](20/README.md)
-
-
-
-
-

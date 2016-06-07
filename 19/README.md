@@ -1,7 +1,12 @@
-The File Message Queuing Protocol (FILEMQ) governs the delivery of files between a 'client' and a 'server'. FILEMQ runs over the ZeroMQ [ZMTP protocol](http://rfc.zeromq.org/spec:15/ZMTP).
+---
+domain: rfc.zeromq.org
+shortname: 19/FILEMQ
+name: File Message Queuing Protocol
+status: retired
+editor: Pieter Hintjens <ph@imatix.com>
+---
 
-* Name: http://rfc.zeromq.org/spec:19/FILEMQ
-* Editor: Pieter Hintjens <ph@imatix.com>
+The File Message Queuing Protocol (FILEMQ) governs the delivery of files between a 'client' and a 'server'. FILEMQ runs over the ZeroMQ [ZMTP protocol](http://rfc.zeromq.org/spec:15/ZMTP).
 
 ## License
 
@@ -213,4 +218,3 @@ The server SHALL respond to an invalid command by sending RTFM. Note that the se
 ## Security Aspects
 
 FILEMQ uses the Simple Authentication and Security Layer (SASL) for authentication and encryption. The SHA-1 digest used for file cache identification has no security implications.
-

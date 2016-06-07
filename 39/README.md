@@ -1,8 +1,12 @@
-The ZeroMQ WebSocket (ZWS) protocol is a mapping for ZeroMQ over WebSocket.
+---
+domain: rfc.zeromq.org
+shortname: 39/ZWS
+name: ZeroMQ WebSocket
+status: stable
+editor: Doron Somech <somdoron@gmail.com>
+---
 
-* Name: http://rfc.zeromq.org/spec:39/ZWTP
-* Editor: Doron Somech <somdoron@gmail.com>
-* Contributors:
+The ZeroMQ WebSocket (ZWS) protocol is a mapping for ZeroMQ over WebSocket.
 
 ## Language
 
@@ -134,4 +138,3 @@ However the protocol can be tunneled over SSL.
 Clients support tunnel over SSL with specifying wss instead of ws, for example "wss://example.com".
 
 Load balancer might terminate the SSL before arriving on the server.
-

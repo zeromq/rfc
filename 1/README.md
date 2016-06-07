@@ -1,7 +1,11 @@
-SPB is a minimalist format for framing opaque binary blobs.  The blobs have no properties and no content structure, and are represented as a size field followed by a blob content.
+---
+domain: rfc.zeromq.org
+shortname: 1/SPB
+status: deprecated
+editor: Martin Sustrik <sustrik@imatix.com>
+---
 
-* Name: http://rfc.zeromq.org/spec:1/SPB
-* Editor: Martin Sustrik <sustrik@imatix.com>
+SPB is a minimalist format for framing opaque binary blobs.  The blobs have no properties and no content structure, and are represented as a size field followed by a blob content.
 
 ## License
 
@@ -68,4 +72,3 @@ data    = *OCTET
 ## Reference implementation
 
 A reference implementation for SPB can be found in the [0MQ](http://www.zeromq.org) project.
-

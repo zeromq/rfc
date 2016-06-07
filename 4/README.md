@@ -1,7 +1,12 @@
-The ZeroMQ Property Language (ZPL) defines a minimalistic framing language for specifying property sets, expressed as a hierarchy of name-value property pairs.
+---
+domain: rfc.zeromq.org
+shortname: 4/ZPL
+name: ZeroMQ Property Language
+status: stable
+editor: Pieter Hintjens <ph@imatix.com>
+---
 
-* Name: http://rfc.zeromq.org/spec:4/ZPL
-* Editor: Pieter Hintjens <ph@imatix.com>
+The ZeroMQ Property Language (ZPL) defines a minimalistic framing language for specifying property sets, expressed as a hierarchy of name-value property pairs.
 
 ## License
 
@@ -101,4 +106,3 @@ ZPL exists because alternatives were inadequate:
 The use of significant whitespace may be controversial. It is meant to be easier to create and verify manually than syntax elements such as braces. It eliminates the need for separators. The fixed 4-character indentation is meant to avoid confusion and errors when fragments of ZPL files from different sources are mixed together.
 
 The lack of type awareness and other semantic validation is deliberate. ZPL is not meant to be a formal grammar but a simple-to-parse framing for name/value pairs. It emulates 0MQ insofar as it frames data but does not attempt to inspect or validate that data.
-

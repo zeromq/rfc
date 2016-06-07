@@ -1,7 +1,12 @@
-This document describes a protocol for performing HTTP requests and responses over ZeroMQ. It is partly modeled after the protocols of Mongrel2 and ZeroGW, but with the addition of streaming capability and credits-based flow control.
+---
+domain: rfc.zeromq.org
+shortname: 33/ZHTTP
+name: HTTP requests and responses over ZeroMQ
+status: stable
+editor: Justin Karneges <justin@fanout.io>
+---
 
-* Name: http://rfc.zeromq.org/spec:33/ZHTTP
-* Editor: Justin Karneges <justin@fanout.io>
+This document describes a protocol for performing HTTP requests and responses over ZeroMQ. It is partly modeled after the protocols of Mongrel2 and ZeroGW, but with the addition of streaming capability and credits-based flow control.
 
 ## License
 
@@ -159,4 +164,3 @@ If both sides attempt to start a handoff at the same time, then this is a tie an
 ### Reference Implementations
 
 Zurl (see "[Zurl](http://github.com/fanout/zurl)") is the prime preference implementation for ZHTTP. It translates incoming ZHTTP requests into outgoing HTTP requests.
-

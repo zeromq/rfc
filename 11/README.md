@@ -1,7 +1,12 @@
-This document proposes a Message Transport Layer (MTL), a connection-oriented protocol that supports broker-based messaging. MTL connects a set of clients with a central message broker, allowing clients to issue commands to the broker, send messages to the broker, and receive messages back from the broker.
+---
+domain: rfc.zeromq.org
+shortname: 11/MTL
+name: Message Transport Layer
+status: draft
+editor: Pieter Hintjens <ph@imatix.com>
+---
 
-* Name: http://rfc.zeromq.org/spec:11/MTL
-* Editor: Pieter Hintjens <ph@imatix.com>
+This document proposes a Message Transport Layer (MTL), a connection-oriented protocol that supports broker-based messaging. MTL connects a set of clients with a central message broker, allowing clients to issue commands to the broker, send messages to the broker, and receive messages back from the broker.
 
 ## License
 
@@ -403,4 +408,3 @@ The server and the client MAY implement the test profile.
 ## Implementations
 
 * https://github.com/imatix/zmetal
-

@@ -1,7 +1,12 @@
-The Titanic Service Protocol (SP) defines a set of services, requests, and replies that implement the Titanic pattern for disconnected persistent messaging across a network of arbitrarily connected clients and workers.
+---
+domain: rfc.zeromq.org
+shortname: 9/TSP
+name: Titanic Service Protocol
+status: stable
+editor: Pieter Hintjens <ph@imatix.com>
+---
 
-* Name: http://rfc.zeromq.org/spec:9/TSP
-* Editor: Pieter Hintjens <ph@imatix.com>
+The Titanic Service Protocol (TSP) defines a set of services, requests, and replies that implement the Titanic pattern for disconnected persistent messaging across a network of arbitrarily connected clients and workers.
 
 ## License
 

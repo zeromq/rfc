@@ -1,8 +1,15 @@
-The Majordomo Protocol (MDP) defines a reliable service-oriented request-reply dialog between a set of client applications, a broker and a set of worker applications. MDP covers presence, heartbeating, and service-oriented request-reply processing. It originated from the Majordomo pattern defined in Chapter 4 of the Guide.
+---
+domain: rfc.zeromq.org
+shortname: 7/MDP
+name: Majordomo Protocol
+status: deprecated
+editor: Pieter Hintjens <ph@imatix.com>
+contributors:
+  - Chuck Remes <cremes@mac.com>
+  - Guido Goldstein <zmqdev@a-nugget.de>
+---
 
-* Name: http://rfc.zeromq.org/spec:7/MDP
-* Editor: Pieter Hintjens <ph@imatix.com>
-* Contributors: Chuck Remes <cremes@mac.com>, Guido Goldstein <zmqdev@a-nugget.de>
+The Majordomo Protocol (MDP) defines a reliable service-oriented request-reply dialog between a set of client applications, a broker and a set of worker applications. MDP covers presence, heartbeating, and service-oriented request-reply processing. It originated from the Majordomo pattern defined in Chapter 4 of the Guide.
 
 ## License
 

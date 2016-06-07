@@ -1,8 +1,12 @@
-Worker-Manager Protocol is a generalization of request-reply pattern, allowing many workers talk to many managers (servers) with intermediate devices and custom load-balancing. **This paper is a rather brief description of protocol, it lacks details and is not complete. I will do my best to finish it and to provide a reference implementation as soon as possible.**
+---
+domain: rfc.zeromq.org
+shortname: 14/WMP
+name: Worker-Manager Protocol
+status: raw
+editor: Brugeman Artur <brugeman.artur@gmail.com>
+---
 
-* Name: http://rfc.zeromq.org/spec:14/WMP
-* Editor: Brugeman Artur <brugeman.artur@gmail.com>
-* Contributors: none yet
+Worker-Manager Protocol is a generalization of request-reply pattern, allowing many workers talk to many managers (servers) with intermediate devices and custom load-balancing. **This paper is a rather brief description of protocol, it lacks details and is not complete. I will do my best to finish it and to provide a reference implementation as soon as possible.**
 
 ## License
 
@@ -97,4 +101,3 @@ All reliability issues, such as jobs timing out, de-duplication of job requests 
 ### Extensions
 
 To extend functionality offered by the protocol, two more commands could be introduced. STATUS - sent by workers to indicate the status of a job. And a CANCEL command, sent by managers, to inform worker that no job result is expected and job processing can be cancelled.
-

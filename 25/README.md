@@ -1,8 +1,14 @@
+---
+domain: rfc.zeromq.org
+shortname: 25/ZMTP-CURVE
+name: ZMTP CURVE
+status: stable
+editor: Pieter Hintjens <ph@imatix.com>
+---
+
 The ZMTP CURVE mechanism provides secure authentication and confidentiality for [ZMTP 3.0](http://rfc.zeromq.org/spec:23). This mechanism implements the [CurveZMQ security protocol](http://curvezmq.org). It is intended for use on public networks where security requirements are high.
 
-* Name: http://rfc.zeromq.org/spec:25/ZMTP-CURVE
-* Editor: Pieter Hintjens <ph@imatix.com>
-* See also: http://rfc.zeromq.org/spec:23/ZMTP, http://rfc.zeromq.org/spec:24/ZMTP-PLAIN.
+See also: http://rfc.zeromq.org/spec:23/ZMTP, http://rfc.zeromq.org/spec:24/ZMTP-PLAIN.
 
 ## Preamble
 

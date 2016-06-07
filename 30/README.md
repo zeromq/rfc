@@ -1,7 +1,12 @@
-This document specifies the semantics of the ZeroMQ pipeline pattern, which covers the PUSH and PULL socket types. This specification is intended to guide implementations of these socket types so that users can depend on reliable semantics.
+---
+domain: rfc.zeromq.org
+shortname: 30/PIPELINE
+name: ZeroMQ Pipeline
+status: stable
+editor: Pieter Hintjens <ph@imatix.com>
+---
 
-* Name: http://rfc.zeromq.org/spec:30/PIPELINE
-* Editor: Pieter Hintjens <ph@imatix.com>
+This document specifies the semantics of the ZeroMQ pipeline pattern, which covers the PUSH and PULL socket types. This specification is intended to guide implementations of these socket types so that users can depend on reliable semantics.
 
 ## Preamble
 

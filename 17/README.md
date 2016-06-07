@@ -1,8 +1,14 @@
-The ZeroMQ Device Configuration File (ZDCF) specifies a standard language for configuring 0MQ devices. It provides information to configure a 0MQ context, and a set of 0MQ sockets. This specification aims to make it easier to build, share, and reuse 0MQ devices and build systems for device administration.
+---
+domain: rfc.zeromq.org
+shortname: 17/ZDCF
+name: ZeroMQ Device Configuration File
+status: stable
+editor: Pieter Hintjens <ph@imatix.com>
+contributors:
+  - Steffen Mueller <smueller@cpan.org>
+---
 
-* Name: http://rfc.zeromq.org/spec:17/ZDCF
-* Editor: Pieter Hintjens <ph@imatix.com>
-* Contributors: Steffen Mueller <smueller@cpan.org>
+The ZeroMQ Device Configuration File (ZDCF) specifies a standard language for configuring 0MQ devices. It provides information to configure a 0MQ context, and a set of 0MQ sockets. This specification aims to make it easier to build, share, and reuse 0MQ devices and build systems for device administration.
 
 ## License
 
@@ -232,4 +238,3 @@ A software that consumes ZDCF content must adhere to the following rules:
 * It shall not accept any ZDCF content that was written against a specification with a greater integer version than what the ZDCF-consuming software was written to accept.
 
 In other words, you are free to implement backwards-compatibility with older versions of the specification, but please don't silently try to accept content that was written against a specification that you did not implement. Your users will thank you for it. If at the time of implementation, the specification version that you had access to is 5.3, then you may accept content written against 5.4 assuming it's a specification change that is backwards compatible. ZDCF 6.0, however, you should reject until you've updated your implementation to handle it.
-

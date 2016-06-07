@@ -1,8 +1,13 @@
+---
+domain: rfc.zeromq.org
+shortname: 34/SRPZMQ
+status: stable
+editor: Diego Duclos <diego.duclos@palmstonegames.com>
+---
+
 This document describes an extension of the ZMQ security mechanism to be able to authenticate a client without the client having to have a private key generated beforehand. Instead, keys are generated from a pregenerated private key on the server side (which have been generated during some kind of registration process) and from a username/password combination on the client side.
 
-* Name: http://rfc.zeromq.org/spec:34/SRPZMQ
-* Editor: Diego Duclos <diego.duclos@palmstonegames.com>
-* See also: http://pythonhosted.org/srp/srp.html#srp-6a-protocol-description, http://srp.stanford.edu/.
+See also: http://pythonhosted.org/srp/srp.html#srp-6a-protocol-description, http://srp.stanford.edu/.
 
 ## Preamble
 

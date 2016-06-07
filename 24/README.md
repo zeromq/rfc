@@ -1,8 +1,14 @@
+---
+domain: rfc.zeromq.org
+shortname: 24/ZMTP-PLAIN
+name: ZMTP PLAIN
+status: stable
+editor: Pieter Hintjens <ph@imatix.com>
+---
+
 The ZMTP PLAIN mechanism defines a simple username/password mechanism for [ZMTP 3.0](http://rfc.zeromq.org/spec:23) that lets a server authenticate a client. PLAIN makes no attempt at security or confidentiality. It is intended for use on internal networks where security requirements are low.
 
-* Name: http://rfc.zeromq.org/spec:24/ZMTP-PLAIN
-* Editor: Pieter Hintjens <ph@imatix.com>
-* See also: http://rfc.zeromq.org/spec:23/ZMTP.
+See also: http://rfc.zeromq.org/spec:23/ZMTP.
 
 ## Preamble
 

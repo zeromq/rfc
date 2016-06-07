@@ -1,3 +1,11 @@
+---
+domain: rfc.zeromq.org
+shortname: 12/CHP
+name: Clustered Hashmap Protocol
+status: stable
+editor: Pieter Hintjens <ph@imatix.com>
+---
+
 The Clustered Hashmap Protocol (CHP) defines a cluster-wide key-value hashmap, and mechanisms for sharing this across a set of clients. CHP allows clients to work with subtrees of the hashmap, to update values, and to define ephemeral values. CHP originated from the Clone pattern defined in Chapter 5 of the Guide.
 
 * Name: http://rfc.zeromq.org/spec:12/CHP
@@ -172,4 +180,3 @@ CHP does not implement any authentication, access control, or encryption mechani
 ### Reference Implementations
 
 The C99 Clone examples from Chapter 5 of the Guide (see "[ØMQ - The Guide](http://zguide.zeromq.org)") act as the prime reference implementation for CHP.
-

@@ -1,7 +1,11 @@
-This document specifies the semantics of the ZeroMQ request-reply pattern, which covers the CLIENT and SERVER socket types. This specification is intended to guide implementations of these socket types so that users can depend on reliable semantics.
+---
+domain: rfc.zeromq.org
+shortname: 41/CLISRV
+status: draft
+editor: Pieter Hintjens <ph@imatix.com>
+---
 
-* Name: http://rfc.zeromq.org/spec:41/CLISRV
-* Editor: Pieter Hintjens <ph@imatix.com>
+This document specifies the semantics of the ZeroMQ request-reply pattern, which covers the CLIENT and SERVER socket types. This specification is intended to guide implementations of these socket types so that users can depend on reliable semantics.
 
 ## Preamble
 

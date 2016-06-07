@@ -1,7 +1,12 @@
-This document specifies the semantics of the ZeroMQ exclusive pair pattern, which covers the PAIR socket type. This specification is intended to guide implementations of this socket type so that users can depend on reliable semantics.
+---
+domain: rfc.zeromq.org
+shortname: 31/EXPAIR
+name: ZeroMQ Exclusive Pair
+status: stable
+editor: Pieter Hintjens <ph@imatix.com>
+---
 
-* Name: http://rfc.zeromq.org/spec:31/EXPAIR
-* Editor: Pieter Hintjens <ph@imatix.com>
+This document specifies the semantics of the ZeroMQ exclusive pair pattern, which covers the PAIR socket type. This specification is intended to guide implementations of this socket type so that users can depend on reliable semantics.
 
 ## Preamble
 

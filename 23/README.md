@@ -1,8 +1,15 @@
-The ZeroMQ Message Transport Protocol (ZMTP) is a transport layer protocol for exchanging messages between two peers over a connected transport layer such as TCP. This document describes ZMTP 3.0. The major change in this version is the addition of security mechanisms and the removal of hard-coded connection metadata (socket type and identity) from the greeting.
+---
+domain: rfc.zeromq.org
+shortname: 23/ZMTP
+name: ZeroMQ Message Transport Protocol
+status: stable
+editor: Pieter Hintjens <ph@imatix.com>
+contributors:
+  - Martin Hurton <mh@imatix.com>
+  - Ian Barber <ian.barber@gmail.com>
+---
 
-* Name: http://rfc.zeromq.org/spec:23/ZMTP
-* Editor: Pieter Hintjens <ph@imatix.com>
-* Contributors: Martin Hurton <mh@imatix.com>, Ian Barber <ian.barber@gmail.com>
+The ZeroMQ Message Transport Protocol (ZMTP) is a transport layer protocol for exchanging messages between two peers over a connected transport layer such as TCP. This document describes ZMTP 3.0. The major change in this version is the addition of security mechanisms and the removal of hard-coded connection metadata (socket type and identity) from the greeting.
 
 ## Preamble
 

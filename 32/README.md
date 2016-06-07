@@ -1,7 +1,11 @@
-This document specifies Z85, a format for representing binary data as printable text. Z85 is a derivative of existing [Ascii85 encoding mechanisms](http://en.wikipedia.org/wiki/Ascii85), modified for better usability, particularly for use in source code.
+---
+domain: rfc.zeromq.org
+shortname: 32/Z85
+status: stable
+editor: Pieter Hintjens <ph@imatix.com>
+---
 
-* Name: http://rfc.zeromq.org/spec:32/Z85
-* Editor: Pieter Hintjens <ph@imatix.com>
+This document specifies Z85, a format for representing binary data as printable text. Z85 is a derivative of existing [Ascii85 encoding mechanisms](http://en.wikipedia.org/wiki/Ascii85), modified for better usability, particularly for use in source code.
 
 ## Preamble
 

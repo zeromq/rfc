@@ -1,7 +1,12 @@
-The ZeroMQ Message Transport Protocol (ZMTP) is a transport layer protocol for exchanging messages between two peers over a connected transport layer such as TCP. This document describes ZMTP 3.1. This version adds SUBSCRIBE, CANCEL, PING and PONG commands, and endpoint resources.
+---
+domain: rfc.zeromq.org
+shortname: 37/ZMTP
+name: ZeroMQ Realtime Exchange Protocol
+status: draft
+editor: Pieter Hintjens <ph@imatix.com>
+---
 
-* Name: http://rfc.zeromq.org/spec:37/ZMTP
-* Editor: Pieter Hintjens <ph@imatix.com>
+The ZeroMQ Message Transport Protocol (ZMTP) is a transport layer protocol for exchanging messages between two peers over a connected transport layer such as TCP. This document describes ZMTP 3.1. This version adds SUBSCRIBE, CANCEL, PING and PONG commands, and endpoint resources.
 
 ## Preamble
 
@@ -616,4 +621,3 @@ This draft is open for discussion. The following topics at least are still on th
 * Credits, as a signaling mechanism for asynchronous flow control. This allows fine control over the amount of queued data. In this scenario, the receiving peer (DEALER, PULL, REP) would send credit which would be used up by messages routed to it. The minimal use-case is for PUSH/DEALER-to-PULL/DEALER round-robin routing. Credit could be octets, or messages.
 
 * Commands or other strategies to allow wire analysis on unencrypted networks (without some additional information it is not possible to determine when messages start).
-

@@ -1,7 +1,12 @@
-This document describes the Extensible Resource Access Protocol (XRAP), a RESTful protocol built over ZeroMQ. XRAP provides a single, extensible answer to the problem of how to work with remote resources. We designed XRAP to avert the development of fragile domain-specific RPC protocols.
+---
+domain: rfc.zeromq.org
+shortname: 40/XRAP
+name:  Extensible Resource Access Protocol
+status: stable
+editor: Pieter Hintjens <ph@imatix.com>
+---
 
-* Name: http://rfc.zeromq.org/spec:40/XRAP
-* Contributors: Pieter Hintjens <ph@imatix.com>
+This document describes the Extensible Resource Access Protocol (XRAP), a RESTful protocol built over ZeroMQ. XRAP provides a single, extensible answer to the problem of how to work with remote resources. We designed XRAP to avert the development of fragile domain-specific RPC protocols.
 
 ## Preamble
 

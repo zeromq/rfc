@@ -1,8 +1,14 @@
+---
+domain: rfc.zeromq.org
+shortname: 38/ZMTP-GSSAPI
+name: ZMTP GSSAPI
+status: draft
+editor: Chris Busbey <cbusbey@connamara.com>
+---
+
 The ZMTP GSSAPI mechanism provides secure authentication and confidentiality for [ZMTP 3.0](http://rfc.zeromq.org/spec:23). This mechanism utilizes the [Generic Security Service Application Interface](http://tools.ietf.org/html/rfc2743).
 
-* Name: http://rfc.zeromq.org/spec:38/ZMTP-GSSAPI
-* Editor: Chris Busbey <cbusbey@connamara.com>
-* See also: http://tools.ietf.org/html/rfc2743
+See also: http://tools.ietf.org/html/rfc2743
 
 ## Preamble
 

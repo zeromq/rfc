@@ -1,7 +1,12 @@
-The ZeroMQ Device Configuration File format (ZDCF) specifies a standard syntax for configuring 0MQ devices.  It provides information to configure a 0MQ context, and a set of 0MQ sockets.  This specification aims to make it easier to share and reuse devices and build systems for device administration.
+---
+domain: rfc.zeromq.org
+shortname: 3/ZDCF
+name: ZeroMQ Device Configuration File
+status: retired
+editor: Pieter Hintjens <ph@imatix.com>
+---
 
-* Name: http://rfc.zeromq.org/spec:3/zdcf
-* Editor: Pieter Hintjens <ph@imatix.com>
+The ZeroMQ Device Configuration File format (ZDCF) specifies a standard syntax for configuring 0MQ devices.  It provides information to configure a 0MQ context, and a set of 0MQ sockets.  This specification aims to make it easier to share and reuse devices and build systems for device administration.
 
 ## License
 
@@ -138,4 +143,3 @@ The built-in device types that exist at time of writing are:
 * "zstreamer" - ZMQ_STREAMER
 
 See [zmq_device(3)](http://api.zeromq.org/zmq_device.html) for details.
-

@@ -1,7 +1,12 @@
-The Freelance Protocol (FLP) defines brokerless reliable request-reply dialogs across an N-to-N network of clients and servers. It originated in Chapter 4 of the Guide.
+---
+domain: rfc.zeromq.org
+shortname: 10/FLP
+name: Freelance Protocol
+status: stable
+editor: Pieter Hintjens <ph@imatix.com>
+---
 
-* Name: http://rfc.zeromq.org/spec:10/FLP
-* Editor: Pieter Hintjens <ph@imatix.com>
+The Freelance Protocol (FLP) defines brokerless reliable request-reply dialogs across an N-to-N network of clients and servers. It originated in Chapter 4 of the Guide.
 
 ## License
 
@@ -62,4 +67,3 @@ Server identities are their *public endpoints*. This is the address string that 
 ### Server Reliability
 
 Clients MAY send ping commands at regular intervals. A client SHOULD consider a server "disconnected" if no "pong" arrives within some multiple of that interval (usually 2-3).
-

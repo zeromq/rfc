@@ -1,7 +1,12 @@
-The Collective Code Construction Contract (C4) is an evolution of the github.com [Fork + Pull Model](http://help.github.com/send-pull-requests/), aimed at providing an optimal collaboration model for free software projects. C4 is derived from the ZeroMQ contribution policy of early 2012.
+---
+domain: rfc.zeromq.org
+shortname: 16/C4
+name: Collective Code Construction Contract (C4)
+status: retired
+editor: Pieter Hintjens <ph@imatix.com>
+---
 
-* Name: http://rfc.zeromq.org/spec:16/C4
-* Editor: Pieter Hintjens <ph@imatix.com>
+The Collective Code Construction Contract (C4) is an evolution of the github.com [Fork + Pull Model](http://help.github.com/send-pull-requests/), aimed at providing an optimal collaboration model for free software projects. C4 is derived from the ZeroMQ contribution policy of early 2012.
 
 Note: this RFC is superceded by [rfc.zeromq.org/spec:22/C4.1](http://rfc.zeromq.org/spec:22).
 
@@ -150,4 +155,3 @@ C4 is meant to provide a reusable optimal collaboration model for open source so
 * Old names SHALL NOT be reused by new features.
 
 * When old names are removed, their implementations MUST provoke an exception (assertion) if used by applications.
-

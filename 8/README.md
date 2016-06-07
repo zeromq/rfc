@@ -1,7 +1,12 @@
-The Majordomo Management Interface (MMI) defines a namespace and set of management services that MDP brokers may provide. MMI is layered on top of the 7/MDP protocol.
+---
+domain: rfc.zeromq.org
+shortname: 8/MMI
+name: Majordomo Management Interface
+status: stable
+editor: Pieter Hintjens <ph@imatix.com>
+---
 
-* Name: http://rfc.zeromq.org/spec:8/MMI
-* Editor: Pieter Hintjens <ph@imatix.com>
+The Majordomo Management Interface (MMI) defines a namespace and set of management services that MDP brokers may provide. MMI is layered on top of the 7/MDP protocol.
 
 ## License
 
@@ -47,4 +52,3 @@ Any unimplemented services in the "mmi." namespace MUST result in a reply "501" 
 ### Reference Implementations
 
 The C99 Majordomo examples from Chapter 4 of the Guide (see "[ØMQ - The Guide](http://zguide.zeromq.org)") act as the prime reference implementation for MMI. Translations of the examples into other languages may be available.
-

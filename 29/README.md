@@ -1,7 +1,12 @@
-This document specifies the semantics of the ZeroMQ publish-subscribe pattern, which covers the PUB, XPUB, SUB, and XSUB socket types. This specification is intended to guide implementations of these socket types so that users can depend on reliable semantics.
+---
+domain: rfc.zeromq.org
+shortname: 29/PUBSUB
+name: ZeroMQ Publish-Subscribe
+status: stable
+editor: Pieter Hintjens <ph@imatix.com>
+---
 
-* Name: http://rfc.zeromq.org/spec:29/PUBSUB
-* Editor: Pieter Hintjens <ph@imatix.com>
+This document specifies the semantics of the ZeroMQ publish-subscribe pattern, which covers the PUB, XPUB, SUB, and XSUB socket types. This specification is intended to guide implementations of these socket types so that users can depend on reliable semantics.
 
 ## Preamble
 

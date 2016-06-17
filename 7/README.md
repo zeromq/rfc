@@ -2,7 +2,7 @@
 domain: rfc.zeromq.org
 shortname: 7/MDP
 name: Majordomo Protocol
-status: deprecated
+status: stable
 editor: Pieter Hintjens <ph@imatix.com>
 contributors:
   - Chuck Remes <cremes@mac.com>

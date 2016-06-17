@@ -16,6 +16,7 @@
 * Stable
   * [4/ZPL](4/README.md)
   * [6/PPP](6/README.md)
+  * [7/MDP](7/README.md)
   * [8/MMI](8/README.md)
   * [9/TSP](9/README.md)
   * [10/FLP](10/README.md)
@@ -40,7 +41,6 @@
 * Deprecated
   * [1/SPB](1/README.md)
   * [2/SPB](2/README.md)
-  * [7/MDP](7/README.md)
   * [13/ZMTP](13/README.md)
   * [15/ZMTP](15/README.md)
   * [22/C4](22/README.md)

@@ -4,7 +4,6 @@
 * Raw
   * [14/WMP](14/README.md)
 * Draft
-  * [33/ZHTTP](33/README.md)
   * [11/MTL](11/README.md)
   * [18/MDP](18/README.md)
   * [35/FILEMQ](35/README.md)

@@ -32,9 +32,9 @@ When a server needs to authenticate a client it has to choose between either doi
 
 For security administrators, the ideal design has all applications calling on the same central repository of credentials. The problem then becomes, "how do we standardize this interaction?"
 
-As in all distributed designs, ZeroMQ already provides a large part of the answer by defining a common message-based transport layer that can be used in any language and on any platform. The second part of the answer is an simple protocol on top of ZeroMQ.
+As in all distributed designs, ZeroMQ already provides a large part of the answer by defining a common message-based transport layer that can be used in any language and on any platform. The second part of the answer is a simple protocol on top of ZeroMQ.
 
-ZAP is such an protocol, specifically aimed at authentication.
+ZAP is such a protocol, specifically aimed at authentication.
 
 ### Reducing The Component Count
 
@@ -104,7 +104,7 @@ The various fields have these meanings:
 * request id: the meaning of this is defined by the sending server only. The reply SHALL echo the request id without modifying it.
 * domain: this requests authentication within some domain. The significance of domains are an application issue and not relevant to ZAP.
 * address: this provides the IP address of the client, to allow address-based filtering. It SHALL be an IPv4 dotted string, or an IPv6 canonical string representation.
-* identity: this provides the Identity metadata property, if any, provided by by the connection. It SHALL be a binary string no longer than 255 bytes.
+* identity: this provides the Identity metadata property, if any, provided by the connection. It SHALL be a binary string no longer than 255 bytes.
 * mechanism: this specifies the security mechanism to authenticate against. The mechanism SHALL NOT be empty.
 * credentials: these provide the user credentials to authenticate. The number of frames needed is defined by each mechanism.
 * status code: this shall be "200" to indicate success, "300" to indicate a temporary error, "400" to indicate authentication failure, and "500" to indicate an internal error (system failure).

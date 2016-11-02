@@ -391,7 +391,7 @@ When a peer does not need backwards interoperability, it SHOULD send its full gr
 
 ### Detecting ZMTP 2.0 Peers
 
-From [[ZMTP 2.0](http://rfc.zeromq.org/spec:13) onwards, the protocol contains the version number immediately after the signature. To detect and interoperate with ZMTP 2.0 peers, the implementation MAY use this strategy:
+From [ZMTP 2.0](http://rfc.zeromq.org/spec:13) onwards, the protocol contains the version number immediately after the signature. To detect and interoperate with ZMTP 2.0 peers, the implementation MAY use this strategy:
 
 * Send the 10-octet signature followed by the major version number (the single octet %x03).
 

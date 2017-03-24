@@ -2,7 +2,7 @@
 domain: rfc.zeromq.org
 shortname: 36/ZRE
 name: ZeroMQ Realtime Exchange Protocol
-status: draft
+status: stable
 editor: Pieter Hintjens <ph@imatix.com>
 ---
 

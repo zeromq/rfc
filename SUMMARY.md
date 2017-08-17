@@ -10,6 +10,7 @@
   * [37/ZMTP](37/README.md)
   * [38/ZMTP-GSSAPI](38/README.md)
   * [41/CLISRV](41/README.md)
+  * [43/ZYREv3](43/README.md)
 * Stable
   * [4/ZPL](4/README.md)
   * [6/PPP](6/README.md)

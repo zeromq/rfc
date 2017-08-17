@@ -35,7 +35,7 @@ The ZRE protocol provides a way for a set of nodes on a local network to discove
 This is version 3 of ZRE. The changes over version 2 are:
 
 * The version number was increased to 3.
-* Becon packets support advertising of a 32-octet CURVE public key for the purposes of establishing CURVE enabled security to the connection.
+* Beacon packets support advertising of a 32-octet CURVE public key for the purposes of establishing CURVE enabled security to the connection.
 
 ## Implementation
 

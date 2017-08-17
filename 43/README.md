@@ -233,7 +233,7 @@ ZRE uses UDP IPv4 *beacon* broadcasts to discover nodes and track their presence
 * Each ZRE node SHALL broadcast, at regular intervals, a UDP beacon that identifies itself to any listening nodes on the network.
 * When a ZRE node receives a beacon from a node that it does not already know about, it SHALL consider this to be a new peer.
 * When a ZRE node stops receiving beacons from a peer that it knows about, after a certain interval it SHALL consider this peer to be disconnected or dead.
-* A ZRE node configured with CURVE security SHOULD ignore beacons that do not contain a valid 32-octet CURVE key.
+* A ZRE node configured with CURVE security SHALL ignore beacons that do not contain a valid 32-octet CURVE key.
 
 The ZRE beacon consists of one 54-octet UDP message with this format:
 
@@ -252,7 +252,7 @@ Notes for implementors:
 * A valid beacon SHALL: use a recognized header; use a body of the right size; and provide a non-zero mailbox port number.
 * A node that receives an invalid beacon SHALL discard it silently. A node MAY log the sender IP address for the purposes of debugging.
 * A node SHALL discard beacons that it receives from itself.
-* A node SHOULD ignore v2 beacons when operating in CURVE mode to avoid down-grade attacks.
+* A node SHALL ignore v2 beacons when operating in CURVE mode to avoid down-grade attacks.
 
 ## Security Aspects
 

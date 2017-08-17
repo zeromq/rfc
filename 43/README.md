@@ -29,6 +29,7 @@ The ZRE protocol provides a way for a set of nodes on a local network to discove
 * To recover from transient failures in connectivity.
 * To be neutral with respect to operating system, programming language, and hardware.
 * To allow any number of nodes to run in one process, to allow large-scale simulation and testing.
+* To provide a CURVE enabled transport framework for implementors looking to extend ZYRE over the open Internet.
 
 ## Changes Over Version 2
 
@@ -256,4 +257,8 @@ Notes for implementors:
 
 ## Security Aspects
 
-ZRE security is handled by the underlying transport. For ZMTP v2 and v1, there is no security model and all information is exchanged in clear text. For ZMTP v3, any of the defined security mechanism may be used.
+ * ZRE security is handled by the underlying transport. 
+ * For ZMTP v2 and v1, there is no security model and all information is exchanged in clear text. 
+ * For ZMTP v3, any of the defined security mechanism may be used.
+ * Applications requiring a form of authorization (CURVE or otherwise) should handle this by using ZAP or custom hooks based on ZYRE events in the application itself.
+ * All peers SHOULD have unique keys where possible, but it is not a requirement.

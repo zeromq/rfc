@@ -1,16 +1,17 @@
 ---
 domain: rfc.zeromq.org
-shortname: 36/ZRE
+shortname: 43/ZRE
 name: ZeroMQ Realtime Exchange Protocol
-status: stable
-editor: Pieter Hintjens <ph@imatix.com>
+status: draft
+editors: Pieter Hintjens <ph@imatix.com>, Wes Young <wes@barely3am.com>
 ---
 
 The ZeroMQ Realtime Exchange Protocol (ZRE) governs how a group of peers on a network discover each other, organize into groups, and send each other events. ZRE runs over the [ZeroMQ Message Transfer Protocol (ZMTP)](http://rfc.zeromq.org/spec:23/ZMTP).
 
 ## Preamble
 
-Copyright (c) 2009-2014 iMatix Corporation
+Copyright (c) 2009-2014 iMatix Corporation  
+Copyright (c) 2017 Barely3am
 
 This Specification is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 3 of the License, or (at your option) any later version. This Specification is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details. You should have received a copy of the GNU General Public License along with this program; if not, see <http://www.gnu.org/licenses>.
 
@@ -29,15 +30,12 @@ The ZRE protocol provides a way for a set of nodes on a local network to discove
 * To be neutral with respect to operating system, programming language, and hardware.
 * To allow any number of nodes to run in one process, to allow large-scale simulation and testing.
 
-## Changes Over Version 1
+## Changes Over Version 2
 
-This is version 2 of ZRE. The changes over version 1 are:
+This is version 3 of ZRE. The changes over version 2 are:
 
-* The 'strings' and 'dictionary' types redesigned for better expandability.
-* The version number was increased to 2.
-* The hard-coded dependency on TCP transport has been removed (merging ipaddress and port into a single endpoint field).
-* Removed the logging extension, which is better handled by a separate framework.
-* Protocol signature is 1 rather than 0.
+* The version number was increased to 3.
+* Becon packets support advertising of a 32-octet CURVE public key for the purposes of establishing CURVE enabled security to the connection.
 
 ## Implementation
 
@@ -49,19 +47,19 @@ A ZRE *node* represents a source or a target for messaging. Nodes usually map to
 
 ZRE uses UDP IPv4 *beacon* broadcasts to discover nodes. Each ZRE node SHALL listen to the ZRE discovery service which is UDP port 5670 (ZRE-DISC port assigned by IANA). Each ZRE node SHALL broadcast, at regular intervals, on UDP port 5670 a beacon that identifies itself to any listening nodes on the network.
 
-The ZRE beacon consists of one 22-octet UDP message with this format:
+The ZRE beacon consists of one 54-octet UDP message with this format:
 
 ```
-+---+---+---+------+  +------+------+
-| Z | R | E | %x01 |  | UUID | port |
-+---+---+---+------+  +------+------+
++---+---+---+------+  +------+------+------------------+
+| Z | R | E | %x01 |  | UUID | port | CURVE PUBLIC KEY |
++---+---+---+------+  +------+------+------------------+
 
-       Header               Body
+       Header                    Body
 ```
 
-The header SHALL consist of the letters 'Z', 'R', and 'E', followed by the beacon version number, which SHALL be %x01.
+The header SHALL consist of the letters 'Z', 'R', and 'E', followed by the beacon version number, which SHALL be %x03.
 
-The body SHALL consist of the sender's 16-octet UUID, followed by a two-byte mailbox port number in network order. If the port is non-zero this signals that the peer will accept ZeroMQ TCP connections on that port number. If the port is zero, this signals that the peer is disconnecting from the network.
+The body SHALL consist of the sender's 16-octet UUID, followed by a two-byte mailbox port number in network order, followed by an *optional* 32-byte CURVE public key. If the port is non-zero this signals that the peer will accept ZeroMQ TCP connections on that port number. If the port is zero, this signals that the peer is disconnecting from the network.
 
 A valid beacon SHALL use a recognized header and a body of the correct size. A node that receives an invalid beacon SHALL discard it silently. A node MAY log the sender IP address for the purposes of debugging. A node SHALL discard beacons that it receives from itself.
 
@@ -95,7 +93,7 @@ This mechanism is designed particularly for applications that bind to ephemeral 
 
 ### Versioning
 
-A version number octet %x02 shall follow the signature. A node SHALL discard messages that do not contain a valid version number. There is no mechanism for backwards interoperability.
+A version number octet %x03 shall follow the signature. A node SHALL discard messages that do not contain a valid version number. There is no mechanism for backwards interoperability.
 
 ### TCP Protocol Grammar
 
@@ -109,7 +107,7 @@ traffic         = whisper / shout / join / leave / ping / ping-ok
 ;     Greet a peer so it can connect back to us
 hello           = signature %d1 version sequence endpoint groups status name headers
 signature       = %xAA %xA1             ; two octets
-version         = number-1              ; Version number (2)
+version         = number-1              ; Version number (3)
 sequence        = number-2              ; Cyclic sequence number
 endpoint        = string                ; Sender connect endpoint
 groups          = strings               ; List of groups sender is in
@@ -119,39 +117,39 @@ headers         = dictionary            ; Sender header properties
 
 ;     Send a multi-part message to a peer
 whisper         = signature %d2 version sequence content
-version         = number-1              ; Version number (2)
+version         = number-1              ; Version number (3)
 sequence        = number-2              ; Cyclic sequence number
 content         = msg                   ; Wrapped message content
 
 ;     Send a multi-part message to a group
 shout           = signature %d3 version sequence group content
-version         = number-1              ; Version number (2)
+version         = number-1              ; Version number (3)
 sequence        = number-2              ; Cyclic sequence number
 group           = string                ; Group to send to
 content         = msg                   ; Wrapped message content
 
 ;     Join a group
 join            = signature %d4 version sequence group status
-version         = number-1              ; Version number (2)
+version         = number-1              ; Version number (3)
 sequence        = number-2              ; Cyclic sequence number
 group           = string                ; Name of group
 status          = number-1              ; Sender groups status value
 
 ;     Leave a group
 leave           = signature %d5 version sequence group status
-version         = number-1              ; Version number (2)
+version         = number-1              ; Version number (3)
 sequence        = number-2              ; Cyclic sequence number
 group           = string                ; Name of group
 status          = number-1              ; Sender groups status value
 
 ;     Ping a peer that has gone silent
 ping            = signature %d6 version sequence
-version         = number-1              ; Version number (2)
+version         = number-1              ; Version number (3)
 sequence        = number-2              ; Cyclic sequence number
 
 ;     Reply to a peer's ping
 ping_ok         = signature %d7 version sequence
-version         = number-1              ; Version number (2)
+version         = number-1              ; Version number (3)
 sequence        = number-2              ; Cyclic sequence number
 
 ; A list of string values
@@ -180,7 +178,7 @@ number-4        = 4OCTET
 
 ### ZRE Commands
 
-All commands start with a protocol signature (%xAA %xA1), then a command identifier, then the protocol version number (%d2), and then a sequence number (two octets in network byte order). The first message from a peer (HELLO) MUST have sequence number 1, and every message must have a strictly incrementing sequence number. When a peer detects gaps in the sequence, or an out-of-sequence message, it SHALL treat the peer as invalid, and disconnect the peer.
+All commands start with a protocol signature (%xAA %xA1), then a command identifier, then the protocol version number (%d3), and then a sequence number (two octets in network byte order). The first message from a peer (HELLO) MUST have sequence number 1, and every message must have a strictly incrementing sequence number. When a peer detects gaps in the sequence, or an out-of-sequence message, it SHALL treat the peer as invalid, and disconnect the peer.
 
 #### The HELLO Command
 
@@ -235,24 +233,26 @@ ZRE uses UDP IPv4 *beacon* broadcasts to discover nodes and track their presence
 * Each ZRE node SHALL broadcast, at regular intervals, a UDP beacon that identifies itself to any listening nodes on the network.
 * When a ZRE node receives a beacon from a node that it does not already know about, it SHALL consider this to be a new peer.
 * When a ZRE node stops receiving beacons from a peer that it knows about, after a certain interval it SHALL consider this peer to be disconnected or dead.
+* A ZRE node configured with CURVE security SHOULD ignore beacons that do not contain a valid 32-octet CURVE key.
 
-The ZRE beacon consists of one 22-octet UDP message with this format:
+The ZRE beacon consists of one 54-octet UDP message with this format:
 
 ```
-+---+---+---+------+  +------+------+
-| Z | R | E | %x01 |  | UUID | port |
-+---+---+---+------+  +------+------+
++---+---+---+------+  +------+------+------------------+
+| Z | R | E | %x03 |  | UUID | port | CURVE PUBLIC KEY |
++---+---+---+------+  +------+------+------------------+
 
-       Header               Body
+       Header                    Body
 ```
 
 Notes for implementors:
 
-* The header SHALL consist of the letters 'Z', 'R', and 'E', followed by the beacon version number, which SHALL be %x01.
-* The body SHALL consist of the sender's 16-octet UUID, followed by a two-byte mailbox port number in network order.
+* The header SHALL consist of the letters 'Z', 'R', and 'E', followed by the beacon version number, which SHALL be %x03.
+* The body SHALL consist of the sender's 16-octet UUID, followed by a two-byte mailbox port number in network order, followed by an *optional* CURVE 32-byte public key.
 * A valid beacon SHALL: use a recognized header; use a body of the right size; and provide a non-zero mailbox port number.
 * A node that receives an invalid beacon SHALL discard it silently. A node MAY log the sender IP address for the purposes of debugging.
 * A node SHALL discard beacons that it receives from itself.
+* A node SHOULD ignore v2 beacons when operating in CURVE mode to avoid down-grade attacks.
 
 ## Security Aspects
 

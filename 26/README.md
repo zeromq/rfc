@@ -124,7 +124,7 @@ curvezmq = C:hello ( S:welcome | S:error )
            *message
 
 ;   HELLO command, 200 octets
-hello = %d5 "HELLO" version padding hello-client hello-nonce hello-box
+hello = %d5 "HELLO" hello-version hello-padding hello-client hello-nonce hello-box
 hello-version = %x1 %x0     ; CurveZMQ major-minor version
 hello-padding = 72%x00      ; Anti-amplification padding
 hello-client = 32OCTET      ; Client public transient key C'
@@ -141,7 +141,7 @@ cookie-nonce = 16OCTET      ; Long nonce, prefixed by "COOKIE--"
 cookie-box = 80OCTET        ; Box [C' + s'](K)
 
 ;   INITIATE command, 257+ octets
-initiate = %d8 "INITIATE" cookie initiate-nonce initiate-box
+initiate = %d8 "INITIATE" initiate-cookie initiate-nonce initiate-box
 initiate-cookie = cookie    ; Server-provided cookie
 initiate-nonce = 8OCTET     ; Short nonce, prefixed by "CurveZMQINITIATE"
 initiate-box = 144*OCTET    ; Box [C + vouch + metadata](C'->S')

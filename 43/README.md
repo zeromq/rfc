@@ -3,7 +3,7 @@ domain: rfc.zeromq.org
 shortname: 43/ZRE
 name: ZeroMQ Realtime Exchange Protocol
 status: draft
-editors: Pieter Hintjens <ph@imatix.com>, Wes Young <wes@barely3am.com>
+editors: Pieter Hintjens <ph@imatix.com>, Wes Young <wes@barely3am.com>, Luca Boccassi <luca.boccassi@gmail.com>
 ---
 
 The ZeroMQ Realtime Exchange Protocol (ZRE) governs how a group of peers on a network discover each other, organize into groups, and send each other events. ZRE runs over the [ZeroMQ Message Transfer Protocol (ZMTP)](http://rfc.zeromq.org/spec:23/ZMTP).
@@ -37,6 +37,7 @@ This is version 3 of ZRE. The changes over version 2 are:
 
 * The version number was increased to 3.
 * Beacon packets support advertising of a 32-octet CURVE public key for the purposes of establishing CURVE enabled security to the connection.
+* UDP discovery over IPv6 Multicast
 
 ## Implementation
 
@@ -46,7 +47,7 @@ A ZRE *node* represents a source or a target for messaging. Nodes usually map to
 
 ### Node Discovery and Presence
 
-ZRE uses UDP IPv4 *beacon* broadcasts to discover nodes. Each ZRE node SHALL listen to the ZRE discovery service which is UDP port 5670 (ZRE-DISC port assigned by IANA). Each ZRE node SHALL broadcast, at regular intervals, on UDP port 5670 a beacon that identifies itself to any listening nodes on the network.
+ZRE uses UDP IPv4/IPv6 *beacon* broadcasts to discover nodes. Each ZRE node SHALL listen to the ZRE discovery service which is UDP port 5670 (ZRE-DISC port assigned by IANA). Each ZRE node SHALL broadcast, at regular intervals, on UDP port 5670 a beacon that identifies itself to any listening nodes on the network.
 
 The ZRE beacon consists of one 54-octet UDP message with this format:
 
@@ -228,10 +229,10 @@ When a node receives a PING command it SHALL reply with a PING-OK command.
 
 ## Node Discovery and Presence
 
-ZRE uses UDP IPv4 *beacon* broadcasts to discover nodes and track their presence. This works as follows:
+ZRE uses UDP IPv4/IPv6 *beacon* broadcasts to discover nodes and track their presence. This works as follows:
 
-* A ZRE node SHALL listen to the ZRE discovery service which is UDP port 5670 (ZRE-DISC port assigned by IANA).
-* Each ZRE node SHALL broadcast, at regular intervals, a UDP beacon that identifies itself to any listening nodes on the network.
+* A ZRE node SHALL listen to the ZRE discovery service which is UDP port 5670 (ZRE-DISC port assigned by IANA) over the IPv4 broadcast address or an IPv6 multicast address.
+* Each ZRE node SHALL broadcast, at regular intervals, a UDP beacon that identifies itself to any listening nodes on the network over an IPv4 broadcast address or IPv6 multicast address.
 * When a ZRE node receives a beacon from a node that it does not already know about, it SHALL consider this to be a new peer.
 * When a ZRE node stops receiving beacons from a peer that it knows about, after a certain interval it SHALL consider this peer to be disconnected or dead.
 * A ZRE node configured with CURVE security SHALL ignore beacons that do not contain a valid 32-octet CURVE key.

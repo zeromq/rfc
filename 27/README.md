@@ -83,7 +83,7 @@ The request message SHALL consist of the following message frames:
 * An address delimiter frame, which SHALL have a length of zero.
 * The version frame, which SHALL contain the three octets "1.0".
 * The *request id*, which MAY contain an opaque binary blob.
-* The *domain*, which SHALL contain a string.
+* The *domain*, which SHALL contain a (non-empty) string.
 * The *address*, the origin network IP address.
 * The *identity*, the connection Identity, if any.
 * The *mechanism*, which SHALL contain a string.

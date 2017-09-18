@@ -188,7 +188,7 @@ This shows an authentication request sent by a server to a handler, for a client
 +-----++
 | 0001 |            Request ID, for example "0001"
 +------+
-| test |            Domain, empty in this case
+| test |            Domain
 +------+-------+
 | 192.168.55.1 |    Address
 +------+-------+
@@ -234,7 +234,7 @@ This shows an authentication request sent by a server to a handler, for a client
 +-----++
 | 0001 |            Request ID, for example "0001"
 +------+
-| test |            Domain, empty in this case
+| test |            Domain
 +------+-------+
 | 192.168.55.1 |    Address
 +-------+------+

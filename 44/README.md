@@ -1,16 +1,17 @@
 ---
 domain: rfc.zeromq.org
-shortname: 42/C4
+shortname: 44/C4
 name: Collective Code Construction Contract
-status: stable
+status: draft
 editor: Pieter Hintjens <ph@imatix.com>
 ---
 
-The Collective Code Construction Contract (C4) is an evolution of the github.com [Fork + Pull Model](https://help.github.com/articles/about-pull-requests/), aimed at providing an optimal collaboration model for free software projects. This is revision 2 of the C4 specification and deprecates RFC 22.
+The Collective Code Construction Contract (C4) is an evolution of the github.com [Fork + Pull Model](https://help.github.com/articles/about-pull-requests/), aimed at providing an optimal collaboration model for free software projects. This is revision 3 of the C4 specification and deprecates RFC 42.
 
 ## License
 
 Copyright (c) 2009-2016 Pieter Hintjens.
+Copyright (c) 2016-2018 The ZeroMQ developers.
 
 This Specification is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 3 of the License, or (at your option) any later version.
 

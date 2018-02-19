@@ -111,8 +111,6 @@ C4 is meant to provide a reusable optimal collaboration model for open source so
 1. A new contract marked as "draft" MUST NOT be changed to "stable" until all the following conditions are met:
     1. Documentation has been written and is as comprehensive as that of comparable contracts.
     1. Self-tests exercising the functionality are passing on the principle target platform.
-    1. No major changes in the implementation have happened for at least one public release.
-    1. No major changes in the implementation have happened for at least 6 months.
     1. No changes in the contract have happened for at least one public release.
     1. No changes in the contract have happened for at least 6 months.
     1. No veto from the Contributor(s) of the new contract and its implementation on the change of status.

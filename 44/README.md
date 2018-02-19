@@ -100,7 +100,7 @@ C4 is meant to provide a reusable optimal collaboration model for open source so
 
 ### 2.6. Evolution of Public Contracts
 
-1. All Public Contracts (APIs or protocols) SHALL be documented.
+1. All Public Contracts (APIs or protocols and their behaviour and side effects) SHALL be documented.
 1. All Public Contracts SHOULD have space for extensibility and experimentation.
 1. A patch that modifies a stable Public Contract SHOULD not break existing applications unless there is overriding consensus on the value of doing this.
 1. A patch that introduces new features SHOULD do so using new names (a new contract).
@@ -108,14 +108,12 @@ C4 is meant to provide a reusable optimal collaboration model for open source so
 1. Old contracts SHOULD be deprecated in a systematic fashion by marking them as "deprecated" and replacing them with new contracts as needed.
 1. When sufficient time has passed, old deprecated contracts SHOULD be removed.
 1. Old names SHALL NOT be reused by new contracts.
-1. A new contract marked as "draft" MUST not be changed to "stable" until all the following conditions are met:
-    1. Documentation has been written and finalised.
+1. A new contract marked as "draft" MUST NOT be changed to "stable" until all the following conditions are met:
+    1. Documentation has been written and is as comprehensive as that of comparable contracts.
     1. Self-tests exercising the functionality are passing on the principle target platform.
-    1. No major changes in the implementation have happened for at least one public release.
-    1. No major changes in the implementation have happened for at least 6 months.
     1. No changes in the contract have happened for at least one public release.
     1. No changes in the contract have happened for at least 6 months.
-    1. The developer(s) of the new contract and its implementation consent to the change of status.
+    1. No veto from the Contributor(s) of the new contract and its implementation on the change of status.
 1. A new contract marked as "draft" SHOULD be changed to "stable" when the above conditions are met.
 1. The "draft" to "stable" transition status for new contracts SHOULD be tracked using the Platform issue tracker.
 

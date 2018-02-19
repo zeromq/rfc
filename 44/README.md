@@ -100,7 +100,7 @@ C4 is meant to provide a reusable optimal collaboration model for open source so
 
 ### 2.6. Evolution of Public Contracts
 
-1. All Public Contracts (APIs or protocols) SHALL be documented.
+1. All Public Contracts (APIs or protocols and their behaviour and side effects) SHALL be documented.
 1. All Public Contracts SHOULD have space for extensibility and experimentation.
 1. A patch that modifies a stable Public Contract SHOULD not break existing applications unless there is overriding consensus on the value of doing this.
 1. A patch that introduces new features SHOULD do so using new names (a new contract).

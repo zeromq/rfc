@@ -425,16 +425,16 @@ To invoke a single heartbeat, the peer MAY, at any point after the security hand
 ```
 ping = command-size %d4 "PING" ping-ttl ping-context
 ping-ttl = 2OCTET
-ping-context = *OCTET
+ping-context = 0*16OCTET
 ```
 
 The ping-ttl is a 16-bit unsigned integer in network order that MAY be zero or MAY contain a time-to-live measured in tenths of seconds. The ping-ttl provides a strong hint to the other peer to disconnect if no further traffic is received after that time. The maximum TTL is 6553 seconds.
 
-When a peer receives a PING command it SHALL respond with a PONG command that echoes the ping-context, which may be empty:
+When a peer receives a PING command it SHALL respond with a PONG command that echoes the ping-context, which may be empty and MUST not exceed 16 octets:
 
 ```
 pong = command-size %d4 "PONG" ping-context
-ping-context = *OCTET
+ping-context = 0*16OCTET
 ```
 
 When a peer does not receive a reply after a reasonable interval, it MAY consider the connection dead, and close it. The interval SHOULD be selected to suit the relevant application use case. This time-out interval will usually be a small multiple of the PING interval.

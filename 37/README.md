@@ -428,7 +428,7 @@ ping-ttl = 2OCTET
 ping-context = 0*16OCTET
 ```
 
-The ping-ttl is a 16-bit unsigned integer in network order that MAY be zero or MAY contain a time-to-live measured in tenths of seconds. The ping-ttl provides a strong hint to the other peer to disconnect if no further traffic is received after that time. The maximum TTL is 6553 seconds.
+The ping-ttl is a 16-bit unsigned integer in network order that MAY be zero or MAY contain a time-to-live measured in tenths of seconds. The ping-ttl provides a strong hint to the other peer to disconnect if no further traffic is received after that time. As a consequence, the maximum TTL is 6553.5 seconds.
 
 When a peer receives a PING command it SHALL respond with a PONG command that echoes the ping-context, which may be empty and MUST not exceed 16 octets:
 

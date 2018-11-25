@@ -65,7 +65,7 @@ C4 is meant to provide a reusable optimal collaboration model for open source so
 1. A patch MUST adhere to the code style guidelines of the project if these are defined.
 1. A patch MUST adhere to the "Evolution of Public Contracts" guidelines defined below.
 1. A patch SHALL NOT include non-trivial code from other projects unless the Contributor is the original author of that code.
-1. A patch MUST compile cleanly and pass project self-tests on at least the principle target platform.
+1. A patch MUST compile cleanly and pass project self-tests on at least the principal target platform.
 1. A patch commit message MUST consist of a single short (less than 50 characters) line stating the problem ("Problem: ...") being solved, followed by a blank line and then the proposed solution ("Solution: ...").
 1. A "Correct Patch" is one that satisfies the above requirements.
 

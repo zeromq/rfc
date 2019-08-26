@@ -96,7 +96,7 @@ C4 is meant to provide a reusable optimal collaboration model for open source so
 
 1. The project SHALL have one branch ("master") that always holds the latest in-progress version and SHOULD always build.
 1. The project SHALL NOT use topic branches for any reason. Personal forks MAY use topic branches.
-1. To make a stable release a Maintainer shall tag the repository. Stable releases SHALL always be released from the repository master.
+1. To make a stable release a Maintainer SHALL tag the repository. Stable releases SHALL always be released from the repository master.
 
 ### 2.6. Evolution of Public Contracts
 

@@ -92,7 +92,7 @@ ZWS define 3 mechanisms that can be used:
 
 ```
 ;   The protocol consists of zero or more connections
-zmtp = *connection
+zws = *connection
 
 ;   A connection a handshake, and traffic
 connection = handshake traffic
@@ -124,7 +124,7 @@ Each ZeroMQ frame maps to one WebSockets message. A frame consists of a FLAG byt
 
 Flags can be:
 * 0x00 - Final message
-* 0x00 - More message
+* 0x01 - More message
 * 0x02 - Command message 
 
 ### Socket Compatibility

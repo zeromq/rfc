@@ -1,6 +1,6 @@
 ---
 domain: rfc.zeromq.org
-shortname: 45/ZWS 2.0
+shortname: 45/ZWS2.0
 name: ZeroMQ WebSocket Protocol 2.0
 status: draft
 editor: Doron Somech <somdoron@gmail.com>

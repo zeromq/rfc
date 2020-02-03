@@ -1,0 +1,9 @@
+baseURL = "http://rfc.zeromq.org"
+languageCode = "en-us"
+title = "ZeroMQ RFC"
+
+[params]
+BookMenuBundle = "/menu"
+
+[permalinks]
+  docs = "/spec/:title"

@@ -14,6 +14,7 @@ bookMenuLevels: 1
   * [41/CLISRV]({{< relref "/docs/rfcs/41/README.md" >}})
   * [43/ZYREv3]({{< relref "/docs/rfcs/43/README.md" >}})
   * [44/C4]({{< relref "/docs/rfcs/44/README.md" >}})
+  * [45/ZWS]({{< relref "/docs/rfcs/45/README.md" >}})
 * Stable
   * [4/ZPL]({{< relref "/docs/rfcs/4/README.md" >}})
   * [6/PPP]({{< relref "/docs/rfcs/6/README.md" >}})

@@ -14,5 +14,3 @@ command = "make preview-build"
 [[redirects]]
 from = "/spec:*"
 to = "/spec/:splat"
-status = 200
-force = true

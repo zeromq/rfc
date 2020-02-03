@@ -1,4 +1,5 @@
 ---
+slug: 37
 title: 37/ZMTP
 aliases: [/spec:37/ZMTP]
 name: ZeroMQ Realtime Exchange Protocol

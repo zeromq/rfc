@@ -1,4 +1,5 @@
 ---
+slug: 10
 title: 10/FLP
 aliases: [/spec:10/FLP]
 name: Freelance Protocol

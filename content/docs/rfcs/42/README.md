@@ -1,4 +1,5 @@
 ---
+slug: 42
 title: 42/C4
 aliases: [/spec:42/C4]
 name: Collective Code Construction Contract

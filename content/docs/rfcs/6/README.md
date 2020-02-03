@@ -1,4 +1,5 @@
 ---
+slug: 6
 title: 6/PPP
 aliases: [/spec:6/PPP]
 name: Paranoid Pirate Protocol

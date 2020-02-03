@@ -1,4 +1,5 @@
 ---
+slug: 3
 title: 3/ZDCF
 aliases: [/spec:3/ZDCF]
 name: ZeroMQ Device Configuration File

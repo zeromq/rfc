@@ -1,4 +1,5 @@
 ---
+slug: 9
 title: 9/TSP
 aliases: [/spec:9/TSP]
 name: Titanic Service Protocol

@@ -1,4 +1,5 @@
 ---
+slug: 1
 title: 1/SPB
 aliases: [/spec:1/SPB]
 status: deprecated

@@ -1,4 +1,5 @@
 ---
+slug: 18
 title: 18/MDP
 aliases: [/spec:18/MDP]
 name:  Majordomo Protocol

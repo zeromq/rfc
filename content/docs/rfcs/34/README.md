@@ -1,4 +1,5 @@
 ---
+slug: 34
 title: 34/SRPZMQ
 aliases: [/spec:34/SRPZMQ]
 status: stable

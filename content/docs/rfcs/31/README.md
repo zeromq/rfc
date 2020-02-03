@@ -1,4 +1,5 @@
 ---
+slug: 31
 title: 31/EXPAIR
 aliases: [/spec:31/EXPAIR]
 name: ZeroMQ Exclusive Pair

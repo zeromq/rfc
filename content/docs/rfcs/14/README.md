@@ -1,4 +1,5 @@
 ---
+slug: 14
 title: 14/WMP
 aliases: [ "/spec:14/WMP" ]
 name: Worker-Manager Protocol

@@ -1,4 +1,5 @@
 ---
+slug: 25
 title: 25/ZMTP-CURVE
 aliases: [/spec:25/ZMTP-CURVE]
 name: ZMTP CURVE

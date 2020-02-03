@@ -1,0 +1,54 @@
+---
+headless: true
+bookMenuLevels: 1
+---
+
+* Raw
+  * [14/WMP]({{< relref "/docs/rfcs/14/README.md" >}})
+* Draft
+  * [11/MTL]({{< relref "/docs/rfcs/11/README.md" >}})
+  * [18/MDP]({{< relref "/docs/rfcs/18/README.md" >}})
+  * [35/FILEMQ]({{< relref "/docs/rfcs/35/README.md" >}})
+  * [37/ZMTP]({{< relref "/docs/rfcs/37/README.md" >}})
+  * [38/ZMTP-GSSAPI]({{< relref "/docs/rfcs/38/README.md" >}})
+  * [41/CLISRV]({{< relref "/docs/rfcs/41/README.md" >}})
+  * [43/ZYREv3]({{< relref "/docs/rfcs/43/README.md" >}})
+  * [44/C4]({{< relref "/docs/rfcs/44/README.md" >}})
+* Stable
+  * [4/ZPL]({{< relref "/docs/rfcs/4/README.md" >}})
+  * [6/PPP]({{< relref "/docs/rfcs/6/README.md" >}})
+  * [7/MDP]({{< relref "/docs/rfcs/7/README.md" >}})
+  * [8/MMI]({{< relref "/docs/rfcs/8/README.md" >}})
+  * [9/TSP]({{< relref "/docs/rfcs/9/README.md" >}})
+  * [10/FLP]({{< relref "/docs/rfcs/10/README.md" >}})
+  * [12/CHP]({{< relref "/docs/rfcs/12/README.md" >}})
+  * [17/ZDCF]({{< relref "/docs/rfcs/17/README.md" >}})
+  * [21/CLASS]({{< relref "/docs/rfcs/21/README.md" >}})
+  * [24/ZMTP-PLAIN]({{< relref "/docs/rfcs/24/README.md" >}})
+  * [25/ZMTP-CURVE]({{< relref "/docs/rfcs/25/README.md" >}})
+  * [23/ZMTP]({{< relref "/docs/rfcs/23/README.md" >}})
+  * [26/CURVEZMQ]({{< relref "/docs/rfcs/26/README.md" >}})
+  * [27/ZAP]({{< relref "/docs/rfcs/27/README.md" >}})
+  * [28/REQREP]({{< relref "/docs/rfcs/28/README.md" >}})
+  * [29/PUBSUB]({{< relref "/docs/rfcs/29/README.md" >}})
+  * [30/PIPELINE]({{< relref "/docs/rfcs/30/README.md" >}})
+  * [31/EXPAIR]({{< relref "/docs/rfcs/31/README.md" >}})
+  * [32/Z85]({{< relref "/docs/rfcs/32/README.md" >}})
+  * [33/ZHTTP]({{< relref "/docs/rfcs/33/README.md" >}})
+  * [34/SRPZMQ]({{< relref "/docs/rfcs/34/README.md" >}})
+  * [36/ZRE]({{< relref "/docs/rfcs/36/README.md" >}})
+  * [39/ZWS]({{< relref "/docs/rfcs/39/README.md" >}})
+  * [40/XRAP]({{< relref "/docs/rfcs/40/README.md" >}})
+  * [42/C4]({{< relref "/docs/rfcs/42/README.md" >}})
+* Deprecated
+  * [1/SPB]({{< relref "/docs/rfcs/1/README.md" >}})
+  * [2/SPB]({{< relref "/docs/rfcs/2/README.md" >}})
+  * [13/ZMTP]({{< relref "/docs/rfcs/13/README.md" >}})
+  * [15/ZMTP]({{< relref "/docs/rfcs/15/README.md" >}})
+  * [22/C4]({{< relref "/docs/rfcs/22/README.md" >}})
+* Retired
+  * [3/ZDCF]({{< relref "/docs/rfcs/3/README.md" >}})
+  * [5/ZDCF]({{< relref "/docs/rfcs/5/README.md" >}})
+  * [16/C4]({{< relref "/docs/rfcs/16/README.md" >}})
+  * [19/FILEMQ]({{< relref "/docs/rfcs/19/README.md" >}})
+  * [20/ZRE]({{< relref "/docs/rfcs/20/README.md" >}})

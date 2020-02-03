@@ -1,0 +1,61 @@
+---
+title: 24/ZMTP-PLAIN
+aliases: [/spec:24/ZMTP-PLAIN]
+name: ZMTP PLAIN
+status: stable
+editor: Pieter Hintjens <ph@imatix.com>
+---
+
+The ZMTP PLAIN mechanism defines a simple username/password mechanism for [ZMTP 3.0](http://rfc.zeromq.org/spec:23) that lets a server authenticate a client. PLAIN makes no attempt at security or confidentiality. It is intended for use on internal networks where security requirements are low.
+
+See also: http://rfc.zeromq.org/spec:23/ZMTP.
+
+## Preamble
+
+Copyright (c) 2013 iMatix Corporation.
+
+This Specification is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 3 of the License, or (at your option) any later version. This Specification is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details. You should have received a copy of the GNU General Public License along with this program; if not, see <http://www.gnu.org/licenses>.
+
+This Specification is a [free and open standard](http://www.digistan.org/open-standard:definition) and is governed by the Digital Standards Organization's [Consensus-Oriented Specification System](http://www.digistan.org/spec:1/COSS).
+
+The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in [RFC 2119](http://tools.ietf.org/html/rfc2119).
+
+## Goals
+
+The ZMTP PLAIN mechanism defines a simple username/password mechanism for [ZMTP 3.0](http://rfc.zeromq.org/spec:23) that lets a server authenticate a client. PLAIN makes no attempt at security or confidentiality. It is intended for use on internal networks where security requirements are low.
+
+This mechanism addresses a specific set of challenges we face in 0MQ architectures:
+
+* When we run multiple services on the same network (for instance, development servers and production servers) and clients must be certain they are accessing the correct server.
+
+* When we want to perform minimal authentication of clients (to avoid errors in configuration).
+
+Previously, applications have tried to do such authentication using socket identities. These do not work for all socket types, nor do they map cleanly to user identities. The PLAIN mechanism lets the client request access based on a user identity which is independent of the socket identity, IP address, and other transport-layer identities.
+
+The PLAIN mechanism is not robust against even the simplest traffic snooping or spoofing attacks, and SHOULD NOT be used on public infrastructure without transport-level security (e.g. over a VPN).
+
+## Implementation
+
+The PLAIN mechanism uses the greeting as-server field to identify which peer is "client" and which peer is "server".
+
+The client authenticates itself to the server by sending a HELLO command. The server accepts or rejects this authentication. If it accepts it, it replies with a WELCOME command. Otherwise, it closes the connection. The client then sends an INITIATE command, which the server parses and validates. The server responds with a READY command. The client MAY send messages after receiving a READY command from the server. The server MAY start to send messages immediately after sending a READY command.
+
+The following ABNF grammar defines the PLAIN security handshake and message flow:
+
+```
+plain = C:hello ( S:welcome | S:error )
+        C:initiate ( S:ready | S:error )
+     *( C:message | S:message )
+
+hello = command-size %d5 "HELLO" username password
+username = OCTET *VCHAR
+password = OCTET *VCHAR
+
+welcome = command-size %d7 "WELCOME"
+
+initiate = command-size %d8 "INITIATE" metadata
+
+ready = command-size %d5 "READY" metadata
+```
+
+All command bodies consist of an 8-character command name, padded with spaces, followed by formatted binary fields. The ZMTP 3.0 specification defines the grammar for message, command-size, metadata, and error.

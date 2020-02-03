@@ -1,0 +1,132 @@
+---
+title: 34/SRPZMQ
+aliases: [/spec:34/SRPZMQ]
+status: stable
+editor: Diego Duclos <diego.duclos@palmstonegames.com>
+---
+
+This document describes an extension of the ZMQ security mechanism to be able to authenticate a client without the client having to have a private key generated beforehand. Instead, keys are generated from a pregenerated private key on the server side (which have been generated during some kind of registration process) and from a username/password combination on the client side.
+
+See also: http://pythonhosted.org/srp/srp.html#srp-6a-protocol-description, http://srp.stanford.edu/.
+
+## Preamble
+
+Copyright (c) 2013 Palm Stone Games.
+
+This Specification is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 3 of the License, or (at your option) any later version. This Specification is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details. You should have received a copy of the GNU General Public License along with this program; if not, see <http://www.gnu.org/licenses>.
+
+This Specification is a [free and open standard](http://www.digistan.org/open-standard:definition) and is governed by the Digital Standards Organization's [Consensus-Oriented Specification System](http://www.digistan.org/spec:1/COSS).
+
+## SRPZMQ Specification
+
+SRPZMQ is a protocol for secure messaging across the internet, in much the same way as CurveZMQ is. However, instead of being based on curveCP, it is based on SRP, as specified by Stanford University at http://srp.stanford.edu/.
+
+## Goals
+
+The goals are very similar to the ones for CurveZMQ, with a few additions: The client must not need know any preshared secret, a username/password combination typed in at runtime by the user should suffice.
+
+Both username and password must be able to be any arbitrary byte array, to give the user freedom to pick a combination which they can readily remember.
+
+In addition, it must be as hard as possible for an attacker that has managed to retrieve a secret key for a user to find the password for that user.
+
+## Why SRP?
+
+SRP has several favorable factors that are attractive, when choosing a reasonably fast hashing algorithm and prime number N, it is both fast and very secure, as well as meeting all of the security goals that the curveZMQ algorithm meets.
+
+## General Design
+
+A connection is opened from client to server, the client sends its username to the server, along with a generated public ephemereal value we'll call A.
+
+The server replies using a salt, along with a challenge, which we'll call B, which is generated from a preshared large prime/modulo combination, a random number, and the client's private key, which is known by the server.
+
+Using this information, both the client and the server must generate a session key, this is only possible if the following factors have been met:
+
+1) The server must know the private key corresponding to the password used by the client
+2) The client must know the password corresponding to the private key.
+
+if these 2 factors are not met, the client and server will not generate the same session key and authentication will fail.
+
+After the session key has been generated on both ends, the two parties need to prove to eachother that they indeed know the key.
+
+To this end, the client sends a packet to the server containing its proof of K. At this point, the server knows the client knows it is who it says it is, and it can send its own proof of K to the client, which will prove to the client that the server is indeed who they pretend they are.
+
+Once this is done, the client and server can both use the session key K as a symmetric encryption key for further communication. As the session key K is based on random session specific information, it will be discarded at end of session and must never be reused.
+
+A few key things to note:
+
+* Both the client and the server must be using the same large, safe prime N and generator g
+* The larger the prime N chosen, the more expensive the algorithm will be, and the larger the values sent through the network will be, but the harder it will be to brute-force through.
+* A properly sized N value must be chosen such that a denial of service attack on the server is not practical and enough security is provided.
+
+The SRP spec also contains a few mandatory validations, they are as follows:
+
+* The client will abort if it recieves B == 0 (mod N) or u == 0
+* The server will abort if it detects A == 0 (mod N)
+* The client must show its proof of K first. If the server detects that this proof is incorrect it must abort without showing its own proof of K
+
+## Detailed information
+
+### Primary variables used in SRP 6a
+
+```
+Variables   Description
+
+N           A large, safe prime (N = 2q+1, where q is a Sophie Germain prime) All arithmetic is performed in the field of integers modulo N
+g           A generator modulo N
+s           Small salt for the verification key
+I           Username
+p           Cleartext password
+H()         One-way hash function
+a,b         Secret, random values
+K           Session key
+```
+
+### Derived Values used in SRP 6a
+
+```
+Derived Values                          Description
+
+k = H(N,g)                              Multiplier Parameter
+A = g^a                                 Public ephemeral value
+B = kv + g^b                            Public ephemeral value
+x = H(s, H( I | ‘:’ | p ))              Private key (as defined by RFC 5054)
+v = g^x                                 Password verifier
+u = H(A,B)                              Random scrambling parameter
+M = H(H(N) xor H(g), H(I), s, A, B, K)  Session key verifier
+```
+
+### Specific algorithms chosen
+
+It is a goal to leave as little as possible up to the user configuration wise. However, SRP leaves a number of things open to the user, namely: the hashing algorithm to use, the large safe prime to use and the generator number.
+
+<TODO: Discuss which prime to pick and which hashing algorithm to pick>
+
+## High-level Grammar
+
+```
+srpzmq = C:hello S:welcome C:proof-m S:proof-hamk
+
+; HELLO command, xxx octets
+hello = %d5 "HELLO" hello-version hello-A hello-username hello-padding
+hello-version = %x1 %x0 ; SRPZMQ major-minor version
+hello-A = 32OCTET ; public ephemereal value
+hello-username = *OCTET ; Variable sized username in plaintext
+hello-padding = *OCTET; Padding equal in size to the safe prime N / 8, zeros only. This is to prevent amplification attacks
+
+; WELCOME command, xxx octets
+welcome = %d7 "WELCOME" welcome-salt welcome-challenge
+welcome-salt = *OCTET ; Randomly chosen salt value specific for this user. This value is typically 4 bytes, but larger salts may be chosen if one wants to make it harder to crack passwords from password verifiers.
+welcome-challenge = *OCTET ; Variable sized challenge, depending on the picked random values, the size of the prime N and the chosen hash function.
+
+; At this point, the client has to calculate the session key K and send its proof
+
+; PROOF-M command, xxx octets
+proof-m = %d7 "PROOF-M" proof
+proof-m-proof = *OCTET ; Variable sized proof of K, length depends on the used hash function
+
+; At this point, the server should calculate its own value of K and then verifies the proof from the client, if all is good, it sends a reply, otherwise, it closes the connection
+
+; PROOF-HAMK command, xxx octets
+proof-hamk = %d10 "PROOF-HAMK" proof
+proof-hamk-proof = *OCTET ; Variable sized proof K, length depends on the user hash function
+```

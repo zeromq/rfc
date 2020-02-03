@@ -1,4 +1,5 @@
 ---
+slug: 12
 title: 12/CHP
 aliases: [/spec:12/CHP]
 name: Clustered Hashmap Protocol

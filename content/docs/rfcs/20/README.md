@@ -1,4 +1,5 @@
 ---
+slug: 20
 title: 20/ZRE
 aliases: [/spec:20/ZRE]
 name: ZeroMQ Realtime Exchange Protocol

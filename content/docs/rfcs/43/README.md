@@ -1,4 +1,5 @@
 ---
+slug: 43
 title: 43/ZRE
 aliases: [/spec:43/ZRE]
 name: ZeroMQ Realtime Exchange Protocol

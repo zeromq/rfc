@@ -1,4 +1,5 @@
 ---
+slug: 45
 title: 45/ZWS
 name: ZeroMQ WebSocket Protocol 2.0
 aliases: [/spec:45/ZWS]

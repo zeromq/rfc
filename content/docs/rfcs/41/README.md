@@ -1,4 +1,5 @@
 ---
+slug: 41
 title: 41/CLISRV
 aliases: [/spec:41/CLISRV]
 status: draft

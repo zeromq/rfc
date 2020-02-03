@@ -1,4 +1,5 @@
 ---
+slug: 39
 title: 39/ZWS
 aliases: [/spec:39/ZWS]
 name: ZeroMQ WebSocket

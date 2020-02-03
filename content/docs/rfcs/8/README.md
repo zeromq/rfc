@@ -1,4 +1,5 @@
 ---
+slug: 8
 title: 8/MMI
 aliases: [/spec:8/MMI]
 name: Majordomo Management Interface

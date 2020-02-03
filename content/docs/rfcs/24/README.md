@@ -1,4 +1,5 @@
 ---
+slug: 24
 title: 24/ZMTP-PLAIN
 aliases: [/spec:24/ZMTP-PLAIN]
 name: ZMTP PLAIN

@@ -1,7 +1,6 @@
 ---
 slug: 44
 title: 44/C4
-aliases: [/spec:44/C4]
 name: Collective Code Construction Contract
 status: draft
 editor: Pieter Hintjens <ph@imatix.com>

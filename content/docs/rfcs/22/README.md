@@ -1,7 +1,6 @@
 ---
 slug: 22
 title: 22/C4
-aliases: [/spec:22/C4]
 name: Collective Code Construction Contract (C4)
 status: deprecated
 editor: Pieter Hintjens <ph@imatix.com>

@@ -1,7 +1,6 @@
 ---
 slug: 36
 title: 36/ZRE
-aliases: [/spec:36/ZRE]
 name: ZeroMQ Realtime Exchange Protocol
 status: stable
 editor: Pieter Hintjens <ph@imatix.com>

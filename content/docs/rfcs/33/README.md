@@ -1,7 +1,6 @@
 ---
 slug: 33
 title: 33/ZHTTP
-aliases: [/spec:33/ZHTTP]
 name: HTTP requests and responses over ZeroMQ
 status: stable
 editor: Justin Karneges <justin@fanout.io>

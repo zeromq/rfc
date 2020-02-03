@@ -1,7 +1,6 @@
 ---
 slug: 9
 title: 9/TSP
-aliases: [/spec:9/TSP]
 name: Titanic Service Protocol
 status: stable
 editor: Pieter Hintjens <ph@imatix.com>

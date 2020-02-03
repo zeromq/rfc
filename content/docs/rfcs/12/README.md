@@ -1,7 +1,6 @@
 ---
 slug: 12
 title: 12/CHP
-aliases: [/spec:12/CHP]
 name: Clustered Hashmap Protocol
 status: stable
 editor: Pieter Hintjens <ph@imatix.com>

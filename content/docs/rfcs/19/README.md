@@ -1,7 +1,6 @@
 ---
 slug: 19
 title: 19/FILEMQ
-aliases: [/spec:19/FILEMQ]
 name: File Message Queuing Protocol
 status: retired
 editor: Pieter Hintjens <ph@imatix.com>

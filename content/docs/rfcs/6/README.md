@@ -1,7 +1,6 @@
 ---
 slug: 6
 title: 6/PPP
-aliases: [/spec:6/PPP]
 name: Paranoid Pirate Protocol
 status: stable
 editor: Pieter Hintjens <ph@imatix.com>

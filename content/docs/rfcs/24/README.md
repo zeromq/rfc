@@ -1,7 +1,6 @@
 ---
 slug: 24
 title: 24/ZMTP-PLAIN
-aliases: [/spec:24/ZMTP-PLAIN]
 name: ZMTP PLAIN
 status: stable
 editor: Pieter Hintjens <ph@imatix.com>

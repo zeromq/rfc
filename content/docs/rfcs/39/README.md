@@ -1,7 +1,6 @@
 ---
 slug: 39
 title: 39/ZWS
-aliases: [/spec:39/ZWS]
 name: ZeroMQ WebSocket
 status: stable
 editor: Doron Somech <somdoron@gmail.com>

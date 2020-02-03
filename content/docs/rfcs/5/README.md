@@ -1,7 +1,6 @@
 ---
 slug: 5
 title: 5/ZDCF
-aliases: [/spec:5/ZDCF]
 name: ZeroMQ Device Configuration File
 status: retired
 editor: Pieter Hintjens <ph@imatix.com>

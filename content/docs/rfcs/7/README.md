@@ -1,7 +1,6 @@
 ---
 slug: 7
 title: 7/MDP
-aliases: [/spec:7/MDP]
 name: Majordomo Protocol
 status: stable
 editor: Pieter Hintjens <ph@imatix.com>

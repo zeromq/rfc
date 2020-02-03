@@ -1,7 +1,6 @@
 ---
 slug: 43
 title: 43/ZRE
-aliases: [/spec:43/ZRE]
 name: ZeroMQ Realtime Exchange Protocol
 status: draft
 editors: Pieter Hintjens <ph@imatix.com>, Wes Young <wes@barely3am.com>, Luca Boccassi <luca.boccassi@gmail.com>

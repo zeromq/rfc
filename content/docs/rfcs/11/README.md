@@ -1,7 +1,6 @@
 ---
 slug: 11
 title: 11/MTL
-aliases: [/spec:11/MTL]
 name: Message Transport Layer
 status: draft
 editor: Pieter Hintjens <ph@imatix.com>

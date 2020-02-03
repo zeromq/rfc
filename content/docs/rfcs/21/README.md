@@ -1,7 +1,6 @@
 ---
 slug: 21
 title: 21/CLASS
-aliases: [/spec:21/CLASS]
 name: C Language Style for Scalability
 status: stable
 editor: Pieter Hintjens <ph@imatix.com>

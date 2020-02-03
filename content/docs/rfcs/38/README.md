@@ -1,7 +1,6 @@
 ---
 slug: 38
 title: 38/ZMTP-GSSAPI
-aliases: [/spec:38/ZMTP-GSSAPI]
 name: ZMTP GSSAPI
 status: draft
 editor: Chris Busbey <cbusbey@connamara.com>

@@ -1,7 +1,6 @@
 ---
 slug: 40
 title: 40/XRAP
-aliases: [/spec:40/XRAP]
 name:  Extensible Resource Access Protocol
 status: stable
 editor: Pieter Hintjens <ph@imatix.com>

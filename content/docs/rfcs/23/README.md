@@ -1,7 +1,6 @@
 ---
 slug: 23
 title: 23/ZMTP
-aliases: [/spec:23/ZMTP]
 name: ZeroMQ Message Transport Protocol
 status: stable
 editor: Pieter Hintjens <ph@imatix.com>

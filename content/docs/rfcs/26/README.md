@@ -1,7 +1,6 @@
 ---
 slug: 26
 title: 26/CURVEZMQ
-aliases: [/spec:26/CURVEZMQ]
 name: CurveZMQ
 status: stable
 editor: Pieter Hintjens <ph@imatix.com>

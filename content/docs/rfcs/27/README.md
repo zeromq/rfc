@@ -1,7 +1,6 @@
 ---
 slug: 27
 title: 27/ZAP
-aliases: [/spec:27/ZAP]
 name: ZeroMQ Authentication Protocol
 status: stable
 editor: Pieter Hintjens <ph@imatix.com>

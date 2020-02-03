@@ -1,7 +1,6 @@
 ---
 slug: 14
 title: 14/WMP
-aliases: [ "/spec:14/WMP" ]
 name: Worker-Manager Protocol
 status: raw
 editor: Brugeman Artur <brugeman.artur@gmail.com>

@@ -2,7 +2,6 @@
 slug: 45
 title: 45/ZWS
 name: ZeroMQ WebSocket Protocol 2.0
-aliases: [/spec:45/ZWS]
 status: draft
 editor: Doron Somech <somdoron@gmail.com>
 ---

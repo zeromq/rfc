@@ -1,7 +1,6 @@
 ---
 slug: 10
 title: 10/FLP
-aliases: [/spec:10/FLP]
 name: Freelance Protocol
 status: stable
 editor: Pieter Hintjens <ph@imatix.com>

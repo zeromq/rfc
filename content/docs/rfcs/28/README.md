@@ -1,7 +1,6 @@
 ---
 slug: 28
 title: 28/REQREP
-aliases: [/spec:28/REQREP]
 name: ZeroMQ Request-Reply
 status: stable
 editor: Pieter Hintjens <ph@imatix.com>

@@ -1,7 +1,6 @@
 ---
 slug: 4
 title: 4/ZPL
-aliases: [/spec:4/ZPL]
 name: ZeroMQ Property Language
 status: stable
 editor: Pieter Hintjens <ph@imatix.com>

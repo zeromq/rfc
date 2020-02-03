@@ -1,7 +1,6 @@
 ---
 slug: 34
 title: 34/SRPZMQ
-aliases: [/spec:34/SRPZMQ]
 status: stable
 editor: Diego Duclos <diego.duclos@palmstonegames.com>
 ---

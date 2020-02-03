@@ -1,7 +1,6 @@
 ---
 slug: 17
 title: 17/ZDCF
-aliases: [/spec:17/ZDCF]
 name: ZeroMQ Device Configuration File
 status: stable
 editor: Pieter Hintjens <ph@imatix.com>

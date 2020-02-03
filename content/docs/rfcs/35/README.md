@@ -1,7 +1,6 @@
 ---
 slug: 35
 title: 35/FILEMQ
-aliases: [/spec:35/FILEMQ]
 name: File Message Queuing Protocol
 status: draft
 editor: Pieter Hintjens <ph@imatix.com>

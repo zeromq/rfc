@@ -1,7 +1,6 @@
 ---
 slug: 29
 title: 29/PUBSUB
-aliases: [/spec:29/PUBSUB]
 name: ZeroMQ Publish-Subscribe
 status: stable
 editor: Pieter Hintjens <ph@imatix.com>

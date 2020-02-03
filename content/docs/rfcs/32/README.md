@@ -1,7 +1,6 @@
 ---
 slug: 32
 title: 32/Z85
-aliases: [/spec:32/Z85]
 status: stable
 editor: Pieter Hintjens <ph@imatix.com>
 ---

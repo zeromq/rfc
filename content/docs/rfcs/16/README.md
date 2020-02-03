@@ -1,7 +1,6 @@
 ---
 slug: 16
 title: 16/C4
-aliases: [/spec:16/C4]
 name: Collective Code Construction Contract (C4)
 status: retired
 editor: Pieter Hintjens <ph@imatix.com>

@@ -1,7 +1,6 @@
 ---
 slug: 2
 title: 2/SPB
-aliases: [/spec:2/SPB]
 status: deprecated
 editor: Pieter Hintjens <ph@imatix.com>
 ---

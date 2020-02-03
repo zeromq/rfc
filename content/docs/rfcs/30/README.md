@@ -1,7 +1,6 @@
 ---
 slug: 30
 title: 30/PIPELINE
-aliases: [/spec:30/PIPELINE]
 name: ZeroMQ Pipeline
 status: stable
 editor: Pieter Hintjens <ph@imatix.com>

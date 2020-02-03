@@ -24,12 +24,14 @@
   <ul>
       <li>Status: {{ .Params.status | markdownify }}</li>
       <li>Editor: {{ .Params.editor | markdownify }}</li>
+      {{ if .Params.contributors }}
       <li>Contributors:
           {{ range  $index, $element := .Params.contributors }}
               {{if $index}},{{end}}
               {{ . | markdownify }}
           {{ end }}
       </li>
+      {{ end }}
   </ul>
 
   {{- .Content -}}

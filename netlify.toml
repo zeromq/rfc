@@ -14,3 +14,7 @@ command = "make preview-build"
 [[redirects]]
 from = "/spec:*"
 to = "/spec/:splat"
+
+[[redirects]]
+from = "/spec/:rfcno/:shortname"
+to = "/spec/:rfcno

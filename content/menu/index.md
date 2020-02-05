@@ -16,6 +16,7 @@ bookMenuLevels: 1
   * [44/C4]({{< relref "/docs/rfcs/44/README.md" >}})
   * [45/ZWS]({{< relref "/docs/rfcs/45/README.md" >}})
   * [46/DAFKA]({{< relref "/docs/rfcs/46/README.md" >}})
+  * [47/CLIENTSERVER]({{< relref "/docs/rfcs/47/README.md" >}})
 * Stable
   * [4/ZPL]({{< relref "/docs/rfcs/4/README.md" >}})
   * [6/PPP]({{< relref "/docs/rfcs/6/README.md" >}})

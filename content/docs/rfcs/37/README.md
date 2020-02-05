@@ -55,6 +55,7 @@ ZMTP defines a *resource* metadata property that lets any number of tasks share 
 * http://rfc.zeromq.org/spec:29/PUBSUB defines the semantics of PUB, XPUB, SUB and XSUB sockets.
 * http://rfc.zeromq.org/spec:30/PIPELINE defines the semantics of PUSH and PULL sockets.
 * http://rfc.zeromq.org/spec:31/EXPAIR defines the semantics of exclusive PAIR sockets.
+* http://rfc.zeromq.org/spec:47/CLIENTSERVER defines the semantics of CLIENT and SERVER.
 
 ## Implementation
 
@@ -411,6 +412,24 @@ The implementation SHOULD follow http://rfc.zeromq.org/spec:30/PIPELINE for the 
 ### The Exclusive Pair Pattern
 
 The implementation SHOULD follow http://rfc.zeromq.org/spec:31/EXPAIR for the semantics of exclusive PAIR sockets.
+
+### The Client-Server Pattern
+
+The implementation SHOULD follow http://rfc.zeromq.org/spec:47/CLIENTSERVER for the semantics of CLIENT and SERVER sockets.
+
+### **NEW:** Thread-Safe Socket Types
+
+Thread-safe is a new family of socket types which are safe to use from multiple threads, both for sending and receiving.
+
+For thread-safety the sockets API MUST be atomic, a call to send MUST send the entire message and a call to receive MUST receive the entire message. Therefore thread-safe sockets disallow multipart messages. 
+
+Thread-safe socket MUST disallow the sending of multipart messages and MUST discard any multipart messages received from the wire. 
+
+Any additional metadata (e.g routing-id or topic) must be attached to the message.
+
+#### Multipart Message Definition
+
+A multipart message is multiple sequential ZMTP messages, where all but the last message has the MORE flag set.
 
 ## Connection Heartbeating
 

@@ -6,7 +6,7 @@ status: draft
 editor: Pieter Hintjens <ph@imatix.com>
 ---
 
-The ZeroMQ Message Transport Protocol (ZMTP) is a transport layer protocol for exchanging messages between two peers over a connected transport layer such as TCP. This document describes ZMTP 3.1. This version adds SUBSCRIBE, CANCEL, PING and PONG commands, and endpoint resources.
+The ZeroMQ Message Transport Protocol (ZMTP) is a transport layer protocol for exchanging messages between two peers over a connected transport layer such as TCP. This document describes ZMTP 3.1. This version adds JOIN, LEAVE, SUBSCRIBE, CANCEL, PING and PONG commands, and endpoint resources.
 
 ## Preamble
 
@@ -284,35 +284,45 @@ socket-type = "REQ" | "REP"
             | "SUB" | "XSUB"
             | "PUSH" | "PULL"
             | "PAIR"
+            | "CLIENT" | "SERVER"
+            | "RADIO" | "DISH"
 ```
 
 The peer SHOULD enforce that the other peer is using a valid socket type. This table shows the legal combinations (as "*"):
 
 ```
-       | REQ | REP | DEALER | ROUTER | PUB | XPUB | SUB | XSUB | PUSH | PULL | PAIR |
--------+-----+-----+--------+--------+-----+------+-----+------+------+------+------+
-REQ    |     |  *  |        |   *    |     |      |     |      |      |      |      |
--------+-----+-----+--------+--------+-----+------+-----+------+------+------+------+
-REP    |  *  |     |   *    |        |     |      |     |      |      |      |      |
--------+-----+-----+--------+--------+-----+------+-----+------+------+------+------+
-DEALER |     |  *  |   *    |   *    |     |      |     |      |      |      |      |
--------+-----+-----+--------+--------+-----+------+-----+------+------+------+------+
-ROUTER |  *  |     |   *    |   *    |     |      |     |      |      |      |      |
--------+-----+-----+--------+--------+-----+------+-----+------+------+------+------+
-PUB    |     |     |        |        |     |      |  *  |  *   |      |      |      |
--------+-----+-----+--------+--------+-----+------+-----+------+------+------+------+
-XPUB   |     |     |        |        |     |      |  *  |  *   |      |      |      |
--------+-----+-----+--------+--------+-----+------+-----+------+------+------+------+
-SUB    |     |     |        |        |  *  |  *   |     |      |      |      |      |
--------+-----+-----+--------+--------+-----+------+-----+------+------+------+------+
-XSUB   |     |     |        |        |  *  |  *   |     |      |      |      |      |
--------+-----+-----+--------+--------+-----+------+-----+------+------+------+------+
-PUSH   |     |     |        |        |     |      |     |      |      |  *   |      |
--------+-----+-----+--------+--------+-----+------+-----+------+------+------+------+
-PULL   |     |     |        |        |     |      |     |      |  *   |      |      |
--------+-----+-----+--------+--------+-----+------+-----+------+------+------+------+
-PAIR   |     |     |        |        |     |      |     |      |      |      |  *   |
--------+-----+-----+--------+--------+-----+------+-----+------+------+------+------+
+       | REQ | REP | DEALER | ROUTER | PUB | XPUB | SUB | XSUB | PUSH | PULL | PAIR | CLIENT | SERVER | RADIO | DISH |
+-------+-----+-----+--------+--------+-----+------+-----+------+------+------+------+--------+--------+-------+------+
+REQ    |     |  *  |        |   *    |     |      |     |      |      |      |      |        |        |       |      |
+-------+-----+-----+--------+--------+-----+------+-----+------+------+------+------+--------+--------+-------+------+
+REP    |  *  |     |   *    |        |     |      |     |      |      |      |      |        |        |       |      |
+-------+-----+-----+--------+--------+-----+------+-----+------+------+------+------+--------+--------+-------+------+
+DEALER |     |  *  |   *    |   *    |     |      |     |      |      |      |      |        |        |       |      |
+-------+-----+-----+--------+--------+-----+------+-----+------+------+------+------+--------+--------+-------+------+
+ROUTER |  *  |     |   *    |   *    |     |      |     |      |      |      |      |        |        |       |      |
+-------+-----+-----+--------+--------+-----+------+-----+------+------+------+------+--------+--------+-------+------+
+PUB    |     |     |        |        |     |      |  *  |  *   |      |      |      |        |        |       |      |
+-------+-----+-----+--------+--------+-----+------+-----+------+------+------+------+--------+--------+-------+------+
+XPUB   |     |     |        |        |     |      |  *  |  *   |      |      |      |        |        |       |      |
+-------+-----+-----+--------+--------+-----+------+-----+------+------+------+------+--------+--------+-------+------+
+SUB    |     |     |        |        |  *  |  *   |     |      |      |      |      |        |        |       |      |
+-------+-----+-----+--------+--------+-----+------+-----+------+------+------+------+--------+--------+-------+------+
+XSUB   |     |     |        |        |  *  |  *   |     |      |      |      |      |        |        |       |      |
+-------+-----+-----+--------+--------+-----+------+-----+------+------+------+------+--------+--------+-------+------+
+PUSH   |     |     |        |        |     |      |     |      |      |  *   |      |        |        |       |      |
+-------+-----+-----+--------+--------+-----+------+-----+------+------+------+------+--------+--------+-------+------+
+PULL   |     |     |        |        |     |      |     |      |  *   |      |      |        |        |       |      |
+-------+-----+-----+--------+--------+-----+------+-----+------+------+------+------+--------+--------+-------+------+
+PAIR   |     |     |        |        |     |      |     |      |      |      |  *   |        |        |       |      |
+-------+-----+-----+--------+--------+-----+------+-----+------+------+------+------+--------+--------+-------+------+
+CLIENT |     |     |        |        |     |      |     |      |      |      |      |        |   *    |       |      |
+-------+-----+-----+--------+--------+-----+------+-----+------+------+------+------+--------+--------+-------+------+
+SERVER |     |     |        |        |     |      |     |      |      |      |      |   *    |        |       |      |
+-------+-----+-----+--------+--------+-----+------+-----+------+------+------+------+--------+--------+-------+------+
+RADIO  |     |     |        |        |     |      |     |      |      |      |      |        |        |       |  *   |
+-------+-----+-----+--------+--------+-----+------+-----+------+------+------+------+--------+--------+-------+------+
+DISH   |     |     |        |        |     |      |     |      |      |      |      |        |        |   *   |      |
+-------+-----+-----+--------+--------+-----+------+-----+------+------+------+------+--------+--------+-------+------+
 ```
 
 When a peer validates the socket type, it SHOULD handle errors by returning an ERROR command, and then disconnecting the peer.
@@ -417,6 +427,36 @@ The implementation SHOULD follow http://rfc.zeromq.org/spec:31/EXPAIR for the se
 
 The implementation SHOULD follow http://rfc.zeromq.org/spec:47/CLIENTSERVER for the semantics of CLIENT and SERVER sockets.
 
+### The Radio-Dish Pattern
+
+The implementation SHOULD follow http://rfc.zeromq.org/spec:48/RADIODISH for the semantics of RADIO and DISH sockets.
+
+When using ZMTP, group membership checks SHALL happen at the RADIO side. To join a group, the DISH peer SHALL send a JOIN command, which has this grammar:
+
+```
+join = command-size %d4 "JOIN" group
+group = 0*255group-char 
+group-char = %d1-255
+```
+
+To leave a group, the DISH peer SHALL send a LEAVE command, which has this grammar:
+
+```
+leave = command-size %d5 "LEAVE" group
+```
+
+The group is a string, a message is sent to a group and all members of the group will receieve the message. Group matching is exact.
+
+When using ZMTP, RADIO send the group and the message are over the wire as a two parts message, which has this grammar:
+
+```
+radio-dish-message = group-part body-part
+group-part = %x01 short-size group
+body-part = message-last
+group = 0*255group-char 
+group-char = %d1-255
+```
+
 ### **NEW:** Thread-Safe Socket Types
 
 Thread-safe is a new family of socket types which are safe to use from multiple threads, both for sending and receiving.
@@ -425,7 +465,13 @@ For thread-safety the sockets API MUST be atomic, a call to send MUST send the e
 
 Thread-safe socket MUST disallow the sending of multipart messages and MUST discard any multipart messages received from the wire. 
 
-Any additional metadata (e.g routing-id or topic) must be attached to the message.
+Any additional metadata (e.g routing-id or group) must be attached to the message.
+
+Socket types that are part of the thread-safe family:
+* CLIENT
+* SERVER
+* RADIO
+* DISH
 
 #### Multipart Message Definition
 

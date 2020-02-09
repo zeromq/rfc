@@ -18,6 +18,7 @@ bookMenuLevels: 1
   * [46/DAFKA]({{< relref "/docs/rfcs/46/README.md" >}})
   * [47/CLIENTSERVER]({{< relref "/docs/rfcs/47/README.md" >}})
   * [48/RADIODISH]({{< relref "/docs/rfcs/48/README.md" >}})
+  * [49/SCATTERGATHER]({{< relref "/docs/rfcs/49/README.md" >}})
 * Stable
   * [4/ZPL]({{< relref "/docs/rfcs/4/README.md" >}})
   * [6/PPP]({{< relref "/docs/rfcs/6/README.md" >}})

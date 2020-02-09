@@ -294,7 +294,7 @@ socket-type = "REQ" | "REP"
 The peer SHOULD enforce that the other peer is using a valid socket type. This table shows the legal combinations (as "*"):
 
 |         | REQ | REP | DEALER | ROUTER | PUB | XPUB | SUB | XSUB | PUSH | PULL | PAIR | CLIENT | SERVER | RADIO | DISH | SCATTER | GATHER |
-| ------- | --- | --- | ------ | ------ | --- | ---- | --- | ---- | ---- | ---- | ---- | ------ | ------ | ----- | ---- | ------- | ------ |
+| ------- | :-: | :-: | :----: | :----: | :-: | :--: | :-: | :--: | :--: | :--: | :--: | :----: | :----: | :---: | :--: | :-----: | :----: |
 | REQ     |     |  *  |        |   *    |     |      |     |      |      |      |      |        |        |       |      |         |        |
 | REP     |  *  |     |   *    |        |     |      |     |      |      |      |      |        |        |       |      |         |        |
 | DEALER  |     |  *  |   *    |   *    |     |      |     |      |      |      |      |        |        |       |      |         |        |

@@ -48,8 +48,11 @@ C4 is meant to provide a reusable optimal collaboration model for open source so
 1. The project SHOULD have clearly documented guidelines for code style.
 1. A "Contributor" is a person who wishes to provide a patch, being a set of commits that solve some clearly identified problem.
 1. A "Maintainer" is a person who merges patches to the project. Maintainers are not developers; their job is to enforce process.
+1. An "Administrator" is a person who manages the set of Maintainers. They are Maintainers themselves.
+1. A "Founder" is a person who created the project and/or is moral owner in some sense.
 1. Contributors SHALL NOT have commit access to the repository unless they are also Maintainers.
 1. Maintainers SHALL have commit access to the repository.
+1. Administrators SHALL have administration rights on the Platform.
 1. Everyone, without distinction or discrimination, SHALL have an equal right to become a Contributor under the terms of this contract.
 
 ### 2.2. Licensing and Ownership

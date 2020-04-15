@@ -201,11 +201,11 @@ The "group status sequence" is a one-octet number that is incremented each time 
 
 #### The WHISPER Command
 
-When a node wishes to send a message to a single peer it SHALL use the WHISPER command. The WHISPER command contains a single field, which is the message content defined as one 0MQ frame. ZRE does not support multi-frame message contents.
+When a node wishes to send a message to a single peer it SHALL use the WHISPER command. The WHISPER command contains a single field, which is the message content defined as a 0MQ multi-part message.
 
 #### The SHOUT Command
 
-When a node wishes to send a message to a set of nodes participating in a group it SHALL use the SHOUT command. The SHOUT command contains two fields: the name of the group, and the the message content defined as one 0MQ frame.
+When a node wishes to send a message to a set of nodes participating in a group it SHALL use the SHOUT command. The SHOUT command contains two fields: the name of the group, and the the message content defined as a 0MQ multi-part message.
 
 Note that messages are sent via ZeroMQ over TCP, so the SHOUT command is unicast to each peer that should receive it. ZRE does not provide any UDP multicast functionality.
 

@@ -36,7 +36,8 @@ The PEER socket type talks to zero or more PEER peers, using an explicit routing
 
 General behavior:
 
-* MAY be connected to any number of PEER peers, and MAY both send and receive messages.
+* MAY be connected to any number of PEER peers.
+* MAY both send and receive messages in any order.
 * SHALL not filter or modify outgoing or incoming messages in any way.
 * SHALL maintain a double queue for each connected peer, allowing outgoing and incoming messages to be queued independently.
 * SHALL create a double queue when initiating an outgoing connection to a peer, and SHALL maintain the double queue whether or not the connection is established.

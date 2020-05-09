@@ -28,14 +28,14 @@ Channel pattern is member of a new family of thread-safe sockets.
 The channel pattern is the thread-safe alternative of the exclusive pair pattern.
 CHANNEL is not a general-purpose socket but is intended for specific use cases where the two peers are architecturally stable. This usually limits CHANNEL to use within a single process, for inter-thread communication.
 
-In order for the API to be thread-safe sending and receiving messages MUST be atomic and a single API call to receive or send entire msg. Therefore, the client-server pattern (and the rest of the thread-safe family) MUST NOT allow multipart messages.
+In order for the API to be thread-safe sending and receiving messages MUST be atomic and a single API call to receive or send entire message. Therefore, the client-server pattern (and the rest of the thread-safe family) MUST NOT allow multipart messages.
 
 ## The CHANNEL Socket Type
 
 General behavior:
 
-* MAY be connected to at most one CHANNEL peers.
-* MAY both send and receive messages.
+* MAY be connected to at most one CHANNEL peer.
+* MAY both send and receive messages in any order.
 * SHALL not filter or modify outgoing or incoming messages in any way.
 * SHALL maintain a double queue for its peer, allowing outgoing and incoming messages to be queued independently.
 * SHALL create a double queue when initiating an outgoing connection to a peer, and SHALL maintain the double queue whether or not the connection is established.

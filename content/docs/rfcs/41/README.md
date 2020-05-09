@@ -1,7 +1,7 @@
 ---
 slug: 41
 title: 41/CLISRV
-status: draft
+status: deprecated
 editor: Pieter Hintjens <ph@imatix.com>
 ---
 

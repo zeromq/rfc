@@ -2,7 +2,7 @@
 slug: 47
 title: 47/CLIENTSERVER
 name: ZeroMQ Client-Server
-status: Draft
+status: retired
 editor: Doron Somech <somdoron@gmail.com>
 ---
 

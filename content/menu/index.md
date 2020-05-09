@@ -20,7 +20,8 @@ bookMenuLevels: 1
   * [49/SCATTERGATHER]({{< relref "/docs/rfcs/49/README.md" >}})
   * [50/MME]({{< relref "/docs/rfcs/50/README.md" >}})
   * [51/PEER2PEER]({{< relref "/docs/rfcs/51/README.md" >}})
-
+  * [52/CHANNEL]({{< relref "/docs/rfcs/52/README.md" >}})
+  
 * Stable
   * [4/ZPL]({{< relref "/docs/rfcs/4/README.md" >}})
   * [6/PPP]({{< relref "/docs/rfcs/6/README.md" >}})

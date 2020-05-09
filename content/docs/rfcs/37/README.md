@@ -59,6 +59,7 @@ ZMTP defines a *resource* metadata property that lets any number of tasks share 
 * http://rfc.zeromq.org/spec:48/RADIODISH defines the semantics of RADIO and DISH.
 * http://rfc.zeromq.org/spec:49/SCATTERGATHER defines the semantics of SCATTER and GATHER.
 * http://rfc.zeromq.org/spec:51/PEER2PEER defines the semantics of PEER.
+* http://rfc.zeromq.org/spec:52/CHANNEL defines the semantics of CHANNEL.
 
 
 ## Implementation
@@ -291,31 +292,33 @@ socket-type = "REQ" | "REP"
             | "CLIENT" | "SERVER"
             | "RADIO" | "DISH"
             | "SCATTER" | "GATHER"
-            | "PEER"
+            | "PEER" 
+            | "CHANNEL"
 ```
 
 The peer SHOULD enforce that the other peer is using a valid socket type. This table shows the legal combinations (as "*"):
 
-|         | REQ | REP | DEALER | ROUTER | PUB | XPUB | SUB | XSUB | PUSH | PULL | PAIR | CLIENT | SERVER | RADIO | DISH | SCATTER | GATHER | PEER |
-| ------- | :-: | :-: | :----: | :----: | :-: | :--: | :-: | :--: | :--: | :--: | :--: | :----: | :----: | :---: | :--: | :-----: | :----: | :--: |
-| REQ     |     |  *  |        |   *    |     |      |     |      |      |      |      |        |        |       |      |         |        |      |
-| REP     |  *  |     |   *    |        |     |      |     |      |      |      |      |        |        |       |      |         |        |      |
-| DEALER  |     |  *  |   *    |   *    |     |      |     |      |      |      |      |        |        |       |      |         |        |      |
-| ROUTER  |  *  |     |   *    |   *    |     |      |     |      |      |      |      |        |        |       |      |         |        |      |
-| PUB     |     |     |        |        |     |      |  *  |  *   |      |      |      |        |        |       |      |         |        |      |
-| XPUB    |     |     |        |        |     |      |  *  |  *   |      |      |      |        |        |       |      |         |        |      |
-| SUB     |     |     |        |        |  *  |  *   |     |      |      |      |      |        |        |       |      |         |        |      |
-| XSUB    |     |     |        |        |  *  |  *   |     |      |      |      |      |        |        |       |      |         |        |      |
-| PUSH    |     |     |        |        |     |      |     |      |      |  *   |      |        |        |       |      |         |        |      |
-| PULL    |     |     |        |        |     |      |     |      |  *   |      |      |        |        |       |      |         |        |      |
-| PAIR    |     |     |        |        |     |      |     |      |      |      |  *   |        |        |       |      |         |        |      |
-| CLIENT  |     |     |        |        |     |      |     |      |      |      |      |        |   *    |       |      |         |        |      |
-| SERVER  |     |     |        |        |     |      |     |      |      |      |      |   *    |        |       |      |         |        |      |
-| RADIO   |     |     |        |        |     |      |     |      |      |      |      |        |        |       |  *   |         |        |      |
-| DISH    |     |     |        |        |     |      |     |      |      |      |      |        |        |   *   |      |         |        |      |
-| SCATTER |     |     |        |        |     |      |     |      |      |      |      |        |        |       |      |         |   *    |      |
-| GATHER  |     |     |        |        |     |      |     |      |      |      |      |        |        |       |      |    *    |        |      |
-| PEER    |     |     |        |        |     |      |     |      |      |      |      |        |        |       |      |         |        |  *   |
+|         | REQ | REP | DEALER | ROUTER | PUB | XPUB | SUB | XSUB | PUSH | PULL | PAIR | CLIENT | SERVER | RADIO | DISH | SCATTER | GATHER | PEER | CHANNEL |
+| ------- | :-: | :-: | :----: | :----: | :-: | :--: | :-: | :--: | :--: | :--: | :--: | :----: | :----: | :---: | :--: | :-----: | :----: | :--: | :-----: |
+| REQ     |     |  *  |        |   *    |     |      |     |      |      |      |      |        |        |       |      |         |        |      |         |
+| REP     |  *  |     |   *    |        |     |      |     |      |      |      |      |        |        |       |      |         |        |      |         |
+| DEALER  |     |  *  |   *    |   *    |     |      |     |      |      |      |      |        |        |       |      |         |        |      |         |
+| ROUTER  |  *  |     |   *    |   *    |     |      |     |      |      |      |      |        |        |       |      |         |        |      |         |
+| PUB     |     |     |        |        |     |      |  *  |  *   |      |      |      |        |        |       |      |         |        |      |         |
+| XPUB    |     |     |        |        |     |      |  *  |  *   |      |      |      |        |        |       |      |         |        |      |         |
+| SUB     |     |     |        |        |  *  |  *   |     |      |      |      |      |        |        |       |      |         |        |      |         |
+| XSUB    |     |     |        |        |  *  |  *   |     |      |      |      |      |        |        |       |      |         |        |      |         |
+| PUSH    |     |     |        |        |     |      |     |      |      |  *   |      |        |        |       |      |         |        |      |         |
+| PULL    |     |     |        |        |     |      |     |      |  *   |      |      |        |        |       |      |         |        |      |         |
+| PAIR    |     |     |        |        |     |      |     |      |      |      |  *   |        |        |       |      |         |        |      |         |
+| CLIENT  |     |     |        |        |     |      |     |      |      |      |      |        |   *    |       |      |         |        |      |         |
+| SERVER  |     |     |        |        |     |      |     |      |      |      |      |   *    |        |       |      |         |        |      |         |
+| RADIO   |     |     |        |        |     |      |     |      |      |      |      |        |        |       |  *   |         |        |      |         |
+| DISH    |     |     |        |        |     |      |     |      |      |      |      |        |        |   *   |      |         |        |      |         |
+| SCATTER |     |     |        |        |     |      |     |      |      |      |      |        |        |       |      |         |   *    |      |         |
+| GATHER  |     |     |        |        |     |      |     |      |      |      |      |        |        |       |      |    *    |        |      |         |
+| PEER    |     |     |        |        |     |      |     |      |      |      |      |        |        |       |      |         |        |  *   |         |
+| CHANNEL |     |     |        |        |     |      |     |      |      |      |      |        |        |       |      |         |        |      |    *    |
 
 When a peer validates the socket type, it SHOULD handle errors by returning an ERROR command, and then disconnecting the peer.
 
@@ -457,6 +460,9 @@ The implementation SHOULD follow http://rfc.zeromq.org/spec:49/SCATTERGATHER for
 
 The implementation SHOULD follow http://rfc.zeromq.org/spec:51/PEER2PEER for the semantics of PEER socket.
 
+### The CHANNEL Pattern
+
+The implementation SHOULD follow http://rfc.zeromq.org/spec:52/CHANNEL for the semantics of CHANNEL socket.
 
 ### **NEW:** Thread-Safe Socket Types
 
@@ -476,6 +482,7 @@ Socket types that are part of the thread-safe family:
 * SCATTER
 * GATHER
 * PEER
+* CHANNEL
 
 #### Multipart Message Definition
 

@@ -1,6 +1,6 @@
 ---
 slug: 51
-title: 51/PEER2PEER
+title: 51/P2P
 name: ZeroMQ Peer-to-Peer
 status: Draft
 editor: Doron Somech <somdoron@gmail.com>

@@ -19,7 +19,7 @@ bookMenuLevels: 1
   * [48/RADIODISH]({{< relref "/docs/rfcs/48/README.md" >}})
   * [49/SCATTERGATHER]({{< relref "/docs/rfcs/49/README.md" >}})
   * [50/MME]({{< relref "/docs/rfcs/50/README.md" >}})
-  * [51/PEER2PEER]({{< relref "/docs/rfcs/51/README.md" >}})
+  * [51/P2P]({{< relref "/docs/rfcs/51/README.md" >}})
   * [52/CHANNEL]({{< relref "/docs/rfcs/52/README.md" >}})
   
 * Stable

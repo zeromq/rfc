@@ -58,7 +58,7 @@ ZMTP defines a *resource* metadata property that lets any number of tasks share 
 * http://rfc.zeromq.org/spec:41/CLIENTSERVER defines the semantics of CLIENT and SERVER.
 * http://rfc.zeromq.org/spec:48/RADIODISH defines the semantics of RADIO and DISH.
 * http://rfc.zeromq.org/spec:49/SCATTERGATHER defines the semantics of SCATTER and GATHER.
-* http://rfc.zeromq.org/spec:51/PEER2PEER defines the semantics of PEER.
+* http://rfc.zeromq.org/spec:51/P2P defines the semantics of PEER.
 * http://rfc.zeromq.org/spec:52/CHANNEL defines the semantics of CHANNEL.
 
 
@@ -458,7 +458,7 @@ The implementation SHOULD follow http://rfc.zeromq.org/spec:49/SCATTERGATHER for
 
 ### The Peer-to-Peer Pattern
 
-The implementation SHOULD follow http://rfc.zeromq.org/spec:51/PEER2PEER for the semantics of PEER socket.
+The implementation SHOULD follow http://rfc.zeromq.org/spec:51/P2P for the semantics of PEER socket.
 
 ### The CHANNEL Pattern
 

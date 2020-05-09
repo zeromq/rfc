@@ -37,7 +37,7 @@ This pattern is meant to deprecate and eventually replace the request-reply patt
 
 ## The CLIENT Socket Type
 
-The CLIENT socket type talks to a set of SERVER peers, sending and receiving messages using round-robin algorithms. It is reliable, insofar as it does not drop messages.
+The CLIENT socket type talks to one or more SERVER peers. If connected to multiple peers, it scatters sent messages among these peers in a round-robin fashion. On reading, it reads fairly, from each peer in turn. It is reliable, insofar as it does not drop messages in normal cases.
 
 General behavior:
 
@@ -51,9 +51,10 @@ General behavior:
 
 For processing outgoing messages:
 
-* SHALL consider a peer as available only when it has a not full outgoing queue.
+* SHALL consider a peer as available only when its outgoing queue is not full.
 * SHALL route outgoing messages to available peers using a round-robin strategy.
 * SHALL block on sending, or return a suitable error, when it has no available peers.
+* SHALL not accept further messages when it has no available peers.
 * SHALL NOT discard messages that it cannot queue.
 * MUST NOT send multipart messages.
 
@@ -61,38 +62,39 @@ For processing incoming messages:
 
 * SHALL receive incoming messages from its peers using a fair-queuing strategy.
 * SHALL deliver these to its calling application.
-* MUST discard any part of a multipart message
+* MUST discard any part of a multipart message.
 * MAY disconnect a peer that is sending multipart messages.
 
 ## The SERVER Socket Type
 
-The SERVER socket type talks to a set of CLIENT peers, using an explicit routing-id so that each outgoing message is sent to a specific peer CLIENT.
+The SERVER socket type talks to zero or more CLIENT peers, using an explicit routing-id so that each outgoing message is sent to a specific peer CLIENT.
 
 General behavior:
 
 * MAY be connected to any number of CLIENT peers, and MAY both send and receive messages.
+* SHALL not filter or modify outgoing or incoming messages in any way.
 * SHALL maintain a double queue for each connected peer, allowing outgoing and incoming messages to be queued independently.
 * SHALL create a double queue when initiating an outgoing connection to a peer, and SHALL maintain the double queue whether or not the connection is established.
 * SHALL create a double queue when a peer connects to it. If this peer disconnects, the SERVER socket SHALL destroy its double queue and SHALL discard any messages it contains.
-* SHALL assign a routing-id to each double queue.
-* Routing-id SHALL be 4-bytes integer.
+* SHALL identify each double queue using a unique "routing id", which is a non-zero 32-bit unsigned integer value.
 * SHALL NOT allow the peer to specify its routing id explicitly.
 * SHOULD constrain incoming and outgoing queue sizes to a runtime-configurable limit.
 
 For processing incoming messages:
 
 * SHALL receive incoming messages from its peers using a fair-queuing strategy.
-* SHALL attach the routing-id of the double queue to the message.
 * SHALL deliver the resulting messages to its calling application.
-* MUST discard any part of a multipart message
+* SHALL provide the application with an API to retrieve the message routing-id.
+* MUST discard any part of a multipart message.
 * MAY disconnect a peer that is sending multipart messages.
 
 For processing outgoing messages:
 
-* SHALL remove the first frame from each outgoing message and use this as the identity of a double queue.
+* SHALL provide the application with an API to set the message routing-id.
 * SHALL route the message to the outgoing queue if that queue exists, and is not full.
-* SHALL either silently drop the message or return an error, depending on configuration, if the queue does not exist, or is full.
-* SHALL NOT block on sending.
+* SHALL return an error if the queue does not exist.
+* SHALL block on sending, if the queue is full, unless otherwise configured.
+* SHALL NOT discard messages that it cannot queue.
 * MUST NOT send multi-part messages.
 
 ## Security Aspects

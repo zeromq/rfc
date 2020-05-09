@@ -55,7 +55,7 @@ ZMTP defines a *resource* metadata property that lets any number of tasks share 
 * http://rfc.zeromq.org/spec:29/PUBSUB defines the semantics of PUB, XPUB, SUB and XSUB sockets.
 * http://rfc.zeromq.org/spec:30/PIPELINE defines the semantics of PUSH and PULL sockets.
 * http://rfc.zeromq.org/spec:31/EXPAIR defines the semantics of exclusive PAIR sockets.
-* http://rfc.zeromq.org/spec:47/CLIENTSERVER defines the semantics of CLIENT and SERVER.
+* http://rfc.zeromq.org/spec:41/CLIENTSERVER defines the semantics of CLIENT and SERVER.
 * http://rfc.zeromq.org/spec:48/RADIODISH defines the semantics of RADIO and DISH.
 * http://rfc.zeromq.org/spec:49/SCATTERGATHER defines the semantics of SCATTER and GATHER.
 

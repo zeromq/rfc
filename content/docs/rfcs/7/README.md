@@ -44,7 +44,7 @@ The goals of MDP are to:
 
 ## Architecture
 
-![Figure](1.png)
+![Figure](/rfcs/7/1.png)
 
 ### Overall Topology
 

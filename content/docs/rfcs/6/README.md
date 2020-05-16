@@ -37,6 +37,7 @@ The goals of PPP are to:
 * Allow the client to recover from dead or disconnected workers by resending requests to other workers.
 
 ## Architecture
+![Figure](/rfcs/6/1.png)
 
 ### Roles
 

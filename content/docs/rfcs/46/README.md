@@ -124,7 +124,7 @@ The following ABNF grammar defines the dafka_proto:
 
     DAFKA           = join-consumer / publish / offsets
 
-    join-consumer   = S:STORE-HELLO C:CONSUMER-HELLO *( S:DIRECT-HEAD [ consumer-fetch ] )
+    join-consumer   = [S:STORE-HELLO C:CONSUMER-HELLO] / [ C:GET_HEADS ] *( S:DIRECT-HEAD [ consumer-fetch ] )
 
     consumer-fetch  = C:FETCH 1*( P:DIRECT-RECORD / S:DIRECT-RECORD )
 
@@ -199,8 +199,8 @@ The following ABNF grammar defines the dafka_proto:
     subject         = string                ;
     sequence        = number-8              ;
 
-    ;  Get heads from stores send by a consumer. Topic is the name of the
-    ;  topic. Address is the address of the consumer.
+    ;  Get partition heads from stores send by a consumer. Topic is the name
+    ;  of the topic. Address is the address of the consumer.
 
     GET-HEADS       = signature %d'G' version address
     version         = number-1              ; Version = 1
@@ -314,10 +314,11 @@ with the address of the producer or store.
 
 #### The GET-HEADS Command
 
-If a consumer subscribes to a dafka topic it SHALL sent a GET-HEADS command.
+If a consumer subscribes to a dafka topic it SHALL sent a GET-HEADS command in
+order to get the heads for each partition of that topic.
 
 The XPUB's topic frame is set to the GET-HEADS command's ID concatenated with
-the address of the consumer.
+the topic for which partition heads are requested for.
 
 #### The DIRECT-HEAD Command
 

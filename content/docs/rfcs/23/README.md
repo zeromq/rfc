@@ -355,11 +355,6 @@ The implementation SHOULD follow http://rfc.zeromq.org/spec:29/PUBSUB for the se
 
 When using ZMTP, message filtering SHALL happen at the publisher side (the PUB or XPUB socket). To create a subscription, the SUB or XSUB peer SHALL send a SUBSCRIBE message, which has this grammar:
 
-message = *message-more message-last
-message-more = ( %x01 short-size | %x03 long-size ) message-body
-message-last = ( %x00 short-size | %x02 long-size ) message-body
-message-body = *OCTET
-
 ```
 subscribe = %x00 short-size %d1 subscription
 subscription = *OCTET
@@ -368,7 +363,7 @@ subscription = *OCTET
 To cancel a subscription, the SUB or XSUB peer SHALL send an unsubscribe message, which has this grammar:
 
 ```
-subscribe = %x00 short-size %d0 subscription
+unsubscribe = %x00 short-size %d0 subscription
 ```
 
 The subscription is a binary string that specifies what messages the subscriber wants. A subscription of "A" SHALL match all messages starting with "A". An empty subscription SHALL match all messages.

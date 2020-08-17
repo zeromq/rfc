@@ -1,7 +1,7 @@
 ---
 slug: 37
 title: 37/ZMTP
-name: ZeroMQ Realtime Exchange Protocol
+name: ZeroMQ Message Transport Protocol
 status: draft
 editor: Pieter Hintjens <ph@imatix.com>
 ---

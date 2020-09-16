@@ -56,7 +56,57 @@ a certain durability.
 
 ### Node Discovery and Presence
 
-TBD
+Dafka uses towers and beacon broadcasts to discover nodes. Each dafka node
+SHALL publish its presence at regular intervals to the tower(s).
+
+Therefore the node sends a node beacon consisting of 4 message frames. The
+message type 'B', the node's UUID and the IP address and port at which other
+peers can reach this node.
+
+```
++---+  +------+  +----+  +------+
+| B |  | UUID |  | IP |  | Port |
++---+  +------+  +----+  +------+
+
+           Node-Beacon
+```
+
+When a tower receives a node beacon it SHALL publish an appropriate tower
+beacon consisting of 3 message frames. The message type 'B', the node's UUID
+and the tcp endpoint where other nodes connect to.
+
+```
++---+  +------+  +--------------+
+| B |  | UUID |  | tcp endpoint |
++---+  +------+  +--------------+
+
+          Tower-Beacon
+```
+
+### Interconnection Model
+
+Dafka establishes a mesh network between all its nodes using a publish and
+subscribe pattern.
+
+Each node SHALL create a ZeroMQ PUB and a ZeroMQ SUB socket to communicate with
+the towers hereinafter called beacon publisher and beacon subscriber socket
+respectivally. The beacon publisher socket SHALL be connected to at least one
+tower's SUB socket and the beacon subscriber socket SHALL be connected to at
+least one tower's PUB socket.
+
+Each node SHALL create a ZeroMQ XPUB socket hereinafter called publisher socket
+and bind it to an address that can be reached by the other nodes. The node
+SHALL send this address at a regular interval to all connected towers. The XPUB
+socket is used to send messages to other nodes and get notified about
+subscriptions.
+
+Each node SHALL create a second ZeroMQ SUB socket hereinafter called subscriber
+socket. When a node discovers another node, it SHALL connect this socket, to
+the other nodes publisher socket. This subscriber socket is used to receive
+messages from other nodes.
+
+A node MAY disconnect its subscriber socket if the peer has failed to respond
+within some time (see Heartbeating).
 
 ### Topics, Partitions and Records
 
@@ -80,32 +130,11 @@ record's offset SHALL be the previous record's offset incremented by 1.
 Dafka does not make any restrictions on the size of a record other than the
 amount of memory available in the nodes.
 
-### Interconnection Model
-
-Dafka establishes a mesh network between all its nodes using a publish and
-subscribe pattern.
-
-Each node SHALL create a ZeroMQ PUB and a ZeroMQ SUB socket to communicate with
-the towers. The PUB socket SHALL be connected to at least one tower's SUB socket
-and the SUB socket SHALL be connected to at least one tower's PUB socket.
-
-Each node SHALL create a ZeroMQ XPUB socket and bind it to an address that can
-be reached by the other nodes. The node SHALL send this address at a regular
-interval to all connected towers. The XPUB socket is used to send messages to
-other nodes and get notified about subscriptions.
-
-Each node SHALL create a second ZeroMQ SUB socket. When a node discovers another
-node, it SHALL connect this socket, to the other nodes XPUB socket. This SUB
-socket is used to receive messages from other nodes.
-
-A node MAY disconnect its SUB socket if the peer has failed to respond within
-some time (see Heartbeating).
-
 ### Protocol Signature
 
-Every Dafka message sent SHALL start with the ZRE protocol signature, %xAA %xA0.
-A node SHALL silently discard any message received that does not start with
-these two octets.
+Every Dafka message sent SHALL start with the DAFKA protocol signature, %xAA
+%xA0. A node SHALL silently discard any message received that does not start
+with these two octets.
 
 This mechanism is designed particularly for applications that bind to ephemeral
 ports which may have been previously used by other protocols, and to which there
@@ -249,22 +278,24 @@ published to. This frame is call topic frame.
 
 #### The STORE-HELLO Command
 
-When a store receives a store hello subscription on its XPUB socket it SHALL
-send a STORE-HELLO command to the subscriber. The STORE-HELLO command has one
-field: the address of the store.
+When a store receives, on its publisher socket, a STORE-HELLO subscription it
+SHALL send, on its publisher socket, a STORE-HELLO command to the subscriber.
+The STORE-HELLO command has one field: the address of the store.
 
-The XPUB's topic frame is set to the STORE-HELLO command's ID concatenated with
-the address of the consumer received by the subscription message.
+The publisher socket's topic frame is set to the STORE-HELLO command's ID concatenated
+with the address of the consumer received by the subscription message.
 
 #### The CONSUMER-HELLO Command
 
-When a consumer receives a STORE-HELLO command it SHOULD reply with
-a CONSUMER-HELLO command. The CONSUMER-HELLO command has two fields: the address
-of the consumer and a list of dafka topics it is subscribed to. If the consumer
-is not subscribed to any dafka topic it MUST NOT send a CONSUMER-HELLO command.
+When a consumer receives, on its consumer socket, a STORE-HELLO command it
+SHOULD reply with a CONSUMER-HELLO command. The CONSUMER-HELLO command has two
+fields: the address of the consumer and a list of dafka topics it is subscribed
+to. If the consumer is not subscribed to any dafka topic it MUST NOT send a
+CONSUMER-HELLO command.
 
-The XPUB's topic frame is set to the CONSUMER-HELLO command's ID concatenated
-with the address of the store the received by the STORE-HELLO command.
+The publisher socket's topic frame is set to the CONSUMER-HELLO command's ID
+concatenated with the address of the store the received by the STORE-HELLO
+command.
 
 #### The RECORD Command
 
@@ -277,7 +308,17 @@ A producer MUST NOT delete send records before receiving at least one ACK
 command.
 
 The XPUB's topic frame is set to the RECORD command's ID concatenated with the
-dafka topics name the record is published to.
+dafka topic name the record is published to.
+
+#### The ACK Command
+
+When a store saved a record from a producer it SHALL ackowledge this by sending
+the ACK command to the same producer. The ACK command contains three fields:
+the dafka topic this record is published to, the offset of the saved record in
+the partition.
+
+The XPUB's topic frame is set to the ACK command's ID concatenated with the
+address of the producer to ackowledge to.
 
 #### The HEAD Command
 

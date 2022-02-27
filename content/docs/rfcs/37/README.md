@@ -296,29 +296,35 @@ socket-type = "REQ" | "REP"
             | "CHANNEL"
 ```
 
-The peer SHOULD enforce that the other peer is using a valid socket type. This table shows the legal combinations (as "*"):
+The peer SHOULD enforce that the other peer is using a valid socket type. For each socket type, its legal peer types are as follows:
 
-|         | REQ | REP | DEALER | ROUTER | PUB | XPUB | SUB | XSUB | PUSH | PULL | PAIR | CLIENT | SERVER | RADIO | DISH | SCATTER | GATHER | PEER | CHANNEL |
-| ------- | :-: | :-: | :----: | :----: | :-: | :--: | :-: | :--: | :--: | :--: | :--: | :----: | :----: | :---: | :--: | :-----: | :----: | :--: | :-----: |
-| REQ     |     |  *  |        |   *    |     |      |     |      |      |      |      |        |        |       |      |         |        |      |         |
-| REP     |  *  |     |   *    |        |     |      |     |      |      |      |      |        |        |       |      |         |        |      |         |
-| DEALER  |     |  *  |   *    |   *    |     |      |     |      |      |      |      |        |        |       |      |         |        |      |         |
-| ROUTER  |  *  |     |   *    |   *    |     |      |     |      |      |      |      |        |        |       |      |         |        |      |         |
-| PUB     |     |     |        |        |     |      |  *  |  *   |      |      |      |        |        |       |      |         |        |      |         |
-| XPUB    |     |     |        |        |     |      |  *  |  *   |      |      |      |        |        |       |      |         |        |      |         |
-| SUB     |     |     |        |        |  *  |  *   |     |      |      |      |      |        |        |       |      |         |        |      |         |
-| XSUB    |     |     |        |        |  *  |  *   |     |      |      |      |      |        |        |       |      |         |        |      |         |
-| PUSH    |     |     |        |        |     |      |     |      |      |  *   |      |        |        |       |      |         |        |      |         |
-| PULL    |     |     |        |        |     |      |     |      |  *   |      |      |        |        |       |      |         |        |      |         |
-| PAIR    |     |     |        |        |     |      |     |      |      |      |  *   |        |        |       |      |         |        |      |         |
-| CLIENT  |     |     |        |        |     |      |     |      |      |      |      |        |   *    |       |      |         |        |      |         |
-| SERVER  |     |     |        |        |     |      |     |      |      |      |      |   *    |        |       |      |         |        |      |         |
-| RADIO   |     |     |        |        |     |      |     |      |      |      |      |        |        |       |  *   |         |        |      |         |
-| DISH    |     |     |        |        |     |      |     |      |      |      |      |        |        |   *   |      |         |        |      |         |
-| SCATTER |     |     |        |        |     |      |     |      |      |      |      |        |        |       |      |         |   *    |      |         |
-| GATHER  |     |     |        |        |     |      |     |      |      |      |      |        |        |       |      |    *    |        |      |         |
-| PEER    |     |     |        |        |     |      |     |      |      |      |      |        |        |       |      |         |        |  *   |         |
-| CHANNEL |     |     |        |        |     |      |     |      |      |      |      |        |        |       |      |         |        |      |    *    |
+* **REQ**: REP, ROUTER<br>
+  **REP**: REQ, DEALER<br>
+  **DEALER**: REP, DEALER, ROUTER<br>
+  **ROUTER**: REQ, DEALER, ROUTER
+
+* **PUB**: SUB, XSUB<br>
+  **XPUB**: SUB, XSUB<br>
+  **SUB**: PUB, XPUB<br>
+  **XSUB**: PUB, XPUB
+
+* **PUSH**: PULL<br>
+  **PULL**: PUSH
+
+* **PAIR**: PAIR
+
+* **CLIENT**: SERVER<br>
+  **SERVER**: CLIENT
+
+* **RADIO**: DISH<br>
+  **DISH**: RADIO
+
+* **SCATTER**: GATHER<br>
+  **GATHER**: SCATTER
+
+* **PEER**: PEER
+
+* **CHANNEL**: CHANNEL
 
 When a peer validates the socket type, it SHOULD handle errors by returning an ERROR command, and then disconnecting the peer.
 

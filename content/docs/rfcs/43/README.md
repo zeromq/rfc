@@ -209,6 +209,8 @@ When a node wishes to send a message to a set of nodes participating in a group 
 
 Note that messages are sent via ZeroMQ over TCP, so the SHOUT command is unicast to each peer that should receive it. ZRE does not provide any UDP multicast functionality.
 
+A node MAY send messages to groups that it has not itself joined.
+
 #### The JOIN Command
 
 When a node joins a group it SHALL broadcast a JOIN command to all its peers. The JOIN command has two fields: the name of the group to join, and the group status sequence number *after* joining the group. Group names are case sensitive.

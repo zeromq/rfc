@@ -21,7 +21,8 @@ bookMenuLevels: 1
   * [50/MME]({{< relref "/docs/rfcs/50/README.md" >}})
   * [51/P2P]({{< relref "/docs/rfcs/51/README.md" >}})
   * [52/CHANNEL]({{< relref "/docs/rfcs/52/README.md" >}})
-  
+  * [53/BLOCKCHAIN]({{< relref "/docs/rfcs/53/README.md" >}})
+  * [54/ZMQ-ADDRV2]({{< relref "/docs/rfcs/54/README.md" >}})
 * Stable
   * [4/ZPL]({{< relref "/docs/rfcs/4/README.md" >}})
   * [6/PPP]({{< relref "/docs/rfcs/6/README.md" >}})
